@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexRay Protocol Explorer</title>
+    <!-- Nhúng Tailwind CSS qua CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Nhúng Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        /* Đảm bảo giao diện mượt mà */
+        body { margin: 0; padding: 0; }
+        
+        /* Ẩn thanh cuộn cho các khối ngang */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased overflow-x-hidden">
+    <div class="min-h-screen p-4 md:p-8">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- Header -->
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-3">
+                    <i data-lucide="activity" class="text-blue-600 w-8 h-8"></i>
+                    FlexRay Protocol Explorer
+                </h1>
+                <p class="text-slate-600">Trình khám phá cấu trúc Frame và cơ chế quản lý dữ liệu của Node</p>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6 bg-white p-2 rounded-xl shadow-sm border border-slate-200 w-fit mx-auto">
+                <button id="btn-tab-frame" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md">
+                    1. Cấu trúc Frame
+                </button>
+                <button id="btn-tab-node" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100">
+                    2. Quản lý Data tại Node
+                </button>
+                <button id="btn-tab-network" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100">
+                    3. Giao tiếp trên Mạng
+                </button>
+            </div>
+
+            <!-- TAB 1: FRAME STRUCTURE -->
+            <div id="tab-frame" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <i data-lucide="info" class="text-blue-500 w-6 h-6"></i> Bản đồ FlexRay Frame
+                </h2>
+                
+                <p class="text-sm text-slate-500 mb-4 italic">
+                    * Click vào các khối màu dưới đây để xem chi tiết cấu trúc bên trong.
+                </p>
+
+                <!-- Interactive Frame Diagram -->
+                <div class="flex gap-2 mb-8 overflow-x-auto pb-4 no-scrollbar">
+                    <button id="btn-seg-header" class="flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform ring-4 ring-offset-2 ring-blue-300 scale-[1.02] bg-blue-600 hover:bg-blue-500" style="min-width: 180px;">
+                        <span class="font-bold text-lg">Header Segment</span>
+                        <span class="text-sm opacity-90">5 Bytes (40 bits)</span>
+                    </button>
+                    <button id="btn-seg-payload" class="flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform opacity-90 hover:scale-105 bg-green-600 hover:bg-green-500" style="min-width: 250px;">
+                        <span class="font-bold text-lg">Payload Segment</span>
+                        <span class="text-sm opacity-90">0 đến 254 Bytes</span>
+                    </button>
+                    <button id="btn-seg-trailer" class="flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform opacity-90 hover:scale-105 bg-red-600 hover:bg-red-500" style="min-width: 180px;">
+                        <span class="font-bold text-lg">Trailer Segment</span>
+                        <span class="text-sm opacity-90">3 Bytes (24 bits)</span>
+                    </button>
+                </div>
+
+                <!-- Details Panel -->
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div id="seg-color" class="w-4 h-4 rounded-full bg-blue-600"></div>
+                        <h3 id="seg-name" class="text-2xl font-bold text-slate-800">Header Segment (Phần đầu)</h3>
+                        <span id="seg-size" class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-medium">
+                            5 Bytes (40 bits)
+                        </span>
+                    </div>
+                    <p id="seg-desc" class="text-slate-700 mb-6">Chứa các thông tin điều khiển, nhận dạng frame và kiểm tra lỗi cho phần Header.</p>
+
+                    <div id="seg-subfields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Subfields will be injected by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: NODE DATA MANAGEMENT -->
+            <div id="tab-node" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <i data-lucide="database" class="text-green-500 w-6 h-6"></i> Cách Node quản lý dữ liệu
+                </h2>
+
+                <div class="mb-6 text-slate-700 leading-relaxed">
+                    <p>
+                        Một Node trong mạng FlexRay thường là một ECU (Electronic Control Unit). Sự kết nối giữa ứng dụng (Host CPU) và mạng vật lý được thông qua <strong>FlexRay Communication Controller (CC)</strong>.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Box 1 -->
+                    <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <i data-lucide="cpu" class="text-blue-600 w-6 h-6"></i>
+                            <h3 class="font-bold text-lg text-blue-900">1. Host CPU & CHI</h3>
+                        </div>
+                        <p class="text-sm text-blue-800 mb-3">
+                            CPU giao tiếp với FlexRay Controller thông qua <strong>CHI (Controller Host Interface)</strong>.
+                        </p>
+                        <ul class="text-sm text-blue-800 list-disc list-inside space-y-1">
+                            <li>Cấu hình mạng ban đầu.</li>
+                            <li>Cập nhật dữ liệu cần truyền.</li>
+                            <li>Đọc dữ liệu nhận được.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Box 2 -->
+                    <div class="bg-amber-50 rounded-xl p-5 border border-amber-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <i data-lucide="database" class="text-amber-600 w-6 h-6"></i>
+                            <h3 class="font-bold text-lg text-amber-900">2. Message Buffers</h3>
+                        </div>
+                        <p class="text-sm text-amber-800 mb-3">
+                            "Kho chứa" dữ liệu trong RAM của Controller. Gán cứng với Frame ID và Hướng (TX/RX).
+                        </p>
+                        <ul class="text-sm text-amber-800 space-y-2">
+                            <li><strong>TX Buffer:</strong> Chờ đến đúng Slot thời gian để tự động bơm ra.</li>
+                            <li><strong>RX Buffer:</strong> Kéo data về, check CRC, báo ngắt (Interrupt) cho CPU.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Box 3 -->
+                    <div class="bg-purple-50 rounded-xl p-5 border border-purple-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <i data-lucide="clock" class="text-purple-600 w-6 h-6"></i>
+                            <h3 class="font-bold text-lg text-purple-900">3. Scheduling (Lập lịch)</h3>
+                        </div>
+                        <p class="text-sm text-purple-800 mb-3">
+                            Giao thức <strong>Time-Triggered</strong>. Mọi thứ được định đoạt từ trước qua Schedule Table.
+                        </p>
+                        <ul class="text-sm text-purple-800 list-disc list-inside space-y-2">
+                            <li>Truyền đúng Slot dựa trên đồng hồ nội bộ đã đồng bộ.</li>
+                            <li>Tự phát Null Frame nếu CPU quên nạp data.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Architecture Diagram -->
+                <div class="mt-8 p-6 bg-slate-900 rounded-xl flex flex-col items-center justify-center text-slate-300">
+                    <h4 class="text-white font-semibold mb-6 flex items-center gap-2">
+                        <i data-lucide="arrow-right-left" class="w-5 h-5"></i> Luồng đi của Dữ liệu (Data Flow)
+                    </h4>
+                    <div class="flex flex-col md:flex-row items-center gap-4 w-full max-w-3xl">
+                        <div class="bg-slate-800 p-4 rounded-lg text-center flex-1 w-full border border-slate-700">
+                            <p class="font-bold text-white mb-1">Host CPU</p>
+                            <p class="text-xs">Tạo dữ liệu ứng dụng</p>
+                        </div>
+                        
+                        <div class="flex flex-col items-center py-2 md:py-0">
+                            <span class="text-[10px] md:text-xs mb-1">Cập nhật qua CHI</span>
+                            <i data-lucide="arrow-right-left" class="text-green-400 w-5 h-5 rotate-90 md:rotate-0"></i>
+                        </div>
+
+                        <div class="bg-slate-800 p-4 rounded-lg text-center flex-1 w-full border border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                            <p class="font-bold text-white mb-1">FlexRay Controller</p>
+                            <p class="text-xs mb-2">Message Buffers (RAM)</p>
+                            <div class="flex justify-center gap-2 text-xs">
+                                <span class="bg-slate-700 px-2 py-1 rounded">TX ID:10</span>
+                                <span class="bg-slate-700 px-2 py-1 rounded">RX ID:25</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center py-2 md:py-0">
+                            <span class="text-[10px] md:text-xs mb-1">Đúng Slot Time</span>
+                            <i data-lucide="arrow-right-left" class="text-blue-400 w-5 h-5 rotate-90 md:rotate-0"></i>
+                        </div>
+
+                        <div class="bg-slate-800 p-4 rounded-lg text-center flex-1 w-full border border-slate-700">
+                            <p class="font-bold text-white mb-1">FlexRay Bus</p>
+                            <p class="text-xs">Physical Layer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: NETWORK COMMUNICATION -->
+            <div id="tab-network" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <i data-lucide="network" class="text-indigo-500 w-6 h-6"></i> Các loại Frame được truyền
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <!-- Startup Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-orange-100 p-2 rounded-lg"><i data-lucide="zap" class="text-orange-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">1. Startup Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">
+                            Gửi bởi <strong>Coldstart Node</strong> để đánh thức mạng và thiết lập nhịp chu kỳ ban đầu.
+                        </p>
+                    </div>
+
+                    <!-- Sync Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-blue-100 p-2 rounded-lg"><i data-lucide="refresh-cw" class="text-blue-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">2. Sync Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">
+                            Được lắng nghe để đo đạc độ lệch thời gian, từ đó đồng bộ đồng hồ nội bộ (Macrotick) cho khớp với toàn mạng.
+                        </p>
+                    </div>
+
+                    <!-- Normal Data Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-green-100 p-2 rounded-lg"><i data-lucide="file-text" class="text-green-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">3. Normal Data Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">
+                            Frame chứa <strong>Dữ liệu ứng dụng thực tế</strong>, gửi ở các slot cố định (Static) hoặc theo Event (Dynamic).
+                        </p>
+                    </div>
+
+                    <!-- Null Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-slate-100 p-2 rounded-lg"><i data-lucide="file-minus" class="text-slate-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">4. Null Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">
+                            Tự động phát ra khi tới lượt Slot trong Static Segment nhưng CPU chưa kịp nạp Data mới.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Cycle Diagram -->
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 overflow-x-auto">
+                    <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="clock" class="text-purple-600 w-5 h-5"></i> 
+                        Phân bổ Frame trong 1 Chu kỳ (Communication Cycle)
+                    </h4>
+                    <div class="flex flex-col gap-2 min-w-[600px]">
+                        <div class="flex text-xs font-semibold text-slate-500 mb-1">
+                            <div class="w-1/2">Static Segment (Thời gian cố định - TDMA)</div>
+                            <div class="w-1/3">Dynamic Segment</div>
+                            <div class="w-1/6 text-right">Symbol & NIT</div>
+                        </div>
+                        
+                        <div class="flex h-12 w-full rounded-lg overflow-hidden border border-slate-300">
+                            <!-- Static Segment -->
+                            <div class="w-1/2 flex">
+                                <div class="flex-1 bg-orange-400 text-white flex items-center justify-center text-xs font-bold border-r border-orange-500">ID 1<br/>(Startup)</div>
+                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600">ID 2<br/>(Data)</div>
+                                <div class="flex-1 bg-slate-400 text-white flex items-center justify-center text-xs font-bold border-r border-slate-500">ID 3<br/>(Null)</div>
+                                <div class="flex-1 bg-blue-500 text-white flex items-center justify-center text-xs font-bold border-r border-blue-600">ID 4<br/>(Sync)</div>
+                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600">ID 5<br/>(Data)</div>
+                            </div>
+                            <!-- Dynamic Segment -->
+                            <div class="w-1/3 bg-teal-100 flex items-center px-2 border-r border-slate-300 overflow-hidden relative">
+                                <div class="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px)]"></div>
+                                <div class="z-10 bg-teal-500 text-white text-[10px] px-2 py-1 rounded shadow-sm mr-2 whitespace-nowrap">ID 100 (Event)</div>
+                            </div>
+                            <!-- Symbol Window & NIT -->
+                            <div class="w-1/6 flex">
+                                <div class="w-1/3 bg-yellow-400"></div>
+                                <div class="w-2/3 bg-slate-800 flex items-center justify-center text-[10px] text-slate-300">NIT</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT ĐIỀU KHIỂN LOGIC (Đã cập nhật để chống lỗi) -->
+    <script>
+        const frameData = {
+            header: {
+                id: 'header', name: 'Header Segment (Phần đầu)', size: '5 Bytes (40 bits)', color: 'bg-blue-600', hover: 'hover:bg-blue-500',
+                desc: 'Chứa các thông tin điều khiển, nhận dạng frame và kiểm tra lỗi cho phần Header.',
+                subFields: [
+                    { name: 'Indicator Bits', bits: '5 bits', desc: 'Gồm 5 bit cờ báo trạng thái: Reserved bit, Payload Preamble bit, Null Frame bit, Sync Frame bit, Startup Frame bit.' },
+                    { name: 'Frame ID', bits: '11 bits', desc: 'Định danh duy nhất cho Frame trong hệ thống (từ 1 đến 2047). Xác định Slot thời gian nào frame này sẽ được gửi trong Static Segment.' },
+                    { name: 'Payload Length', bits: '7 bits', desc: 'Chỉ định độ dài của phần Payload. Đơn vị tính là Word (1 Word = 2 Bytes).' },
+                    { name: 'Header CRC', bits: '11 bits', desc: 'Mã kiểm tra lỗi (Cyclic Redundancy Check) dành riêng cho phần Header.' },
+                    { name: 'Cycle Count', bits: '6 bits', desc: 'Đếm chu kỳ giao tiếp hiện tại của mạng (từ 0 đến 63).' }
+                ]
+            },
+            payload: {
+                id: 'payload', name: 'Payload Segment (Dữ liệu)', size: '0 đến 254 Bytes', color: 'bg-green-600', hover: 'hover:bg-green-500',
+                desc: 'Phần chứa dữ liệu thực tế cần truyền tải giữa các ECU (Engine Control Unit).',
+                subFields: [
+                    { name: 'Data Bytes', bits: '0 - 254 Bytes', desc: 'Dữ liệu ứng dụng thực tế. Độ dài luôn là số chẵn (bội số của 2 bytes).' },
+                    { name: 'Message ID (Tùy chọn)', bits: '16 bits', desc: 'Chỉ xuất hiện trong Dynamic Segment nếu bit Payload Preamble = 1.' },
+                    { name: 'NM Vector (Tùy chọn)', bits: '0 - 12 Bytes', desc: 'Network Management Vector, dùng để quản lý trạng thái ngủ/thức của mạng.' }
+                ]
+            },
+            trailer: {
+                id: 'trailer', name: 'Trailer Segment (Phần đuôi)', size: '3 Bytes (24 bits)', color: 'bg-red-600', hover: 'hover:bg-red-500',
+                desc: 'Phần kết thúc frame, đảm bảo tính toàn vẹn của toàn bộ dữ liệu.',
+                subFields: [
+                    { name: 'Frame CRC', bits: '24 bits', desc: 'Mã kiểm tra lỗi CRC 24-bit được tính toán dựa trên toàn bộ Header và Payload. Node nhận sẽ tính lại mã này và so sánh.' }
+                ]
+            }
+        };
+
+        function switchTab(tabId) {
+            document.getElementById('tab-frame').classList.add('hidden');
+            document.getElementById('tab-node').classList.add('hidden');
+            document.getElementById('tab-network').classList.add('hidden');
+            
+            const inactiveClass = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
+            document.getElementById('btn-tab-frame').className = inactiveClass;
+            document.getElementById('btn-tab-node').className = inactiveClass;
+            document.getElementById('btn-tab-network').className = inactiveClass;
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabId}`).className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md";
+        }
+
+        function selectSegment(segId) {
+            const seg = frameData[segId];
+            
+            ['header', 'payload', 'trailer'].forEach(key => {
+                const btn = document.getElementById(`btn-seg-${key}`);
+                const data = frameData[key];
+                if(key === segId) {
+                    btn.className = `flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform ring-4 ring-offset-2 ring-blue-300 scale-[1.02] ${data.color} ${data.hover}`;
+                } else {
+                    btn.className = `flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform opacity-90 hover:scale-105 ${data.color} ${data.hover}`;
+                }
+            });
+
+            document.getElementById('seg-color').className = `w-4 h-4 rounded-full ${seg.color}`;
+            document.getElementById('seg-name').innerText = seg.name;
+            document.getElementById('seg-size').innerText = seg.size;
+            document.getElementById('seg-desc').innerText = seg.desc;
+            
+            const subfieldsContainer = document.getElementById('seg-subfields');
+            subfieldsContainer.innerHTML = '';
+            seg.subFields.forEach(field => {
+                subfieldsContainer.innerHTML += `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-slate-900">${field.name}</h4>
+                            <span class="text-xs font-mono bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${field.bits}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">${field.desc}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // TÁCH BIỆT LOGIC UI KHỎI CÁC THƯ VIỆN BÊN NGOÀI
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Gắn sự kiện cốt lõi (luôn chạy được)
+            document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
+            document.getElementById('btn-tab-node').addEventListener('click', () => switchTab('node'));
+            document.getElementById('btn-tab-network').addEventListener('click', () => switchTab('network'));
+            
+            document.getElementById('btn-seg-header').addEventListener('click', () => selectSegment('header'));
+            document.getElementById('btn-seg-payload').addEventListener('click', () => selectSegment('payload'));
+            document.getElementById('btn-seg-trailer').addEventListener('click', () => selectSegment('trailer'));
+
+            // Khởi tạo mặc định
+            selectSegment('header');
+
+            // 2. Load Icon riêng biệt, nếu lỗi do Host chèn banner cũng không làm đứng web
+            try {
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (error) {
+                console.warn("Lucide icons failed to load, but UI will still work.");
+            }
+        });
+    </script>
+</body>
+</html>
