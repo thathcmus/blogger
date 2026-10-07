@@ -99,15 +99,31 @@ Minh họa cách một ECU xử lý và trao đổi dữ liệu:
 
 ---
 
+### Tab 4: Góc Phỏng Vấn Kiến Trúc (Interview Q&A Deep-Dive)
+Chuyên đề chuyên sâu giải quyết câu hỏi phỏng vấn Senior/Architect:
+1. **Bóc tách bẫy thuật ngữ "POC Frame"**:
+   - Khẳng định không tồn tại "POC Frame" trong chuẩn FlexRay v3.0.1 / ISO 17458.
+   - POC (Protocol Operation Control) là **State Machine** phần cứng quản lý chu trình node (`CONFIG` &rarr; `READY` &rarr; `NORMAL_ACTIVE` &rarr; `HALT`).
+   - Đồng bộ chu kỳ sử dụng **Sync Frames** do các Sync Nodes phát ra.
+2. **So sánh toàn diện Static Segment (TDMA) vs Dynamic Segment (FTDMA)**:
+   - Bảng đối chiếu 5 đặc tính: Cơ chế truy cập bus, Tính tiền định & Jitter, Độ dài Payload, Cơ chế xử lý khi thiếu data (Null Frame vs Minislot trôi), và Use case thực tế (ASIL D vs UDS/Calibration).
+3. **Hai chế độ vận hành: Synchronous Mode vs Free-Running Mode**:
+   - *Synchronous Mode*: Nhận đủ Sync Frames, chạy giải thuật FTM trong khoảng NIT để bù trừ độ lệch xung nhịp (Clock Drift).
+   - *Free-Running Mode*: Mất tín hiệu Sync, đồng hồ trôi tự do theo thạch anh nội bộ. POC State Machine tự động chuyển sang `NORMAL_PASSIVE` hoặc `HALT` để bảo vệ an toàn toàn bus.
+4. **Khung câu trả lời phỏng vấn gợi ý (Interview Pitch)**: Mẫu câu trả lời 3 phần giúp ứng viên ghi điểm tuyệt đối.
+
+---
+
 ## 4. Bản Đồ Mã Nguồn (Source Code Architecture)
 
 * **Dòng 1 – 26**: Thẻ HTML Header, CDN scripts (Tailwind, Lucide), CSS tùy chỉnh (`animate-fadeIn`, `no-scrollbar`).
-* **Dòng 27 – 52**: Wrapper Container, Header và thanh điều hướng Tabs (`#btn-tab-frame`, `#btn-tab-node`, `#btn-tab-network`).
-* **Dòng 53 – 95**: Cụm giao diện Tab 1 (Sơ đồ Segment tương tác và khung chi tiết thuộc tính).
-* **Dòng 96 – 194**: Cụm giao diện Tab 2 (3 Box quản lý dữ liệu và Sơ đồ Data Flow kiến trúc ECU).
-* **Dòng 195 – 330**: Cụm giao diện Tab 3 (4 card phân loại Frame, Card kiến trúc Dual Channel, và Biểu đồ Communication Cycle phân đoạn).
-* **Dòng 331 – 455**: JavaScript logic:
+* **Dòng 27 – 55**: Wrapper Container, Header và thanh điều hướng 4 Tabs (`#btn-tab-frame`, `#btn-tab-node`, `#btn-tab-network`, `#btn-tab-interview`).
+* **Dòng 56 – 98**: Cụm giao diện Tab 1 (Sơ đồ Segment tương tác và khung chi tiết thuộc tính).
+* **Dòng 99 – 197**: Cụm giao diện Tab 2 (3 Box quản lý dữ liệu và Sơ đồ Data Flow kiến trúc ECU).
+* **Dòng 198 – 330**: Cụm giao diện Tab 3 (4 card phân loại Frame, Card kiến trúc Dual Channel, và Biểu đồ Communication Cycle phân đoạn).
+* **Dòng 331 – 495**: Cụm giao diện Tab 4 (Quote box phỏng vấn, Alert bẫy POC Frame, Bảng so sánh Static vs Dynamic, Card chế độ Sync vs Free-running, Khung trả lời mẫu).
+* **Dòng 496 – 661**: JavaScript logic:
   - Khai báo hằng số dữ liệu cấu trúc `const frameData = { header, payload, trailer }`.
-  - Hàm `switchTab(tabId)`: Chuyển đổi tab hiển thị mượt mà.
+  - Hàm `switchTab(tabId)`: Chuyển đổi 4 tabs mượt mà.
   - Hàm `selectSegment(segId)`: Đổi màu viền và render động các sub-fields tương ứng.
-  - Sự kiện `DOMContentLoaded`: Gắn event listener và gọi an toàn `lucide.createIcons()`.
+  - Sự kiện `DOMContentLoaded`: Gắn event listener cho 4 nút tab và gọi an toàn `lucide.createIcons()`.

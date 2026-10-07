@@ -14,6 +14,18 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 
 ---
 
+## [1.2.0] - 2026-10-07
+
+### Added
+- **FlexRay - Interview Q&A Deep-Dive (Tab 4)**: Bổ sung Tab 4 chuyên đề phỏng vấn kỹ sư ô tô / Automotive Architect giải quyết trọn vẹn câu hỏi Q2.3:
+  - *Bẫy thuật ngữ*: Bóc tách sự thật không có "POC Frame", giải thích rõ POC State Machine điều khiển quá trình đồng bộ thông qua các Sync Frames.
+  - *So sánh Static vs Dynamic*: Bảng đối chiếu 5 chiều giữa Static Segment (TDMA, tiền định tuyệt đối, payload cố định cho ASIL D) và Dynamic Segment (FTDMA minislot, ưu tiên theo Frame ID cho UDS/Events).
+  - *Chế độ chạy*: Phân tích cơ chế Synchronous Mode (bù trừ độ lệch FTM trong khoảng NIT) và Free-Running Mode (dao động tự do khi mất Sync, hạ trạng thái POC xuống Normal Passive/Halt).
+  - *Mẫu trả lời phỏng vấn*: Cung cấp cấu trúc câu trả lời mẫu 3 bước gãy gọn, sắc sảo cho ứng viên.
+- **Documentation**: Cập nhật `docs/flexray/CURRENT_INFO.md` tương ứng với giao diện và mã nguồn 4 tabs mới.
+
+---
+
 ## [1.1.0] - 2026-10-07
 
 ### Added

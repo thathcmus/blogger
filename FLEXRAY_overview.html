@@ -48,6 +48,10 @@
                 <button id="btn-tab-network" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100">
                     3. Giao tiếp trên Mạng
                 </button>
+                <button id="btn-tab-interview" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-1.5">
+                    <i data-lucide="help-circle" class="w-4 h-4 text-amber-500"></i>
+                    <span>4. Góc Phỏng Vấn (Q&A)</span>
+                </button>
             </div>
 
             <!-- TAB 1: FRAME STRUCTURE -->
@@ -324,6 +328,168 @@
                 </div>
             </div>
 
+            <!-- TAB 4: INTERVIEW Q&A DEEP-DIVE -->
+            <div id="tab-interview" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 mb-2">
+                            <i data-lucide="award" class="w-3.5 h-3.5"></i> Chuyên Đề Phỏng Vấn Kỹ Sư Ô Tô / Automotive Systems Architect
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="help-circle" class="text-amber-500 w-6 h-6"></i> 
+                            Q2.3: Đồng Bộ Thời Gian & Kiến Trúc Tích Hợp FlexRay
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- Interview Question Quote Box -->
+                <div class="mb-8 p-5 bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl text-white shadow-md border border-slate-800">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-amber-500/20 rounded-lg text-amber-400 mt-0.5">
+                            <i data-lucide="message-square-quote" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-xs uppercase tracking-wider font-semibold text-amber-400 block mb-1">Câu hỏi phỏng vấn thực tế:</span>
+                            <blockquote class="text-base md:text-lg font-medium text-slate-100 leading-relaxed italic">
+                                "Mạng FlexRay có đặc tính đồng bộ thời gian (Time-Triggered) rất đặc thù. Ở mức độ tìm hiểu và tích hợp kiến trúc (broad exposure), bạn hiểu thế nào về Static Segment vs Dynamic Segment, cơ chế đồng bộ chu kỳ qua POC frame và các chế độ chạy (Synchronous vs Free-running mode)?"
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 1: The POC Frame Trap -->
+                <div class="mb-8 p-5 bg-rose-50/80 rounded-xl border border-rose-200">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-600"></i>
+                        <h3 class="font-bold text-lg text-rose-900">1. Bóc Tách Bẫy Thuật Ngữ: "POC Frame" Có Thực Sự Tồn Tại?</h3>
+                    </div>
+                    <p class="text-sm text-rose-950 leading-relaxed mb-4">
+                        <strong>Không có khái niệm "POC Frame" trong đặc tả chuẩn FlexRay (ISO 17458 / FlexRay Spec v3.0.1)!</strong> Đây là một câu hỏi bẫy kinh điển để đánh giá ứng viên hiểu sâu bản chất kiến trúc hay chỉ nhớ mặt chữ:
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-white p-4 rounded-xl border border-rose-200 shadow-sm">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="cpu" class="w-4 h-4 text-blue-600"></i>
+                                <h4 class="font-bold text-slate-900">POC (Protocol Operation Control)</h4>
+                            </div>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                POC là <strong>Bộ máy trạng thái hữu hạn (State Machine)</strong> tích hợp trong phần cứng Controller. POC điều khiển các pha vận hành của node: <code>DEFAULT_CONFIG</code> &rarr; <code>CONFIG</code> &rarr; <code>READY</code> &rarr; <code>STARTUP</code> &rarr; <code>NORMAL_ACTIVE</code> / <code>NORMAL_PASSIVE</code> &rarr; <code>HALT</code>. <em>POC không phải là một loại frame truyền trên bus.</em>
+                            </p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-rose-200 shadow-sm">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-600"></i>
+                                <h4 class="font-bold text-slate-900">Cơ Chế Đồng Bộ Qua Sync Frame</h4>
+                            </div>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                Chu kỳ được đồng bộ bằng các <strong>Sync Frames</strong> (các khung có bit <code>Sync Frame Indicator = 1</code>) được phát bởi các Sync Nodes theo lịch trình cố định. POC State Machine của node nhận sẽ lắng nghe, giám sát và điều khiển quá trình khóa đồng bộ này.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Deep Comparison Table -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-5 h-5 text-indigo-600"></i>
+                        2. Phân Tích So Sánh: Static Segment vs Dynamic Segment
+                    </h3>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead class="bg-slate-100 text-slate-700 text-xs uppercase font-semibold">
+                                <tr>
+                                    <th class="p-3.5 border-b border-slate-200 w-1/4">Đặc tính kiến trúc</th>
+                                    <th class="p-3.5 border-b border-slate-200 w-3/8 text-blue-700 bg-blue-50/50">Static Segment (TDMA)</th>
+                                    <th class="p-3.5 border-b border-slate-200 w-3/8 text-teal-700 bg-teal-50/50">Dynamic Segment (FTDMA)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-600">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-slate-800">Cơ chế truy cập bus</td>
+                                    <td class="p-3 bg-blue-50/20"><strong>TDMA</strong> (Time Division Multiple Access) - Chia thời gian thành các slot cố định bằng nhau.</td>
+                                    <td class="p-3 bg-teal-50/20"><strong>FTDMA</strong> (Flexible TDMA) - Phân chia theo các Mini-slots rất ngắn.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-slate-800">Tính tiền định (Determinism)</td>
+                                    <td class="p-3 bg-blue-50/20"><span class="text-emerald-700 font-bold">Tiền định cứng 100%</span>. Jitter cực thấp, độ trễ và thời điểm phát được tính toán chính xác tuyệt đối.</td>
+                                    <td class="p-3 bg-teal-50/20"><strong>Ưu tiên linh hoạt</strong>. Trọng tài theo Frame ID: Node có Frame ID nhỏ hơn sẽ chiếm quyền phát trước.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-slate-800">Độ dài Payload</td>
+                                    <td class="p-3 bg-blue-50/20">Bắt buộc <strong>cố định và bằng nhau</strong> cho mọi frame trong cùng cluster (<code>gPayloadLengthStatic</code>).</td>
+                                    <td class="p-3 bg-teal-50/20"><strong>Co giãn linh hoạt</strong> theo từng frame (0 đến 254 bytes), tùy theo nhu cầu truyền tải.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-slate-800">Xử lý khi không có dữ liệu</td>
+                                    <td class="p-3 bg-blue-50/20">Tự phát <strong>Null Frame</strong> (Active-Low: bit = 0) để duy trì cấu trúc nhịp thời gian slot.</td>
+                                    <td class="p-3 bg-teal-50/20">Minislot tự động trôi qua (chỉ tốn vài micro-giây), giải phóng băng thông cho các node tiếp theo.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-slate-800">Ứng dụng tiêu biểu (Use Cases)</td>
+                                    <td class="p-3 bg-blue-50/20">Tín hiệu điều khiển an toàn cao (<strong>ASIL D</strong>): Phanh điện tử (Brake-by-Wire), Lái điện tử (Steer-by-Wire), Powertrain.</td>
+                                    <td class="p-3 bg-teal-50/20">Dữ liệu theo sự kiện (Event-triggered), Chẩn đoán <strong>UDS (ISO 14229)</strong>, Hiệu chỉnh phần mềm ECU (Calibration XCP).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section 3: Operating Modes -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="gauge" class="w-5 h-5 text-purple-600"></i>
+                        3. Chế Độ Vận Hành: Synchronous Mode vs Free-Running Mode
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Synchronous Mode -->
+                        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-5 rounded-xl border border-emerald-200">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <h4 class="font-bold text-emerald-900 text-base">Synchronous Mode (Bình Thường)</h4>
+                            </div>
+                            <p class="text-xs text-emerald-800 leading-relaxed mb-3">
+                                Trạng thái chuẩn của node trong mạng khi tham gia giao tiếp (POC ở trạng thái <code>NORMAL_ACTIVE</code>).
+                            </p>
+                            <ul class="text-xs text-emerald-900 space-y-2 list-disc list-inside">
+                                <li><strong>Đo đạc:</strong> Node liên tục lắng nghe các Sync Frames từ các Sync Nodes khác trong cluster để đo độ lệch thời gian xuất hiện thực tế so với lịch trình.</li>
+                                <li><strong>Thuật toán FTM:</strong> Trong khoảng thời gian NIT (Network Idle Time), node chạy thuật toán <em>Fault-Tolerant Midpoint</em> để lọc bỏ nhiễu và tính toán giá trị bù trừ.</li>
+                                <li><strong>Hiệu chỉnh nhịp:</strong> Co/giãn các Microtick để Macrotick toàn mạng đồng bộ chính xác tới micro-giây.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Free-Running Mode -->
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-xl border border-amber-200">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                <h4 class="font-bold text-amber-900 text-base">Free-Running Mode (Mất Đồng Bộ / Suy Giảm)</h4>
+                            </div>
+                            <p class="text-xs text-amber-800 leading-relaxed mb-3">
+                                Trạng thái khi node bị cô lập hoặc mất kết nối với các Sync Nodes (xảy ra lỗi mạng hoặc chế độ test nội bộ).
+                            </p>
+                            <ul class="text-xs text-amber-900 space-y-2 list-disc list-inside">
+                                <li><strong>Mất nguồn tham chiếu:</strong> Node không nhận đủ số lượng Sync Frames hợp lệ để tính toán hiệu chỉnh FTM.</li>
+                                <li><strong>Chạy theo thạch anh nội bộ:</strong> Đồng hồ của node trôi tự do (drift) theo tần số bộ dao động thạch anh cục bộ (Local Oscillator).</li>
+                                <li><strong>Xử lý lỗi POC:</strong> Nếu lỗi đồng bộ kéo dài liên tiếp qua nhiều chu kỳ (<code>pClockCorrectionFailed</code>), POC State Machine sẽ chuyển sang <code>NORMAL_PASSIVE</code> (chỉ nghe, ngừng phát) hoặc chuyển hẳn về <code>HALT</code> để không phá vỡ slot TDMA của các ECU khác.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Recommended Answer Template for Interview -->
+                <div class="p-5 bg-slate-900 rounded-xl text-slate-200 border border-slate-800">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                        <h4 class="font-bold text-white text-base">Mẫu Câu Trả Lời Gợi Ý Khi Đi Phỏng Vấn (Senior/Architect Pitch)</h4>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed italic bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                        "Trước hết, theo đặc tả FlexRay v3.0.1 / ISO 17458, không có khái niệm <strong>'POC frame'</strong>, mà đồng bộ chu kỳ được thực hiện qua các <strong>Sync Frames</strong> do các Sync Nodes phát, được kiểm soát bởi <strong>POC State Machine</strong> của controller.<br/><br/>
+                        Về phân bổ chu kỳ, <strong>Static Segment</strong> sử dụng TDMA với slot và payload cố định, đem lại tính tiền định tuyệt đối cho các luồng dữ liệu an toàn ASIL D. Ngược lại, <strong>Dynamic Segment</strong> sử dụng FTDMA minislotting, phân xử theo Frame ID để linh hoạt truyền các bản tin chẩn đoán UDS hoặc sự kiện.<br/><br/>
+                        Ở <strong>Synchronous mode</strong>, node liên tục dùng thuật toán Fault-Tolerant Midpoint (FTM) trong khoảng NIT để bù trừ xung nhịp toàn mạng. Nếu node bị mất tín hiệu Sync, nó sẽ rơi vào <strong>Free-running mode</strong> (chạy bằng thạch anh nội bộ), và POC State Machine sẽ tự động hạ trạng thái xuống <em>NORMAL_PASSIVE</em> hoặc <em>HALT</em> để bảo vệ an toàn cho bus."
+                    </p>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -411,14 +577,22 @@
             document.getElementById('tab-frame').classList.add('hidden');
             document.getElementById('tab-node').classList.add('hidden');
             document.getElementById('tab-network').classList.add('hidden');
+            document.getElementById('tab-interview').classList.add('hidden');
             
-            const inactiveClass = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
-            document.getElementById('btn-tab-frame').className = inactiveClass;
-            document.getElementById('btn-tab-node').className = inactiveClass;
-            document.getElementById('btn-tab-network').className = inactiveClass;
+            const inactiveClass = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-1.5";
+            document.getElementById('btn-tab-frame').className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
+            document.getElementById('btn-tab-node').className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
+            document.getElementById('btn-tab-network').className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
+            document.getElementById('btn-tab-interview').className = inactiveClass;
+
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            if (tabId === 'interview') {
+                activeBtn.className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md flex items-center gap-1.5";
+            } else {
+                activeBtn.className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md";
+            }
 
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${tabId}`).className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md";
             
             try {
                 if(typeof lucide !== 'undefined') lucide.createIcons();
@@ -466,6 +640,7 @@
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-node').addEventListener('click', () => switchTab('node'));
             document.getElementById('btn-tab-network').addEventListener('click', () => switchTab('network'));
+            document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
             
             document.getElementById('btn-seg-header').addEventListener('click', () => selectSegment('header'));
             document.getElementById('btn-seg-payload').addEventListener('click', () => selectSegment('payload'));
