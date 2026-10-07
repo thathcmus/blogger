@@ -115,10 +115,10 @@
                         <p class="text-sm text-blue-800 mb-3">
                             CPU giao tiếp với FlexRay Controller thông qua <strong>CHI (Controller Host Interface)</strong>.
                         </p>
-                        <ul class="text-sm text-blue-800 list-disc list-inside space-y-1">
-                            <li>Cấu hình mạng ban đầu.</li>
-                            <li>Cập nhật dữ liệu cần truyền.</li>
-                            <li>Đọc dữ liệu nhận được.</li>
+                        <ul class="text-sm text-blue-800 list-disc list-inside space-y-1.5">
+                            <li>Cấu hình mạng ban đầu & điều khiển POC (Protocol Operation Control).</li>
+                            <li><strong>Shadow Buffers (Double Buffering):</strong> Ngăn chặn tranh chấp dữ liệu (Race Condition) giữa CPU bất đồng bộ và Controller.</li>
+                            <li>Cơ chế Input/Output Buffer Lock bảo đảm tính toàn vẹn dữ liệu nguyên tử (atomic).</li>
                         </ul>
                     </div>
 
@@ -129,11 +129,12 @@
                             <h3 class="font-bold text-lg text-amber-900">2. Message Buffers</h3>
                         </div>
                         <p class="text-sm text-amber-800 mb-3">
-                            "Kho chứa" dữ liệu trong RAM của Controller. Gán cứng với Frame ID và Hướng (TX/RX).
+                            "Kho chứa" dữ liệu trong RAM của Controller. Gán theo Frame ID, chu kỳ và hướng truyền (TX/RX).
                         </p>
                         <ul class="text-sm text-amber-800 space-y-2">
-                            <li><strong>TX Buffer:</strong> Chờ đến đúng Slot thời gian để tự động bơm ra.</li>
-                            <li><strong>RX Buffer:</strong> Kéo data về, check CRC, báo ngắt (Interrupt) cho CPU.</li>
+                            <li><strong>Single Buffers:</strong> Gán cứng với Frame ID / Slot cho TX và RX.</li>
+                            <li><strong>Receive FIFO:</strong> Bộ đệm hàng đợi nhận linh hoạt các frame sự kiện có Frame ID khác nhau trong Dynamic Segment.</li>
+                            <li><strong>Filtering:</strong> Lọc theo Frame ID, Channel (A/B) và Cycle Repetition.</li>
                         </ul>
                     </div>
 
@@ -144,11 +145,11 @@
                             <h3 class="font-bold text-lg text-purple-900">3. Scheduling (Lập lịch)</h3>
                         </div>
                         <p class="text-sm text-purple-800 mb-3">
-                            Giao thức <strong>Time-Triggered</strong>. Mọi thứ được định đoạt từ trước qua Schedule Table.
+                            Giao thức <strong>Time-Triggered</strong>. Toàn bộ lịch phát sóng được định đoạt từ trước qua Schedule Table.
                         </p>
                         <ul class="text-sm text-purple-800 list-disc list-inside space-y-2">
-                            <li>Truyền đúng Slot dựa trên đồng hồ nội bộ đã đồng bộ.</li>
-                            <li>Tự phát Null Frame nếu CPU quên nạp data.</li>
+                            <li>Truyền đúng Slot dựa trên đồng hồ nội bộ đã đồng bộ (Microtick / Macrotick).</li>
+                            <li>Tự phát <strong>Null Frame</strong> (cờ Null = 0, Active-Low) nếu đến lượt Slot trong Static Segment mà Host CPU chưa kịp nạp dữ liệu mới.</li>
                         </ul>
                     </div>
                 </div>
@@ -204,8 +205,9 @@
                             <div class="bg-orange-100 p-2 rounded-lg"><i data-lucide="zap" class="text-orange-600 w-5 h-5"></i></div>
                             <h3 class="font-bold text-slate-800">1. Startup Frame</h3>
                         </div>
-                        <p class="text-sm text-slate-600">
-                            Gửi bởi <strong>Coldstart Node</strong> để đánh thức mạng và thiết lập nhịp chu kỳ ban đầu.
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Gửi bởi <strong>Coldstart Node</strong> (sau khi phát ký hiệu CAS) để khởi tạo nhịp đồng bộ chu kỳ và lịch trình toàn mạng.<br/>
+                            <span class="text-xs text-amber-700 font-medium block mt-1.5">⚠️ Lưu ý: Đánh thức phần cứng dùng tín hiệu <strong>WUP</strong> (Wakeup Pattern), không phải Startup Frame. Một Startup Frame luôn có cờ Sync = 1.</span>
                         </p>
                     </div>
 
@@ -215,8 +217,8 @@
                             <div class="bg-blue-100 p-2 rounded-lg"><i data-lucide="refresh-cw" class="text-blue-600 w-5 h-5"></i></div>
                             <h3 class="font-bold text-slate-800">2. Sync Frame</h3>
                         </div>
-                        <p class="text-sm text-slate-600">
-                            Được lắng nghe để đo đạc độ lệch thời gian, từ đó đồng bộ đồng hồ nội bộ (Macrotick) cho khớp với toàn mạng.
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Được lắng nghe để đo độ lệch thời gian (time deviation), từ đó đồng bộ Microtick/Macrotick giữa các node theo giải thuật <strong>Fault-Tolerant Midpoint (FTM)</strong>. Cần tối thiểu 2 Coldstart Nodes và 2–3 Sync Nodes.
                         </p>
                     </div>
 
@@ -226,8 +228,8 @@
                             <div class="bg-green-100 p-2 rounded-lg"><i data-lucide="file-text" class="text-green-600 w-5 h-5"></i></div>
                             <h3 class="font-bold text-slate-800">3. Normal Data Frame</h3>
                         </div>
-                        <p class="text-sm text-slate-600">
-                            Frame chứa <strong>Dữ liệu ứng dụng thực tế</strong>, gửi ở các slot cố định (Static) hoặc theo Event (Dynamic).
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Chứa dữ liệu ứng dụng thực tế (cờ <code>Null Frame Bit = 1</code>). Trong Static Segment có độ dài cố định theo cấu hình hệ thống, trong Dynamic Segment có độ dài linh hoạt theo nhu cầu.
                         </p>
                     </div>
 
@@ -237,9 +239,31 @@
                             <div class="bg-slate-100 p-2 rounded-lg"><i data-lucide="file-minus" class="text-slate-600 w-5 h-5"></i></div>
                             <h3 class="font-bold text-slate-800">4. Null Frame</h3>
                         </div>
-                        <p class="text-sm text-slate-600">
-                            Tự động phát ra khi tới lượt Slot trong Static Segment nhưng CPU chưa kịp nạp Data mới.
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Tự động phát ra khi đến slot trong Static Segment nhưng Host CPU chưa kịp nạp dữ liệu mới.<br/>
+                            <span class="text-xs text-rose-700 font-medium block mt-1.5">⚠️ Đặc điểm kỹ thuật: <strong>Null Frame Indicator bit = 0 (Active-Low)</strong>, Payload chứa toàn số 0.</span>
                         </p>
+                    </div>
+                </div>
+
+                <!-- Dual Channel Section -->
+                <div class="mb-8 p-5 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-100">
+                    <h3 class="font-bold text-indigo-900 mb-2 flex items-center gap-2">
+                        <i data-lucide="git-branch" class="w-5 h-5 text-indigo-600"></i>
+                        Kiến trúc Kênh đôi (Dual Channel A & B)
+                    </h3>
+                    <p class="text-sm text-indigo-800 mb-3 leading-relaxed">
+                        FlexRay hỗ trợ 2 kênh vật lý độc lập (Channel A & Channel B, 10 Mbps mỗi kênh) để phục vụ hai mục đích thiết kế:
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div class="bg-white p-3.5 rounded-lg border border-indigo-200/60 shadow-sm">
+                            <strong class="text-indigo-900 block mb-1">🛡️ Dự phòng an toàn (Redundancy Mode):</strong>
+                            Cùng truyền 1 dữ liệu đồng thời trên cả 2 kênh A & B. Nếu 1 kênh bị đứt hoặc lỗi, kênh còn lại vẫn hoạt động thông suốt (chuẩn an toàn Fail-Operational cho Steer-by-Wire, Brake-by-Wire, ASIL D).
+                        </div>
+                        <div class="bg-white p-3.5 rounded-lg border border-indigo-200/60 shadow-sm">
+                            <strong class="text-indigo-900 block mb-1">⚡ Nhân đôi băng thông (High Bandwidth Mode):</strong>
+                            Truyền các dữ liệu khác nhau trên mỗi kênh, nâng tổng thông lượng mạng lên <strong>20 Mbps</strong> (10 Mbps mỗi kênh).
+                        </div>
                     </div>
                 </div>
 
@@ -249,31 +273,51 @@
                         <i data-lucide="clock" class="text-purple-600 w-5 h-5"></i> 
                         Phân bổ Frame trong 1 Chu kỳ (Communication Cycle)
                     </h4>
-                    <div class="flex flex-col gap-2 min-w-[600px]">
+                    <div class="flex flex-col gap-2 min-w-[650px]">
                         <div class="flex text-xs font-semibold text-slate-500 mb-1">
-                            <div class="w-1/2">Static Segment (Thời gian cố định - TDMA)</div>
-                            <div class="w-1/3">Dynamic Segment</div>
+                            <div class="w-1/2">Static Segment (Bắt buộc - TDMA)</div>
+                            <div class="w-1/3">Dynamic Segment (Tùy chọn)</div>
                             <div class="w-1/6 text-right">Symbol & NIT</div>
                         </div>
                         
                         <div class="flex h-12 w-full rounded-lg overflow-hidden border border-slate-300">
                             <!-- Static Segment -->
                             <div class="w-1/2 flex">
-                                <div class="flex-1 bg-orange-400 text-white flex items-center justify-center text-xs font-bold border-r border-orange-500">ID 1<br/>(Startup)</div>
-                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600">ID 2<br/>(Data)</div>
-                                <div class="flex-1 bg-slate-400 text-white flex items-center justify-center text-xs font-bold border-r border-slate-500">ID 3<br/>(Null)</div>
-                                <div class="flex-1 bg-blue-500 text-white flex items-center justify-center text-xs font-bold border-r border-blue-600">ID 4<br/>(Sync)</div>
-                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600">ID 5<br/>(Data)</div>
+                                <div class="flex-1 bg-orange-400 text-white flex items-center justify-center text-xs font-bold border-r border-orange-500" title="Startup Frame (Static Slot 1)">ID 1<br/>(Startup)</div>
+                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600" title="Data Frame (Static Slot 2)">ID 2<br/>(Data)</div>
+                                <div class="flex-1 bg-slate-400 text-white flex items-center justify-center text-xs font-bold border-r border-slate-500" title="Null Frame (Static Slot 3, bit=0)">ID 3<br/>(Null)</div>
+                                <div class="flex-1 bg-blue-500 text-white flex items-center justify-center text-xs font-bold border-r border-blue-600" title="Sync Frame (Static Slot 4)">ID 4<br/>(Sync)</div>
+                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600" title="Data Frame (Static Slot 5)">ID 5<br/>(Data)</div>
                             </div>
                             <!-- Dynamic Segment -->
-                            <div class="w-1/3 bg-teal-100 flex items-center px-2 border-r border-slate-300 overflow-hidden relative">
+                            <div class="w-1/3 bg-teal-100 flex items-center px-2 border-r border-slate-300 overflow-hidden relative" title="Dynamic Segment (FTDMA Minislots - Event Triggered)">
                                 <div class="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px)]"></div>
-                                <div class="z-10 bg-teal-500 text-white text-[10px] px-2 py-1 rounded shadow-sm mr-2 whitespace-nowrap">ID 100 (Event)</div>
+                                <div class="z-10 bg-teal-500 text-white text-[10px] px-2 py-1 rounded shadow-sm mr-2 whitespace-nowrap font-medium">ID 100 (Event)</div>
                             </div>
                             <!-- Symbol Window & NIT -->
                             <div class="w-1/6 flex">
-                                <div class="w-1/3 bg-yellow-400"></div>
-                                <div class="w-2/3 bg-slate-800 flex items-center justify-center text-[10px] text-slate-300">NIT</div>
+                                <div class="w-1/3 bg-yellow-400 flex items-center justify-center text-[9px] font-bold text-slate-800" title="Symbol Window (Tùy chọn: Gửi Media Test Symbol)">SW</div>
+                                <div class="w-2/3 bg-slate-800 flex items-center justify-center text-[10px] text-slate-300 font-semibold" title="Network Idle Time (Bắt buộc: Bù lệch xung nhịp)">NIT</div>
+                            </div>
+                        </div>
+
+                        <!-- Chú thích 4 phân đoạn -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-xs text-slate-600">
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-blue-700 block mb-0.5">Static Segment (Bắt buộc):</span>
+                                Các slot cố định (TDMA), đảm bảo tính thời gian thực cứng và độ trễ tiền định.
+                            </div>
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-teal-700 block mb-0.5">Dynamic Segment (Tùy chọn):</span>
+                                Chia theo Minislot (FTDMA), Frame ID nhỏ hơn được quyền phát trước.
+                            </div>
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-amber-700 block mb-0.5">Symbol Window (Tùy chọn):</span>
+                                Dùng để gửi Media Test Symbol (MTS) để kiểm tra đường truyền vật lý.
+                            </div>
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-slate-800 block mb-0.5">NIT (Bắt buộc):</span>
+                                Khoảng lặng cuối chu kỳ để CC tính toán bù lệch pha/tần số (Offset Correction).
                             </div>
                         </div>
                     </div>
@@ -290,27 +334,75 @@
                 id: 'header', name: 'Header Segment (Phần đầu)', size: '5 Bytes (40 bits)', color: 'bg-blue-600', hover: 'hover:bg-blue-500',
                 desc: 'Chứa các thông tin điều khiển, nhận dạng frame và kiểm tra lỗi cho phần Header.',
                 subFields: [
-                    { name: 'Indicator Bits', bits: '5 bits', desc: 'Gồm 5 bit cờ báo trạng thái: Reserved bit, Payload Preamble bit, Null Frame bit, Sync Frame bit, Startup Frame bit.' },
-                    { name: 'Frame ID', bits: '11 bits', desc: 'Định danh duy nhất cho Frame trong hệ thống (từ 1 đến 2047). Xác định Slot thời gian nào frame này sẽ được gửi trong Static Segment.' },
-                    { name: 'Payload Length', bits: '7 bits', desc: 'Chỉ định độ dài của phần Payload. Đơn vị tính là Word (1 Word = 2 Bytes).' },
-                    { name: 'Header CRC', bits: '11 bits', desc: 'Mã kiểm tra lỗi (Cyclic Redundancy Check) dành riêng cho phần Header.' },
-                    { name: 'Cycle Count', bits: '6 bits', desc: 'Đếm chu kỳ giao tiếp hiện tại của mạng (từ 0 đến 63).' }
+                    { 
+                        name: 'Indicator Bits', 
+                        bits: '5 bits', 
+                        desc: 'Gồm 5 cờ trạng thái theo thứ tự truyền:<br/>' +
+                              '• <strong>Reserved bit (1b):</strong> Luôn bằng 0 (dành cho tương thích tương lai).<br/>' +
+                              '• <strong>Payload Preamble (1b):</strong> Ở Static = có NM Vector; ở Dynamic = 2 byte đầu là Message ID.<br/>' +
+                              '• <strong>Null Frame Indicator (1b):</strong> <span class="text-rose-600 font-semibold">Active-Low</span> (0 = Frame rỗng/không nạp data mới, 1 = Chứa data hợp lệ).<br/>' +
+                              '• <strong>Sync Frame Indicator (1b):</strong> 1 = Khung dùng để đồng bộ xung nhịp toàn mạng.<br/>' +
+                              '• <strong>Startup Frame Indicator (1b):</strong> 1 = Khung từ Coldstart Node (luôn đi kèm Sync bit = 1).'
+                    },
+                    { 
+                        name: 'Frame ID', 
+                        bits: '11 bits', 
+                        desc: 'Định danh duy nhất từ 1 đến 2047 (0 không hợp lệ):<br/>' +
+                              '• <strong>Static Segment:</strong> Xác định chính xác Slot số k mà frame được gửi cố định.<br/>' +
+                              '• <strong>Dynamic Segment:</strong> Xác định độ ưu tiên phân xử Mini-slot (FTDMA) - ID nhỏ hơn có quyền phát trước.'
+                    },
+                    { 
+                        name: 'Payload Length', 
+                        bits: '7 bits', 
+                        desc: 'Chỉ định số Word (1 Word = 2 Bytes), tối đa 127 Words = 254 Bytes.<br/>' +
+                              '• <strong>Quy tắc Static:</strong> Tất cả frame trong Static Segment của cùng cluster bắt buộc có <em>cùng độ dài tĩnh</em> (gPayloadLengthStatic).<br/>' +
+                              '• <strong>Dynamic:</strong> Độ dài có thể thay đổi linh hoạt theo từng frame.'
+                    },
+                    { 
+                        name: 'Header CRC', 
+                        bits: '11 bits', 
+                        desc: 'Mã CRC-11 (đa thức 0x385) bảo vệ <strong class="text-blue-700">đúng 20 bits quan trọng</strong>:<br/>' +
+                              'Sync bit (1) + Startup bit (1) + Frame ID (11) + Payload Length (7).<br/>' +
+                              '<em>Lưu ý:</em> Không tính trên Reserved, Payload Preamble, Null bit (do thay đổi runtime), và không tính Cycle Count. Được tính offline bởi công cụ cấu hình.'
+                    },
+                    { 
+                        name: 'Cycle Count', 
+                        bits: '6 bits', 
+                        desc: 'Đếm chu kỳ giao tiếp từ 0 đến 63 (gCycleCountMax = 63), tuần hoàn tăng dần sau mỗi Communication Cycle.'
+                    }
                 ]
             },
             payload: {
                 id: 'payload', name: 'Payload Segment (Dữ liệu)', size: '0 đến 254 Bytes', color: 'bg-green-600', hover: 'hover:bg-green-500',
-                desc: 'Phần chứa dữ liệu thực tế cần truyền tải giữa các ECU (Engine Control Unit).',
+                desc: 'Phần chứa dữ liệu ứng dụng thực tế giữa các ECU (độ dài luôn là số chẵn do tính theo Word 16-bit).',
                 subFields: [
-                    { name: 'Data Bytes', bits: '0 - 254 Bytes', desc: 'Dữ liệu ứng dụng thực tế. Độ dài luôn là số chẵn (bội số của 2 bytes).' },
-                    { name: 'Message ID (Tùy chọn)', bits: '16 bits', desc: 'Chỉ xuất hiện trong Dynamic Segment nếu bit Payload Preamble = 1.' },
-                    { name: 'NM Vector (Tùy chọn)', bits: '0 - 12 Bytes', desc: 'Network Management Vector, dùng để quản lý trạng thái ngủ/thức của mạng.' }
+                    { 
+                        name: 'Data Bytes', 
+                        bits: '0 - 254 Bytes', 
+                        desc: 'Dữ liệu ứng dụng thực tế. Cố định theo cluster trong Static Segment, có thể thay đổi trong Dynamic Segment.' 
+                    },
+                    { 
+                        name: 'Message ID (Tùy chọn)', 
+                        bits: '16 bits', 
+                        desc: 'Chiếm 2 byte đầu tiên của Payload trong Dynamic Segment khi bit Payload Preamble = 1, hỗ trợ lọc thông điệp linh hoạt tại bên nhận.' 
+                    },
+                    { 
+                        name: 'NM Vector (Tùy chọn)', 
+                        bits: '0 - 12 Bytes', 
+                        desc: 'Network Management Vector nằm ở đầu Payload của Static Frame khi bit Payload Preamble = 1, phục vụ quản lý trạng thái thức/ngủ cụm mạng.' 
+                    }
                 ]
             },
             trailer: {
                 id: 'trailer', name: 'Trailer Segment (Phần đuôi)', size: '3 Bytes (24 bits)', color: 'bg-red-600', hover: 'hover:bg-red-500',
-                desc: 'Phần kết thúc frame, đảm bảo tính toàn vẹn của toàn bộ dữ liệu.',
+                desc: 'Phần kết thúc frame, đảm bảo tính toàn vẹn của dữ liệu bằng mã kiểm tra lỗi CRC 24-bit.',
                 subFields: [
-                    { name: 'Frame CRC', bits: '24 bits', desc: 'Mã kiểm tra lỗi CRC 24-bit được tính toán dựa trên toàn bộ Header và Payload. Node nhận sẽ tính lại mã này và so sánh.' }
+                    { 
+                        name: 'Frame CRC', 
+                        bits: '24 bits', 
+                        desc: 'Mã CRC-24 tính toán trên toàn bộ 40 bits Header và Payload.<br/>' +
+                              '• <strong>Vector khởi tạo riêng biệt theo kênh:</strong> Kênh A dùng <code>0xFECABC</code>, Kênh B dùng <code>0xABCDEF</code> để loại trừ hoàn toàn nguy cơ nhận nhầm khung chéo kênh.' 
+                    }
                 ]
             }
         };
@@ -327,6 +419,12 @@
 
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             document.getElementById(`btn-tab-${tabId}`).className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md";
+            
+            try {
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (error) {
+                console.warn("Lucide icons failed to load:", error);
+            }
         }
 
         function selectSegment(segId) {
