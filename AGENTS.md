@@ -36,8 +36,8 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 ├── LICENSE                                 # Giấy phép nguồn mở MIT
 ├── .gitignore                              # Chặn file rác
 │
-├── FLEXRAY_overview.html                   # Widget: Trực quan hóa giao thức FlexRay
-└── OOP_Cpp_Simulator.html                  # Widget: Trực quan hóa lập trình hướng đối tượng C++
+├── widget_flexray.html                   # Widget: Trực quan hóa giao thức FlexRay
+└── widget_cpp_oop.html                  # Widget: Trực quan hóa lập trình hướng đối tượng C++
 ```
 
 ---

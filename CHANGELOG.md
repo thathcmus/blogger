@@ -14,6 +14,31 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 
 ---
 
+## [1.4.0] - 2026-10-07
+
+### Added
+- **CAN FD Protocol Explorer (`widget_can_fd.html`)**: Khởi tạo widget mô phỏng tương tác mạng CAN FD mới với theme Amber/Orange đặc trưng:
+  - *Tab 1 (Cấu Trúc Khung)*: Trực quan hóa cấu trúc CAN FD ở cấp độ Bit, nhấn mạnh cơ chế Dual Bit Rate qua cờ BRS và payload 64 bytes.
+  - *Tab 2 (So Sánh)*: Bảng đối chiếu tiến hóa công nghệ chi tiết giữa Classic CAN 2.0, CAN FD và CAN XL.
+  - *Tab 3 (Phỏng Vấn)*: Khung Placeholder chờ cập nhật ngân hàng câu hỏi Q&A phỏng vấn CAN FD.
+- **Documentation**: Tạo hệ thống tài liệu chuẩn hoá cho CAN FD gồm `docs/can_fd/CURRENT_INFO.md` và `docs/can_fd/BACKLOG.md`.
+- Cập nhật `README.md` thêm CAN FD vào danh mục Widget.
+
+---
+
+## [1.3.0] - 2026-10-07
+
+### Added
+- **FlexRay - Interview Q&A Accordion (Tab 4 - Q2)**: Bổ sung câu hỏi phỏng vấn thực chiến chuyên sâu **Q2**:
+  - *Bản chất & Vai trò Sync Node*: Cung cấp mốc chuẩn toàn cầu, tham gia Coldstart. Khẳng định 100% Sync Node vẫn truyền nhận Application Payload data thông thường (lên tới 254 bytes), chỉ khác là bật bit cờ Header `Sync Frame Indicator = 1`.
+  - *Bảng so sánh 4 chiều*: Đối chiếu chi tiết Sync Node vs Regular (Non-Sync) Node.
+  - *Cơ chế bù lệch Clock Drift*: Phân tích quy trình 3 giai đoạn: Đo đạc Action Point $\Delta t_i$, thuật toán Fault-Tolerant Midpoint (FTM) lọc bỏ lỗi cực trị Byzantine do node hỏng, và bù lệch pha (Offset Correction) cùng bù lệch tần số (Rate Correction) tại khoảng lặng NIT.
+  - *Bộ mô phỏng tương tác 4-Node (Interactive Clock Drift & FTM Visualizer)*: Trực quan hóa timeline 4 Node (Master Sync A, Steering Sync B, Brake C, Byzantine Faulty D) với 4 nút điều khiển thời gian thực và log tính toán FTM.
+  - *Mở rộng Q3, Q4...*: Tạo sẵn slot placeholder Q3 cho câu hỏi tiếp theo.
+- **Documentation**: Cập nhật `docs/flexray/CURRENT_INFO.md` tương ứng với giao diện và mã nguồn mới.
+
+---
+
 ## [1.2.0] - 2026-10-07
 
 ### Added
@@ -46,8 +71,8 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ## [1.0.0] - 2026-04-11
 
 ### Added
-- Khởi tạo widget **FlexRay Protocol Explorer** (`FLEXRAY_overview.html`):
+- Khởi tạo widget **FlexRay Protocol Explorer** (`widget_flexray.html`):
   - Tab 1: Khám phá tương tác 3 phân đoạn Header (5B), Payload (0-254B), Trailer (3B).
   - Tab 2: Quản lý dữ liệu Node giữa Host CPU, CHI và Message Buffers.
   - Tab 3: Phân loại 4 loại Frame và sơ đồ chu kỳ Communication Cycle.
-- Khởi tạo widget **C++ OOP Simulator** (`OOP_Cpp_Simulator.html`): Mô phỏng tương tác các tính chất hướng đối tượng trong C++.
+- Khởi tạo widget **C++ OOP Simulator** (`widget_cpp_oop.html`): Mô phỏng tương tác các tính chất hướng đối tượng trong C++.

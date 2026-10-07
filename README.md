@@ -15,8 +15,9 @@ Kho lưu trữ các công cụ trực quan hóa và mô phỏng tương tác (**
 
 | Widget | Mô Tả Trực Quan | Xem Trực Tiếp (Live Demo) | Tài Liệu Kỹ Thuật |
 | :--- | :--- | :---: | :---: |
-| **FlexRay Protocol Explorer**<br>`FLEXRAY_overview.html` | Khám phá cấu trúc Frame (Header/Payload/Trailer), quản lý dữ liệu Node qua CHI & Message Buffers, và sơ đồ chu kỳ truyền thông (Static, Dynamic, Symbol Window, NIT) chuẩn **FlexRay 3.0.1 / ISO 17458**. | [🔗 Mở Demo](https://thathcmus.github.io/blogger/FLEXRAY_overview.html) | [`docs/flexray/`](docs/flexray/CURRENT_INFO.md) |
-| **C++ OOP Simulator**<br>`OOP_Cpp_Simulator.html` | Mô phỏng tương tác 4 tính chất của Lập trình hướng đối tượng (Kế thừa, Đóng gói, Đa hình, Trừu tượng hóa) kèm bảng phân tích bộ nhớ và cơ chế Virtual Table (VTABLE). | [🔗 Mở Demo](https://thathcmus.github.io/blogger/OOP_Cpp_Simulator.html) | Đang cập nhật |
+| **FlexRay Protocol Explorer**<br>`widget_flexray.html` | Khám phá cấu trúc Frame (Header/Payload/Trailer), quản lý dữ liệu Node qua CHI & Message Buffers, và sơ đồ chu kỳ truyền thông (Static, Dynamic, Symbol Window, NIT) chuẩn **FlexRay 3.0.1 / ISO 17458**. | [🔗 Mở Demo](https://thathcmus.github.io/blogger/widget_flexray.html) | [`docs/flexray/`](docs/flexray/CURRENT_INFO.md) |
+| **CAN FD Protocol Explorer**<br>`widget_can_fd.html` | Trực quan hóa cấu trúc CAN FD ở cấp độ Bit, cơ chế chuyển đổi tốc độ kép qua cờ BRS, và bảng phân tích so sánh chi tiết giữa Classic CAN vs CAN FD vs CAN XL. | [🔗 Mở Demo](https://thathcmus.github.io/blogger/widget_can_fd.html) | [`docs/can_fd/`](docs/can_fd/CURRENT_INFO.md) |
+| **C++ OOP Simulator**<br>`widget_cpp_oop.html` | Mô phỏng tương tác 4 tính chất của Lập trình hướng đối tượng (Kế thừa, Đóng gói, Đa hình, Trừu tượng hóa) kèm bảng phân tích bộ nhớ và cơ chế Virtual Table (VTABLE). | [🔗 Mở Demo](https://thathcmus.github.io/blogger/widget_cpp_oop.html) | Đang cập nhật |
 
 ---
 
@@ -31,7 +32,7 @@ Kho lưu trữ các công cụ trực quan hóa và mô phỏng tương tác (**
 ```html
 <!-- FlexRay Explorer Embed Widget -->
 <div style="width: 100%; margin: 24px auto; text-align: center;">
-    <iframe src="https://thathcmus.github.io/blogger/FLEXRAY_overview.html" 
+    <iframe src="https://thathcmus.github.io/blogger/widget_flexray.html" 
             width="100%" 
             height="850px" 
             style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;" 
@@ -79,8 +80,8 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 ├── CHANGELOG.md                            # Lịch sử thay đổi phiên bản (SemVer)
 ├── README.md                               # Tài liệu giới thiệu dự án
 ├── LICENSE                                 # Giấy phép mã nguồn mở MIT
-├── FLEXRAY_overview.html                   # Widget FlexRay Explorer
-└── OOP_Cpp_Simulator.html                  # Widget C++ OOP Simulator
+├── widget_flexray.html                   # Widget FlexRay Explorer
+└── widget_cpp_oop.html                  # Widget C++ OOP Simulator
 ```
 
 ---

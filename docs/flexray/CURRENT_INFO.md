@@ -1,6 +1,6 @@
 # Đặc Tả Kỹ Thuật Hiện Trạng: FlexRay Protocol Explorer (Current Info)
 
-* **Tên file nguồn**: [`FLEXRAY_overview.html`](../../FLEXRAY_overview.html)
+* **Tên file nguồn**: [`widget_flexray.html`](../../widget_flexray.html)
 * **Phiên bản hiện tại**: `v1.1.0` (Cập nhật chuẩn hóa FlexRay 3.0.1 & ISO 17458:2013)
 * **Ngày cập nhật**: `2026-10-07`
 * **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức truyền thông mạng trên ô tô FlexRay phục vụ nhúng vào bài viết Google Blogger (Blogspot) hoặc xem độc lập.
@@ -12,7 +12,7 @@
 ### Cách 1: Nhúng Iframe qua GitHub Pages (Tối ưu & Khuyên dùng)
 Dán đoạn mã sau vào bài đăng Blogger ở chế độ **HTML View**:
 ```html
-<iframe src="https://thathcmus.github.io/blogger/FLEXRAY_overview.html" 
+<iframe src="https://thathcmus.github.io/blogger/widget_flexray.html" 
         width="100%" 
         height="850px" 
         style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;"
@@ -21,7 +21,7 @@ Dán đoạn mã sau vào bài đăng Blogger ở chế độ **HTML View**:
 ```
 
 ### Cách 2: Nhúng mã trực tiếp (Direct Embed)
-Copy toàn bộ nội dung từ file `FLEXRAY_overview.html` và dán thẳng vào chế độ Soạn thảo HTML của bài viết Blogger.
+Copy toàn bộ nội dung từ file `widget_flexray.html` và dán thẳng vào chế độ Soạn thảo HTML của bài viết Blogger.
 
 ---
 
@@ -106,8 +106,14 @@ Minh họa cách một ECU xử lý và trao đổi dữ liệu:
    - *Bảng so sánh 5 chiều*: Static Segment (TDMA, tiền định tuyệt đối, payload cố định cho ASIL D) vs Dynamic Segment (FTDMA minislotting, ưu tiên theo Frame ID cho UDS/Events).
    - *Hai chế độ vận hành*: Synchronous Mode (bù trừ độ lệch FTM trong khoảng NIT) vs Free-Running Mode (dao động tự do khi mất Sync, hạ trạng thái POC xuống Normal Passive/Halt).
    - *Mẫu câu trả lời gợi ý (Senior/Architect Pitch)*: Khung trả lời 3 phần súc tích.
-2. **Khung mở rộng Q2, Q3...**:
-   - Thiết kế dạng thẻ Accordion độc lập (`toggleQuestion(qId)`), sẵn sàng nhân bản để bổ sung các câu hỏi tiếp theo (ví dụ: Q2 Coldstart/Wakeup, Q3 Bus Guardian/Fault-Tolerance...).
+2. **Câu hỏi Q2: Đồng Bộ Xung Clock Khi Bị Lệch, Thuật Toán FTM & Bản Chất Sync Node**:
+   - *Bản chất & Vai trò Sync Node*: Cung cấp mốc thời gian toàn cục, tham gia Coldstart. Khẳng định Sync Node **hoàn toàn gửi dữ liệu ứng dụng bình thường** (Payload tối đa 254B) như mọi ECU khác, chỉ khác là bật cờ `Sync Frame Indicator = 1`.
+   - *Bảng so sánh 4 chiều*: Sync Node vs Regular (Non-Sync) Node.
+   - *Cơ chế bù lệch*: Đo độ lệch Action Point $\Delta t_i$, lọc bỏ lỗi cực trị Byzantine qua thuật toán **Fault-Tolerant Midpoint (FTM)**, bù lệch pha (Offset Correction) và bù lệch tần số (Rate Correction) trong khoảng **NIT**.
+   - *Bộ mô phỏng tương tác thời gian thực (4-Node Simulator)*: Trực quan hóa Node A (Master Sync), Node B (Steering Sync - lệch nhanh), Node C (Brake Regular - lệch chậm), và Node D (Byzantine Faulty). Cho phép bấm mô phỏng Drift, chạy thuật toán FTM loại bỏ cực trị, và bù lệch tại NIT.
+   - *Mẫu câu trả lời phỏng vấn Senior/Architect Pitch*.
+3. **Khung mở rộng Q3, Q4...**:
+   - Thiết kế dạng thẻ Accordion độc lập (`toggleQuestion(qId)`), sẵn sàng nhân bản để bổ sung các câu hỏi tiếp theo (ví dụ: Q3 Coldstart/Wakeup/CAS, Q4 Bus Guardian...).
 
 ---
 
@@ -118,10 +124,11 @@ Minh họa cách một ECU xử lý và trao đổi dữ liệu:
 * **Dòng 56 – 98**: Cụm giao diện Tab 1 (Sơ đồ Segment tương tác và khung chi tiết thuộc tính).
 * **Dòng 99 – 197**: Cụm giao diện Tab 2 (3 Box quản lý dữ liệu và Sơ đồ Data Flow kiến trúc ECU).
 * **Dòng 198 – 330**: Cụm giao diện Tab 3 (4 card phân loại Frame, Card kiến trúc Dual Channel, và Biểu đồ Communication Cycle phân đoạn).
-* **Dòng 331 – 540**: Cụm giao diện Tab 4 (Ngân hàng câu hỏi phỏng vấn dạng Accordion: Item Q1 chi tiết kèm mẫu mở rộng Q2).
-* **Dòng 541 – 740**: JavaScript logic:
+* **Dòng 331 – 670**: Cụm giao diện Tab 4 (Ngân hàng câu hỏi phỏng vấn dạng Accordion: Item Q1 phân tích Time-Triggered & POC, Item Q2 chi tiết về Sync Node & Bộ mô phỏng tương tác Clock Drift 4-Node, và placeholder slot Q3).
+* **Dòng 671 – 890**: JavaScript logic:
   - Khai báo hằng số dữ liệu cấu trúc `const frameData = { header, payload, trailer }`.
   - Hàm `switchTab(tabId)`: Chuyển đổi 4 tabs mượt mà.
   - Hàm `toggleQuestion(qId)`: Đóng/mở câu hỏi dạng accordion với hiệu ứng xoay icon mũi tên.
+  - Hàm `runSimClock(step)`: Điều khiển 4 bước mô phỏng tương tác xung clock và thuật toán FTM cho Q2.
   - Hàm `selectSegment(segId)`: Đổi màu viền và render động các sub-fields tương ứng.
-  - Sự kiện `DOMContentLoaded`: Gắn event listener cho 4 nút tab và gọi an toàn `lucide.createIcons()`.
+  - Sự kiện `DOMContentLoaded`: Gắn event listener cho các nút tab và gọi an toàn `lucide.createIcons()`.

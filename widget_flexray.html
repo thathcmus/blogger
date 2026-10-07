@@ -524,17 +524,314 @@
                         </div>
                     </div>
 
-                    <!-- QUESTION 2: PLACEHOLDER / EXTENSION SLOT (READY FOR Q2, Q3...) -->
-                    <div id="q-card-q2" class="border border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <!-- QUESTION 2: ACCORDION ITEM -->
+                    <div id="q-card-q2" class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all">
+                        <!-- Accordion Header Button -->
+                        <button onclick="toggleQuestion('q2')" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors text-left border-b border-slate-200">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-amber-600 text-white font-bold text-xs rounded-md shadow-sm">Q2</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base md:text-lg">
+                                        Đồng Bộ Xung Clock Khi Bị Lệch, Thuật Toán FTM & Bản Chất Sync Node
+                                    </h3>
+                                    <span class="text-xs text-slate-500 block mt-0.5">
+                                        Mô phỏng trực quan Clock Drift, bù lệch Offset/Rate tại NIT, thuật toán Fault-Tolerant Midpoint & vai trò Sync Node vs Node thông thường
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-amber-50 text-amber-800 font-medium px-2.5 py-1 rounded-full border border-amber-200 hidden md:inline-block">
+                                    Clock Sync & FTM Simulation
+                                </span>
+                                <div class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm">
+                                    <i id="q-icon-q2" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200 rotate-180"></i>
+                                </div>
+                            </div>
+                        </button>
+
+                        <!-- Accordion Content Body (Expanded by default) -->
+                        <div id="q-content-q2" class="p-4 md:p-6 bg-white animate-fadeIn">
+                            <!-- Question Quote Box -->
+                            <div class="mb-6 p-4 md:p-5 bg-gradient-to-r from-slate-900 to-amber-950 rounded-xl text-white shadow-md border border-slate-800">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2 bg-amber-500/20 rounded-lg text-amber-400 mt-0.5">
+                                        <i data-lucide="message-square-quote" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <span class="text-xs uppercase tracking-wider font-semibold text-amber-400 block mb-1">Đề bài câu hỏi phỏng vấn:</span>
+                                        <blockquote class="text-sm md:text-base font-medium text-slate-100 leading-relaxed italic">
+                                            "Trong mạng FlexRay, khi các node sử dụng thạch anh độc lập và bị lệch xung nhịp (clock drift), cơ chế đồng bộ frame trên nhiều node hoạt động như thế nào qua các chu kỳ? Sync Node đóng vai trò gì, cách hoạt động ra sao và nó có thực hiện truyền nhận dữ liệu ứng dụng như các node thông thường không?"
+                                        </blockquote>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 1: Giải Mã Toàn Diện Sync Node -->
+                            <div class="mb-6 p-5 bg-indigo-50/70 rounded-xl border border-indigo-200">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="cpu" class="w-5 h-5 text-indigo-700"></i>
+                                    <h4 class="font-bold text-base md:text-lg text-indigo-950">1. Bản Chất & Vai Trò Của Sync Node: Có Gửi Data Như Node Thường Không?</h4>
+                                </div>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm mb-4">
+                                    <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+                                        <h5 class="font-bold text-slate-900 flex items-center gap-2 mb-2 text-sm">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                                            Sync Node là gì & Vai trò gì?
+                                        </h5>
+                                        <p class="text-xs text-slate-600 leading-relaxed mb-2">
+                                            Trong mỗi cluster FlexRay, các kỹ sư hệ thống cấu hình từ <strong>2 đến 15 node quan trọng</strong> (như Master Gateway, Phanh ESP, Trợ lực lái EPS) làm <strong>Sync Nodes</strong>:
+                                        </p>
+                                        <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+                                            <li><strong>Phát mốc chuẩn:</strong> Định kỳ phát <em>Sync Frame</em> (Header có bit <code>Sync Frame Indicator = 1</code>) trong Static Segment tại slot cố định.</li>
+                                            <li><strong>Global Time Base:</strong> Đóng vai trò làm mốc thời gian để toàn mạng đo đạc và căn chỉnh xung nhịp.</li>
+                                            <li><strong>Bắt buộc cho Coldstart:</strong> Chỉ các Sync Node mới được chỉ định làm <em>Coldstart Node</em> để đánh thức và khởi động mạng từ trạng thái nghỉ.</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+                                        <h5 class="font-bold text-slate-900 flex items-center gap-2 mb-2 text-sm">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                                            Sync Node có gửi dữ liệu ứng dụng như node thường không?
+                                        </h5>
+                                        <div class="p-2.5 bg-emerald-50 text-emerald-900 rounded-lg border border-emerald-200 text-xs font-semibold mb-2">
+                                            CÓ 100%! Sync Node vẫn là một ECU chức năng bình thường, truyền nhận Application Data trọn vẹn trong Payload Segment.
+                                        </div>
+                                        <p class="text-xs text-slate-600 leading-relaxed">
+                                            Rất nhiều người lầm tưởng Sync Node chỉ phát "xung vô nghĩa" để đồng bộ. Thực tế, Sync Frame mang trọn vẹn <strong>0 đến 254 bytes Payload</strong> chứa tín hiệu cảm biến (tốc độ xe, góc lái, mô-men xoắn...). Điểm khác biệt duy nhất của nó là bit cờ Header <code>Sync Indicator = 1</code> và nó không được phép gửi Null Frame trừ khi hỏng hóc.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Bảng so sánh Sync Node vs Regular Node -->
+                                <div class="overflow-x-auto border border-indigo-200/80 rounded-xl bg-white shadow-sm">
+                                    <table class="w-full text-xs text-left border-collapse">
+                                        <thead class="bg-indigo-100/70 text-indigo-900 font-bold uppercase">
+                                            <tr>
+                                                <th class="p-3 border-b border-indigo-200 w-1/4">Đặc điểm kỹ thuật</th>
+                                                <th class="p-3 border-b border-indigo-200 w-3/8 text-blue-800 bg-blue-50/50">Sync Node (Node Đồng Bộ)</th>
+                                                <th class="p-3 border-b border-indigo-200 w-3/8 text-slate-800 bg-slate-50/50">Regular Node (Node Thường)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Bit Sync Frame Indicator</td>
+                                                <td class="p-2.5 bg-blue-50/20 font-bold text-blue-700">Luôn = 1 trong frame Static được gán</td>
+                                                <td class="p-2.5 bg-slate-50/20 font-mono text-slate-600">Luôn = 0</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Truyền Application Data</td>
+                                                <td class="p-2.5 bg-blue-50/20 text-emerald-700 font-semibold">CÓ (Payload Segment đầy đủ tới 254B)</td>
+                                                <td class="p-2.5 bg-slate-50/20 text-emerald-700 font-semibold">CÓ (Payload Segment đầy đủ tới 254B)</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Vai trò trong thuật toán FTM</td>
+                                                <td class="p-2.5 bg-blue-50/20">Là <strong>nguồn phát mốc chuẩn</strong> + đồng thời tự lắng nghe các Sync Node khác để tự sửa clock</td>
+                                                <td class="p-2.5 bg-slate-50/20"><strong>Chỉ là bên nhận</strong>: Lắng nghe các Sync Node để tự sửa clock mình, không phát mốc</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Số lượng tối thiểu trong Cluster</td>
+                                                <td class="p-2.5 bg-blue-50/20 font-semibold text-amber-800">Tối thiểu &ge; 2 (mạng 2 kênh) hoặc &ge; 3 (mạng 1 kênh)</td>
+                                                <td class="p-2.5 bg-slate-50/20">Không bắt buộc (có thể gồm hàng chục node)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 2: Cơ Chế Đồng Bộ Khi Clock Lệch (Clock Drift & FTM) -->
+                            <div class="mb-6">
+                                <h4 class="text-base md:text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                    <i data-lucide="git-merge" class="w-5 h-5 text-amber-600"></i>
+                                    2. Cơ Chế Xử Lý Khi Xung Clock Lệch (Clock Drift, Offset/Rate & Thuật Toán FTM)
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs mb-4">
+                                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                        <div class="flex items-center gap-2 mb-2 font-bold text-slate-800">
+                                            <span class="w-5 h-5 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px]">1</span>
+                                            Đo Đạc Lệch Pha (Measurement)
+                                        </div>
+                                        <p class="text-slate-600 leading-relaxed">
+                                            Mỗi ECU dùng dao động thạch anh nội bộ sinh ra <strong>Microtick (&mu;T)</strong>. Do nhiệt độ (-40&deg;C &sim; 125&deg;C) và sai số chế tạo, nhịp &mu;T của các ECU bị lệch nhau.<br/><br/>
+                                            Khi Sync Frame tới, Controller ghi nhận thời điểm cạnh xuống (Action Point) so với Macrotick dự kiến để tính độ lệch thời gian $\Delta t_i$.
+                                        </p>
+                                    </div>
+
+                                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+                                        <div class="flex items-center gap-2 mb-2 font-bold text-amber-900">
+                                            <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px]">2</span>
+                                            Thuật Toán FTM (Lọc Byzantine)
+                                        </div>
+                                        <p class="text-amber-800 leading-relaxed">
+                                            <strong>Fault-Tolerant Midpoint (FTM)</strong> giải quyết bài toán chống node hỏng (Byzantine Fault):<br/>
+                                            &bull; Sắp xếp tất cả giá trị lệch đo được tăng dần.<br/>
+                                            &bull; Loại bỏ $k$ giá trị cực tiểu và $k$ giá trị cực đại ($k$ tùy số node).<br/>
+                                            &bull; Lấy <em>trung bình cộng của cận giữa</em> làm giá trị bù trừ chuẩn $\Delta_{corr}$.
+                                        </p>
+                                    </div>
+
+                                    <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                                        <div class="flex items-center gap-2 mb-2 font-bold text-emerald-900">
+                                            <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">3</span>
+                                            Bù Trừ Tại NIT (Correction)
+                                        </div>
+                                        <p class="text-emerald-800 leading-relaxed">
+                                            Tại khoảng lặng <strong>NIT (Network Idle Time)</strong> cuối chu kỳ:<br/>
+                                            &bull; <strong>Offset Correction:</strong> Co/giãn số Microtick trong các Macrotick cuối để chu kỳ mới bắt đầu đúng micro-giây.<br/>
+                                            &bull; <strong>Rate Correction:</strong> Đo trên 2 chu kỳ chẵn/lẻ để bù đều tần số thạch anh cho toàn chu kỳ tiếp theo.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 3: INTERACTIVE CLOCK SYNC SIMULATOR -->
+                            <div class="mb-6 p-5 bg-slate-900 rounded-2xl text-slate-100 border border-slate-800 shadow-lg">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="play-circle" class="w-5 h-5 text-amber-400"></i>
+                                        <div>
+                                            <h4 class="font-bold text-white text-base">Bộ Mô Phỏng Tương Tác: Lệch Xung Clock & Thuật Toán FTM</h4>
+                                            <span class="text-xs text-slate-400">Trực quan hóa thời gian thực 4 Node trên bus FlexRay</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="sim-status-badge" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                            Trạng thái: Đã đồng bộ (Synchronized)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Simulation Control Toolbar -->
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+                                    <button id="btn-sim-drift" onclick="runSimClock(1)" class="p-2.5 bg-rose-600/90 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                        <i data-lucide="zap-off" class="w-3.5 h-3.5"></i>
+                                        <span>1. Giả lập lệch Clock</span>
+                                    </button>
+                                    <button id="btn-sim-ftm" onclick="runSimClock(2)" class="p-2.5 bg-amber-600/90 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                        <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+                                        <span>2. Chạy thuật toán FTM</span>
+                                    </button>
+                                    <button id="btn-sim-nit" onclick="runSimClock(3)" class="p-2.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                                        <span>3. Bù lệch tại NIT</span>
+                                    </button>
+                                    <button id="btn-sim-reset" onclick="runSimClock(0)" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border border-slate-700 active:scale-95">
+                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                        <span>Reset ban đầu</span>
+                                    </button>
+                                </div>
+
+                                <!-- Multi-Node Timeline Visualizer -->
+                                <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800 mb-4 overflow-x-auto no-scrollbar">
+                                    <div class="min-w-[620px]">
+                                        <!-- Global Nominal Reference Line Header -->
+                                        <div class="flex items-center justify-between text-[11px] text-slate-400 mb-3 px-1 border-b border-slate-800 pb-2">
+                                            <span>Mốc Slot bắt đầu (Action Point chuẩn: 0.0 &mu;s)</span>
+                                            <span class="text-indigo-400 font-mono">Trục tham chiếu toàn cục (Cluster Global Time)</span>
+                                            <span>Kết thúc Slot TDMA</span>
+                                        </div>
+
+                                        <!-- Timeline Tracks for 4 Nodes -->
+                                        <div class="space-y-3 relative">
+                                            <!-- Trục tham chiếu thẳng đứng (Nominal Target Line) -->
+                                            <div class="absolute top-0 bottom-0 left-[35%] w-[2px] bg-indigo-500/40 z-0 pointer-events-none dashed-line"></div>
+
+                                            <!-- Node 1: Master Sync Node -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-blue-600 text-[10px] font-bold rounded text-white">SYNC</span>
+                                                    <span class="font-semibold text-slate-200">Node A (Master)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-a" class="h-7 rounded-md bg-blue-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 1 [SYNC]</span>
+                                                        <span id="sim-drift-a" class="text-[10px] bg-blue-900/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Node 2: Steering Sync Node (Fast drift) -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-blue-600 text-[10px] font-bold rounded text-white">SYNC</span>
+                                                    <span class="font-semibold text-slate-200">Node B (Steering)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-b" class="h-7 rounded-md bg-blue-500/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 2 [SYNC]</span>
+                                                        <span id="sim-drift-b" class="text-[10px] bg-blue-900/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Node 3: Regular Brake Node (Slow drift) -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-slate-600 text-[10px] font-bold rounded text-slate-200">DATA</span>
+                                                    <span class="font-semibold text-slate-200">Node C (Braking)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-c" class="h-7 rounded-md bg-teal-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 3 [DATA]</span>
+                                                        <span id="sim-drift-c" class="text-[10px] bg-teal-900/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Node 4: Faulty/Sensor Node (Byzantine Anomaly) -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-rose-700 text-[10px] font-bold rounded text-white">FAULTY</span>
+                                                    <span class="font-semibold text-slate-200">Node D (Lỗi thạch anh)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-d" class="h-7 rounded-md bg-rose-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 4 [DATA]</span>
+                                                        <span id="sim-drift-d" class="text-[10px] bg-rose-950/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Explanation & Calculation Box -->
+                                <div id="sim-explanation-box" class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 text-xs text-slate-300">
+                                    <div class="font-bold text-white mb-1 flex items-center gap-1.5">
+                                        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+                                        <span>Giai đoạn hiện tại: Bình Thường (Synchronized)</span>
+                                    </div>
+                                    <p class="leading-relaxed text-slate-300">
+                                        Tất cả các node đang căn chỉnh xung nhịp Action Point thẳng hàng với vạch thời gian danh định của cluster. Nhấn nút <strong>"1. Giả lập lệch Clock"</strong> để xem hiện tượng thạch anh trôi dạt do chênh lệch nhiệt độ.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 4: Senior Architect Interview Pitch Script -->
+                            <div class="p-5 bg-slate-900 rounded-xl text-slate-200 border border-slate-800">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                                    <h5 class="font-bold text-white text-sm md:text-base">Mẫu Câu Trả Lời Gợi Ý Khi Phỏng Vấn (Senior/Architect Pitch)</h5>
+                                </div>
+                                <p class="text-xs text-slate-300 leading-relaxed italic bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                                    "Trong mạng FlexRay, mỗi node chạy bộ dao động thạch anh riêng nên sự trôi dạt tần số (drift) theo nhiệt độ là không thể tránh khỏi. Để duy trì tính tiền định TDMA, FlexRay cấu hình tối thiểu 2 đến 3 <strong>Sync Nodes</strong>. Sync Node là các ECU chức năng hoàn toàn bình thường, vừa truyền application payload (tốc độ, góc lái...) vừa bật cờ <code>Sync Frame Indicator = 1</code> trong Header để phát mốc thời gian.<br/><br/>
+                                    Khi lệch xung, các node đo đạc sai số thời điểm Action Point của Sync Frame. Trong khoảng <strong>NIT (Network Idle Time)</strong>, bộ điều khiển chạy thuật toán <strong>Fault-Tolerant Midpoint (FTM)</strong>: sắp xếp mảng sai số, gạch bỏ các giá trị cực trị lớn nhất và nhỏ nhất để triệt tiêu lỗi Byzantine do node hỏng gây ra, sau đó lấy trung bình khoảng giữa.<br/><br/>
+                                    Cuối cùng, phần cứng tự động bù trừ <strong>Offset Correction</strong> (co/giãn Microticks trong NIT) và <strong>Rate Correction</strong> (phân bổ đều Microtick trên chu kỳ sau), đảm bảo toàn mạng đồng bộ chính xác tới cấp độ micro-giây mà không hề bị va chạm slot."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QUESTION 3: PLACEHOLDER / EXTENSION SLOT (READY FOR Q3, Q4...) -->
+                    <div id="q-card-q3" class="border border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50/50 hover:bg-slate-50 transition-colors">
                         <div class="p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <span class="px-2.5 py-1 bg-slate-400 text-white font-bold text-xs rounded-md shadow-sm">Q2</span>
+                                <span class="px-2.5 py-1 bg-slate-400 text-white font-bold text-xs rounded-md shadow-sm">Q3</span>
                                 <div>
                                     <h3 class="font-bold text-slate-700 text-base">
                                         Cơ Chế Khởi Động Mạng: Coldstart, Wakeup Pattern (WUP) & Phân Xử Va Chạm CAS
                                     </h3>
                                     <span class="text-xs text-slate-400 block mt-0.5">
-                                        Sẵn sàng mở rộng thêm Q2, Q3, Q4... bằng cách nhân bản khối Accordion item
+                                        Sẵn sàng mở rộng thêm Q3, Q4... bằng cách nhân bản khối Accordion item
                                     </span>
                                 </div>
                             </div>
@@ -676,6 +973,156 @@
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             } catch (error) {
                 console.warn("Lucide render failed on toggle:", error);
+            }
+        }
+
+        // LOGIC MÔ PHỎNG ĐỒNG BỘ CLOCK & FTM (CHO QUESTION 2)
+        let currentSimClockStep = 0;
+
+        function runSimClock(step) {
+            currentSimClockStep = step;
+            const barA = document.getElementById('sim-bar-a');
+            const barB = document.getElementById('sim-bar-b');
+            const barC = document.getElementById('sim-bar-c');
+            const barD = document.getElementById('sim-bar-d');
+
+            const driftA = document.getElementById('sim-drift-a');
+            const driftB = document.getElementById('sim-drift-b');
+            const driftC = document.getElementById('sim-drift-c');
+            const driftD = document.getElementById('sim-drift-d');
+
+            const badge = document.getElementById('sim-status-badge');
+            const explain = document.getElementById('sim-explanation-box');
+
+            if (!barA || !barB || !barC || !barD) return;
+
+            if (step === 0) {
+                // RESET TO NOMINAL
+                barA.style.marginLeft = '35%';
+                barB.style.marginLeft = '35%';
+                barC.style.marginLeft = '35%';
+                barD.style.marginLeft = '35%';
+
+                barA.className = 'h-7 rounded-md bg-blue-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+                barB.className = 'h-7 rounded-md bg-blue-500/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+                barC.className = 'h-7 rounded-md bg-teal-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+                barD.className = 'h-7 rounded-md bg-slate-700 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+
+                driftA.innerText = '0.0 µs';
+                driftB.innerText = '0.0 µs';
+                driftC.innerText = '0.0 µs';
+                driftD.innerText = '0.0 µs';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                badge.innerText = 'Trạng thái: Đã đồng bộ (Synchronized)';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-white mb-1 flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+                        <span>Giai đoạn hiện tại: Bình Thường (Synchronized)</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        Tất cả các node đang căn chỉnh xung nhịp Action Point thẳng hàng với vạch thời gian danh định của cluster (35% timeline). Nhấn nút <strong>"1. Giả lập lệch Clock"</strong> để quan sát hiện tượng trôi dạt xung nhịp do thạch anh.
+                    </p>
+                `;
+            } else if (step === 1) {
+                // STEP 1: DRIFT SIMULATION
+                barA.style.marginLeft = '35%';     // Reference Node A (0.0 us)
+                barB.style.marginLeft = '43%';     // Node B fast drift (+1.6 us) -> shifted right
+                barC.style.marginLeft = '28%';     // Node C slow drift (-1.4 us) -> shifted left
+                barD.style.marginLeft = '52%';     // Node D faulty Byzantine (+3.4 us) -> heavy shift
+
+                barA.className = 'h-7 rounded-md bg-blue-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-blue-400';
+                barB.className = 'h-7 rounded-md bg-amber-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-amber-400';
+                barC.className = 'h-7 rounded-md bg-orange-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-orange-400';
+                barD.className = 'h-7 rounded-md bg-rose-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-rose-400 animate-pulse';
+
+                driftA.innerText = '0.0 µs (Mốc)';
+                driftB.innerText = '+1.6 µs (Nhanh)';
+                driftC.innerText = '-1.4 µs (Chậm)';
+                driftD.innerText = '+3.4 µs (Byzantine Lỗi)';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                badge.innerText = 'Cảnh báo: Lệch Clock (Clock Drift Detected)';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-rose-300 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+                        <span>Bước 1: Hiện tượng trôi xung nhịp (Clock Drift do nhiệt độ/linh kiện)</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        &bull; <strong>Node A (Sync Node 1):</strong> Hoạt động danh định ở mốc chuẩn (0.0 &mu;s).<br/>
+                        &bull; <strong>Node B (Sync Node 2):</strong> Thạch anh chạy nhanh &rarr; lệch pha <strong>+1.6 &mu;s</strong>.<br/>
+                        &bull; <strong>Node C (Regular Node):</strong> Thạch anh chạy chậm &rarr; lệch pha <strong>-1.4 &mu;s</strong>.<br/>
+                        &bull; <strong>Node D (Lỗi Byzantine):</strong> Cảm biến bị xung nhiễu cực đoan &rarr; lệch tới <strong>+3.4 &mu;s</strong> có nguy cơ đè slot!<br/>
+                        <em>Nhấn nút <strong>"2. Chạy thuật toán FTM"</strong> để xem cách bộ vi điều khiển lọc lỗi và tính toán bù trừ.</em>
+                    </p>
+                `;
+            } else if (step === 2) {
+                // STEP 2: FTM ALGORITHM RUNNING
+                barA.className = 'h-7 rounded-md bg-blue-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500';
+                barB.className = 'h-7 rounded-md bg-amber-500 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500';
+                barC.className = 'h-7 rounded-md bg-slate-600 text-slate-400 line-through text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 opacity-60';
+                barD.className = 'h-7 rounded-md bg-rose-900 text-rose-400 line-through text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 opacity-40 border border-rose-500';
+
+                driftC.innerText = '-1.4 µs (Bỏ Min)';
+                driftD.innerText = '+3.4 µs (Loại Byzantine)';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                badge.innerText = 'Đang xử lý: Thuật toán FTM (Fault-Tolerant Midpoint)';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-amber-300 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="calculator" class="w-4 h-4 text-amber-400"></i>
+                        <span>Bước 2: Xử lý mảng sai số bằng thuật toán FTM (ISO 17458)</span>
+                    </div>
+                    <div class="p-2.5 bg-slate-900/90 rounded-lg border border-slate-700 font-mono text-[11px] text-slate-200 mb-2 leading-relaxed">
+                        1. Mảng sai số đo đạc: [-1.4&mu;s, 0.0&mu;s, +1.6&mu;s, +3.4&mu;s]<br/>
+                        2. Lọc cực trị (k = 1): <span class="line-through text-red-400">[-1.4&mu;s]</span> và <span class="line-through text-red-400">[+3.4&mu;s (Byzantine)]</span> bị gạch bỏ hoàn toàn!<br/>
+                        3. Cặp giá trị an toàn ở giữa: [0.0&mu;s, +1.6&mu;s]<br/>
+                        4. <strong>Giá trị hiệu chỉnh trung bình Midpoint:</strong> (0.0 + 1.6) / 2 = <span class="text-emerald-400 font-bold">+0.8 &mu;s</span>.
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        Nhờ loại bỏ giá trị cực đại +3.4 &mu;s, mạng FlexRay không hề bị đánh lừa bởi node D bị hỏng! Nhấn <strong>"3. Bù lệch tại NIT"</strong> để xem controller điều chỉnh vi xung Microtick.
+                    </p>
+                `;
+            } else if (step === 3) {
+                // STEP 3: CORRECTION APPLIED AT NIT
+                barA.style.marginLeft = '35%';
+                barB.style.marginLeft = '35%';
+                barC.style.marginLeft = '35%';
+                barD.style.marginLeft = '35%';
+
+                barA.className = 'h-7 rounded-md bg-emerald-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-emerald-400';
+                barB.className = 'h-7 rounded-md bg-emerald-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-emerald-400';
+                barC.className = 'h-7 rounded-md bg-emerald-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-emerald-400';
+                barD.className = 'h-7 rounded-md bg-slate-600 text-slate-300 text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500';
+
+                driftA.innerText = '0.0 µs (Khóa pha)';
+                driftB.innerText = '0.0 µs (Đã bù -0.8µs)';
+                driftC.innerText = '0.0 µs (Đã bù +1.4µs)';
+                driftD.innerText = 'Đã cô lập / Passive';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                badge.innerText = 'Đồng bộ hoàn tất: Chu kỳ mới căn lề 100%';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-emerald-300 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                        <span>Bước 3: Hiệu chỉnh hoàn tất trong khoảng NIT (Network Idle Time)</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        &bull; <strong>Offset Correction:</strong> Bộ điều khiển co/giãn các vi xung (&mu;T) ngay trong khoảng lặng NIT &rarr; đưa Action Point của chu kỳ tiếp theo về thẳng tắp đúng 0.0 &mu;s.<br/>
+                        &bull; <strong>Rate Correction:</strong> Đo đạc chênh lệch giữa chu kỳ chẵn và lẻ để phân bổ vi xung đều đặn suốt 64 chu kỳ.<br/>
+                        &bull; <strong>Node D:</strong> Bị phát hiện lệch clock liên tiếp (<code>pClockCorrectionFailed</code>) &rarr; POC hạ trạng thái về <code>NORMAL_PASSIVE</code> để ngăn chặn nguy cơ làm hỏng bus TDMA của xe!
+                    </p>
+                `;
+            }
+
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide render failed on sim update:", e);
             }
         }
 

@@ -1,6 +1,6 @@
 # Kế Hoạch Cải Tiến & Yêu Cầu Thay Đổi: FlexRay Protocol Explorer (Backlog)
 
-Tài liệu này lưu trữ danh sách các tính năng dự kiến nâng cấp, các vấn đề kỹ thuật cần cải tiến, và cung cấp biểu mẫu chuẩn để tạo một yêu cầu thay đổi mới cho widget [`FLEXRAY_overview.html`](../../FLEXRAY_overview.html).
+Tài liệu này lưu trữ danh sách các tính năng dự kiến nâng cấp, các vấn đề kỹ thuật cần cải tiến, và cung cấp biểu mẫu chuẩn để tạo một yêu cầu thay đổi mới cho widget [`widget_flexray.html`](../../widget_flexray.html).
 
 ---
 
