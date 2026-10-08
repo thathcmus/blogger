@@ -26,8 +26,12 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │           └── SKILL.md                    # Hướng dẫn 5 bước và template tạo widget mới
 │
 ├── docs/                                   # Tài liệu chi tiết từng widget
-│   └── flexray/
-│       ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật của FlexRay widget
+│   ├── can_fd/                             # Widget CAN FD
+│   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật CAN FD
+│   │   ├── BACKLOG.md                      # Backlog tính năng tổng thể
+│   │   └── MAINTENANCE_PLAN.md             # Kế hoạch bảo trì 60 ngày & Ground Truth Q&A
+│   └── flexray/                            # Widget FlexRay
+│       ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật FlexRay
 │       └── BACKLOG.md                      # Kế hoạch nâng cấp và mẫu yêu cầu thay đổi
 │
 ├── AGENTS.md                               # [File này] Bản chỉ dẫn dành cho Agent
@@ -36,8 +40,9 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 ├── LICENSE                                 # Giấy phép nguồn mở MIT
 ├── .gitignore                              # Chặn file rác
 │
-├── widget_flexray.html                   # Widget: Trực quan hóa giao thức FlexRay
-└── widget_cpp_oop.html                  # Widget: Trực quan hóa lập trình hướng đối tượng C++
+├── widget_can_fd.html                      # Widget: Trực quan hóa giao thức CAN FD
+├── widget_flexray.html                     # Widget: Trực quan hóa giao thức FlexRay
+└── widget_cpp_oop.html                     # Widget: Trực quan hóa lập trình hướng đối tượng C++
 ```
 
 ---
@@ -45,7 +50,7 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 ## 3. Quy Trình Vận Hành Tiêu Chuẩn Cho Agent (Standard Operating Procedures)
 
 ### SOP-1: Khi Sửa Đổi / Nâng Cấp Widget Hiện Có
-1. **Bước 1 (Đọc Ngữ Cảnh)**: Bắt buộc đọc file `docs/<tên_widget>/CURRENT_INFO.md` để hiểu toàn bộ kiến trúc DOM, CSS, data model, và logic JS trước khi chỉnh sửa.
+1. **Bước 1 (Đọc Ngữ Cảnh)**: Bắt buộc đọc file `docs/<tên_widget>/CURRENT_INFO.md` và `docs/<tên_widget>/MAINTENANCE_PLAN.md` (nếu có) để hiểu toàn bộ kiến trúc DOM, CSS, data model, Ground Truth và logic JS trước khi chỉnh sửa.
 2. **Bước 2 (Kiểm Tra Invariants)**: Đọc `.agents/rules/blogger-embed-rules.md`. Không được vi phạm các quy tắc:
    - Giữ nguyên root container cô lập; không đụng chạm thẻ `html`, `body`.
    - Giữ nguyên `try ... catch` bảo vệ khi gọi thư viện ngoài (Lucide icons).
@@ -53,7 +58,7 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 3. **Bước 3 (Chỉnh Sửa Mã Nguồn)**: Sử dụng các công cụ chỉnh sửa tệp để sửa đổi chính xác.
 4. **Bước 4 (Thực Thi Giao Thức Nghiệm Thu - Verification Protocol)**: Chạy kiểm tra cú pháp (xem Mục 4 bên dưới).
 5. **Bước 5 (Cập Nhật Tài Liệu)**:
-   - Cập nhật các thay đổi vào `docs/<tên_widget>/CURRENT_INFO.md`.
+   - Cập nhật các thay đổi vào `docs/<tên_widget>/CURRENT_INFO.md` và `docs/<tên_widget>/MAINTENANCE_PLAN.md` (đồng bộ Ground Truth Q&A).
    - Cập nhật nhật ký vào `CHANGELOG.md` dưới mục `[Unreleased]` hoặc phiên bản mới.
 
 ### SOP-2: Khi Tạo Widget Mới

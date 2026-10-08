@@ -16,7 +16,7 @@ Kho lưu trữ các công cụ trực quan hóa và mô phỏng tương tác (**
 | Widget | Mô Tả Trực Quan | Xem Trực Tiếp (Live Demo) | Tài Liệu Kỹ Thuật |
 | :--- | :--- | :---: | :---: |
 | **FlexRay Protocol Explorer**<br>`widget_flexray.html` | Khám phá cấu trúc Frame (Header/Payload/Trailer), quản lý dữ liệu Node qua CHI & Message Buffers, và sơ đồ chu kỳ truyền thông (Static, Dynamic, Symbol Window, NIT) chuẩn **FlexRay 3.0.1 / ISO 17458**. | [🔗 Mở Demo](https://thathcmus.github.io/blogger/widget_flexray.html) | [`docs/flexray/`](docs/flexray/CURRENT_INFO.md) |
-| **CAN FD Protocol Explorer**<br>`widget_can_fd.html` | Trực quan hóa cấu trúc CAN FD ở cấp độ Bit, cơ chế chuyển đổi tốc độ kép qua cờ BRS, và bảng phân tích so sánh chi tiết giữa Classic CAN vs CAN FD vs CAN XL. | [🔗 Mở Demo](https://thathcmus.github.io/blogger/widget_can_fd.html) | [`docs/can_fd/`](docs/can_fd/CURRENT_INFO.md) |
+| **CAN FD Protocol Explorer**<br>`widget_can_fd.html` | Trực quan hóa cấu trúc CAN FD bit-level, cơ chế BRS, bảng so sánh thế hệ CAN, và ngân hàng câu hỏi phỏng vấn Q&A 4 tầng (Theory, SystemC Modeling, AUTOSAR, Bẫy kép) song ngữ VN/EN. | [🔗 Mở Demo](https://thathcmus.github.io/blogger/widget_can_fd.html) | [`docs/can_fd/`](docs/can_fd/CURRENT_INFO.md) |
 | **C++ OOP Simulator**<br>`widget_cpp_oop.html` | Mô phỏng tương tác 4 tính chất của Lập trình hướng đối tượng (Kế thừa, Đóng gói, Đa hình, Trừu tượng hóa) kèm bảng phân tích bộ nhớ và cơ chế Virtual Table (VTABLE). | [🔗 Mở Demo](https://thathcmus.github.io/blogger/widget_cpp_oop.html) | Đang cập nhật |
 
 ---
@@ -70,18 +70,23 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 
 ```text
 ├── .agents/                                # Quy chuẩn và kỹ năng cho AI Agent
-│   ├── rules/blogger-embed-rules.md        # Luật nhúng Blogger
-│   └── skills/blogger-widget-creator/      # Kỹ năng tạo widget mới
-├── docs/                                   # Tài liệu hiện trạng & backlog từng widget
-│   └── flexray/
-│       ├── CURRENT_INFO.md                 # Đặc tả kỹ thuật hiện tại của FlexRay
+│   ├── rules/blogger-embed-rules.md        # Luật nhúng Blogger & Tiêu chuẩn 4 tầng Q&A
+│   └── skills/blogger-widget-creator/      # Kỹ năng và template tạo widget mới
+├── docs/                                   # Tài liệu hiện trạng, backlog & maintenance plan
+│   ├── can_fd/                             # Tài liệu CAN FD Protocol
+│   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật
+│   │   ├── BACKLOG.md                      # Backlog tính năng tổng thể
+│   │   └── MAINTENANCE_PLAN.md             # Kế hoạch bảo trì 60 ngày & Ground Truth Q&A
+│   └── flexray/                            # Tài liệu FlexRay Protocol
+│       ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật
 │       └── BACKLOG.md                      # Kế hoạch cải tiến của FlexRay
-├── AGENTS.md                               # Hướng dẫn dành cho AI Agent
+├── AGENTS.md                               # Hướng dẫn & quy chuẩn vận hành cho AI Agent
 ├── CHANGELOG.md                            # Lịch sử thay đổi phiên bản (SemVer)
 ├── README.md                               # Tài liệu giới thiệu dự án
 ├── LICENSE                                 # Giấy phép mã nguồn mở MIT
-├── widget_flexray.html                   # Widget FlexRay Explorer
-└── widget_cpp_oop.html                  # Widget C++ OOP Simulator
+├── widget_can_fd.html                      # Widget CAN FD Protocol Explorer
+├── widget_flexray.html                     # Widget FlexRay Protocol Explorer
+└── widget_cpp_oop.html                     # Widget C++ OOP Simulator
 ```
 
 ---
