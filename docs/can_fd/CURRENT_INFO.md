@@ -47,8 +47,12 @@ Cung cấp bản đồ tương tác bit-level của frame CAN FD:
 ### Tab 2: So Sánh Thế Hệ (Classic CAN vs CAN FD vs CAN XL)
 Bảng đối chiếu 4 chiều (Max Payload, Max Data Rate, Cơ chế Baudrate, Ứng dụng thực tế ô tô). Nhấn mạnh sự đột phá của CAN FD (64B, Dual Bit Rate 8Mbps).
 
-### Tab 3: Q&A Phỏng Vấn (Backlog)
-Tạm thời hiển thị trạng thái đang xây dựng, chuẩn bị cho các câu hỏi phỏng vấn kỹ thuật hóc búa về CAN FD.
+### Tab 3: Q&A Phỏng Vấn (Ngân Hàng Câu Hỏi)
+Cung cấp ngân hàng câu hỏi dạng thẻ (Accordion cards) với các bộ lọc phân loại theo Độ Khó (Basic/Intermediate/Advanced/Senior) và Chủ Đề (Tag).
+Mỗi thẻ Q&A hỗ trợ 3 tab phụ chuyên sâu:
+- **📖 Lý Thuyết:** Giải thích nguyên lý cốt lõi.
+- **🔧 ECU/AUTOSAR Practice:** Cấu hình thực tế trên module hệ thống (MCAL, CanIf, CanSM, PduR...).
+- **⚠️ Interview Trap:** Cạm bẫy câu hỏi thường gặp khi đi phỏng vấn.
 
 ---
 
@@ -58,9 +62,11 @@ Tạm thời hiển thị trạng thái đang xây dựng, chuẩn bị cho các
 * **Dòng 22 – 47**: Wrapper Container, Header và thanh điều hướng 3 Tabs (`#btn-tab-frame`, `#btn-tab-compare`, `#btn-tab-interview`). Thiết kế theme màu **Amber/Orange**.
 * **Dòng 48 – 113**: Cụm giao diện Tab 1 (Sơ đồ Segment tương tác trực quan cấp độ bit).
 * **Dòng 114 – 159**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
-* **Dòng 160 – 180**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi phỏng vấn placeholder).
-* **Dòng 181 – 275**: JavaScript logic:
-  - Khai báo hằng số `segmentData` chứa thông tin giải thích chuyên sâu.
-  - Hàm `switchTab(targetId)`: Chuyển đổi 3 tabs mượt mà.
-  - Hàm `selectSegment(segmentId)`: Thay đổi nội dung giải thích động với hiệu ứng fade.
-  - Sự kiện `DOMContentLoaded` đính kèm event listener và khởi tạo an toàn icon.
+* **Dòng 160 – 218**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi phỏng vấn) chứa hệ thống các nút lọc khó/dễ, lọc tags và `div#qa-container` để render danh sách câu hỏi động, cùng với `div#qa-empty-state`, `div#qa-wip-state` hiển thị khi không có dữ liệu phù hợp.
+* **Dòng 219 – 545**: JavaScript logic điều khiển:
+  - `qaData`: Mảng Object đóng vai trò là Data Layer chứa nội dung các câu hỏi Q&A.
+  - `renderQACards()`, `toggleAnswer()`, `switchQATab()`, `applyFilters()`, `filterByDifficulty()`, `filterByTag()`, `resetFilters()`, `updateFilterUI()`: Đóng vai trò là UI Engine (Data-driven) xử lý lọc, tương tác mở đóng các tab Q&A.
+  - Khai báo hằng số `segmentData` chứa thông tin giải thích chuyên sâu của Tab 1.
+  - Hàm `switchTab(targetId)`: Chuyển đổi 3 tabs chính mượt mà.
+  - Hàm `selectSegment(segmentId)`: Thay đổi nội dung giải thích động với hiệu ứng fade (Tab 1).
+  - Sự kiện `DOMContentLoaded` đính kèm event listener khởi tạo hiển thị ban đầu.

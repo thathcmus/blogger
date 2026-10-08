@@ -196,25 +196,57 @@
         <!-- Tab 3 Container: Interview Q&A -->
         <div id="tab-interview" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
             <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 border-slate-100 flex items-center gap-2">
-                <i data-lucide="message-square-text" class="text-amber-600"></i> Ngân Hàng Câu Hỏi Phỏng Vấn (Đang Xây Dựng)
+                <i data-lucide="message-square-text" class="text-amber-600"></i> Ngân Hàng Câu Hỏi Phỏng Vấn
             </h2>
-            <div class="p-5 border-l-4 border-amber-500 bg-amber-50 rounded-r-xl">
+            
+            <!-- Filters -->
+            <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto">Độ khó:</div>
+                    <div class="flex flex-wrap gap-2" id="difficulty-filters">
+                        <button onclick="filterByDifficulty('All')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn" data-level="All">Tất cả</button>
+                        <button onclick="filterByDifficulty('Basic')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Basic">Basic</button>
+                        <button onclick="filterByDifficulty('Intermediate')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Intermediate">Intermediate</button>
+                        <button onclick="filterByDifficulty('Advanced')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Advanced">Advanced</button>
+                        <button onclick="filterByDifficulty('Senior')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Senior">Senior</button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-4 items-center mt-3">
+                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto">Chủ đề:</div>
+                    <div class="flex flex-wrap gap-2" id="tag-filters">
+                        <button onclick="filterByTag('#Frame')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Frame">#Frame</button>
+                        <button onclick="filterByTag('#Stuffing')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Stuffing">#Stuffing</button>
+                        <button onclick="filterByTag('#BitTiming')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#BitTiming">#BitTiming</button>
+                        <button onclick="filterByTag('#Error')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Error">#Error</button>
+                        <button onclick="filterByTag('#AUTOSAR')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#AUTOSAR">#AUTOSAR</button>
+                        <button onclick="filterByTag('#Physical')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Physical">#Physical</button>
+                        <button onclick="filterByTag('#Diagnostics')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Diagnostics">#Diagnostics</button>
+                        <button onclick="filterByTag('#SecOC')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#SecOC">#SecOC</button>
+                        <button onclick="filterByTag('#Strategic')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Strategic">#Strategic</button>
+                        <button onclick="resetFilters()" class="px-2 py-1 text-xs font-medium rounded text-slate-500 hover:text-slate-700 transition-colors underline ml-auto hidden" id="reset-filter-btn">Xóa bộ lọc</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q&A List Container -->
+            <div id="qa-container" class="space-y-4">
+                <!-- Data-driven Q&A cards will be injected here -->
+            </div>
+            
+            <div id="qa-empty-state" class="hidden p-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 text-slate-400"></i>
+                <p>Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.</p>
+                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-colors">Xóa bộ lọc</button>
+            </div>
+
+            <div id="qa-wip-state" class="mt-4 p-5 border-l-4 border-amber-500 bg-amber-50 rounded-r-xl">
                 <div class="flex items-center gap-3 mb-2 text-amber-800">
                     <i data-lucide="construction" class="w-6 h-6"></i>
                     <h3 class="font-bold text-lg">Chuyên mục đang được biên soạn</h3>
                 </div>
-                <p class="text-amber-700 text-sm leading-relaxed ml-9 mb-4">
-                    Nội dung phỏng vấn chuyên sâu cho CAN FD đang trong quá trình chuẩn bị. Chúng tôi sẽ cập nhật các câu hỏi cốt lõi để giúp bạn vượt qua vòng phỏng vấn Technical Automotive.
+                <p class="text-amber-700 text-sm leading-relaxed ml-9">
+                    Nội dung phỏng vấn chuyên sâu cho CAN FD đang được cập nhật dần theo từng Phase. Các câu hỏi sẽ sớm xuất hiện tại đây.
                 </p>
-                <div class="ml-9">
-                    <h4 class="text-sm font-semibold text-amber-900 mb-2">Các chủ đề dự kiến:</h4>
-                    <ul class="list-disc ml-5 text-sm text-amber-700 space-y-1">
-                        <li>Bài toán tính toán Bus Load thực tế với CAN FD.</li>
-                        <li>Giải thích sâu về cơ chế Stuffing (Stuff Bits và Stuff Count) trong CAN FD.</li>
-                        <li>Sự khác biệt trong cách xử lý Error Handling giữa Classic CAN và CAN FD.</li>
-                        <li>Bài toán nâng cấp: Làm sao để tích hợp node CAN FD vào hệ thống CAN 2.0 hiện hữu.</li>
-                    </ul>
-                </div>
             </div>
         </div>
 
@@ -222,6 +254,234 @@
 
     <!-- SCRIPT ĐIỀU KHIỂN (VANILLA JS FAULT-TOLERANT) -->
     <script>
+        // DATA LAYER CHO Q&A
+        const qaData = [
+            {
+                id: "q_can_foundation_1",
+                question: "CSMA/CR hoạt động thế nào? Tại sao CAN không bị collision như Ethernet?",
+                difficulty: "Basic",
+                tags: ["#Frame"],
+                answer: {
+                    theory: "<strong>Carrier Sense Multiple Access / Collision Resolution:</strong> Các node đồng thời gửi bit, bit Dominant (0) đè Recessive (1). Node nào phát Recessive nhưng đọc lại trên bus thấy Dominant &rarr; biết mình thua &rarr; ngừng phát ngay lập tức.",
+                    practice: "<strong>ECU:</strong> Quá trình Arbitration hoàn toàn do CAN Controller hardware xử lý. Software không can thiệp được. Application/COM chỉ nhận được callback <code>TxConfirmation</code> sau khi node thắng arbitration và phát thành công.",
+                    trap: "<strong>Node thua arbitration có mất dữ liệu không?</strong><br>&rarr; Không. Nó sẽ tự động retry ở IFS (Interframe Space) tiếp theo. Dữ liệu vẫn nằm an toàn trong HW Tx buffer."
+                }
+            },
+            {
+                id: "q_can_foundation_2",
+                question: "Remote Frame trong CAN 2.0 là gì? CAN FD xử lý thế nào?",
+                difficulty: "Intermediate",
+                tags: ["#Frame"],
+                answer: {
+                    theory: "<strong>Remote Frame:</strong> Là cơ chế một node yêu cầu node khác phát Data Frame có cùng ID. <strong>CAN FD:</strong> Đã loại bỏ hoàn toàn Remote Frame (bit RRS thay thế cho RTR, và luôn mang giá trị Dominant). Tính năng này bị loại bỏ vì không phù hợp với thiết kế dual-rate.",
+                    practice: "<strong>AUTOSAR:</strong> Nếu cấu hình <code>CanIfTxPduType = REMOTE</code> trong một node CAN FD, Tool sẽ báo lỗi DET hoặc lỗi configuration ngay lúc compile.",
+                    trap: "<strong>Tại sao CAN FD không hỗ trợ Remote Frame?</strong><br>&rarr; Vì Remote Frame được gửi ở tốc độ nền (Nominal rate), nhưng Data Frame phản hồi lại có thể ở tốc độ cao (Data rate) &rarr; Timing cực kỳ phức tạp, không đảm bảo tính deterministic (thời gian thực)."
+                }
+            },
+            {
+                id: "q_can_foundation_3",
+                question: "Overload Frame khác Error Frame thế nào?",
+                difficulty: "Intermediate",
+                tags: ["#Error"],
+                answer: {
+                    theory: "<strong>Overload Frame:</strong> Node phát để xin thêm thời gian xử lý (trước hoặc giữa các frames).<br><strong>Error Frame:</strong> Phát ra khi phát hiện lỗi trên bus.<br>Cả hai đều sử dụng 6 bit Dominant liên tiếp phá vỡ rule bit-stuffing, nhưng context timing của chúng khác nhau.",
+                    practice: "<strong>Modern ECU:</strong> Overload Frame cực kỳ hiếm gặp trong hệ thống AUTOSAR vì hardware buffer đủ lớn và CPU đủ mạnh. Nếu bạn thấy Overload Frame trên trace &rarr; Dấu hiệu ECU đang bị quá tải nghiêm trọng.",
+                    trap: "<strong>CAN FD còn dùng Overload Frame không?</strong><br>&rarr; Có, nhưng nó chỉ được phép sinh ra và hoạt động ở tốc độ nền (Nominal rate)."
+                }
+            }
+        ];
+
+        let currentDifficulty = 'All';
+        let currentTag = '';
+
+        function renderQACards(data) {
+            const container = document.getElementById('qa-container');
+            const emptyState = document.getElementById('qa-empty-state');
+            const wipState = document.getElementById('qa-wip-state');
+            
+            container.innerHTML = '';
+            
+            if (data.length === 0 && qaData.length === 0) {
+                // Hoàn toàn chưa có data
+                container.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                if (wipState) wipState.classList.remove('hidden');
+                return;
+            } else if (data.length === 0 && qaData.length > 0) {
+                // Có data nhưng filter không trúng
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                if (wipState) wipState.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            if (wipState) wipState.classList.add('hidden');
+
+            const diffColors = {
+                'Basic': 'bg-green-100 text-green-700 border-green-200',
+                'Intermediate': 'bg-blue-100 text-blue-700 border-blue-200',
+                'Advanced': 'bg-purple-100 text-purple-700 border-purple-200',
+                'Senior': 'bg-rose-100 text-rose-700 border-rose-200'
+            };
+
+            data.forEach(item => {
+                const diffClass = diffColors[item.difficulty] || 'bg-slate-100 text-slate-700 border-slate-200';
+                const absoluteIndex = qaData.findIndex(q => q.id === item.id) + 1;
+                
+                let tagsHtml = item.tags.map(tag => `<span class="px-2 py-0.5 text-[10px] font-medium bg-slate-100 text-slate-600 rounded border border-slate-200">${tag}</span>`).join('');
+
+                const cardHtml = `
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm transition-all hover:border-amber-300">
+                        <div class="p-4 cursor-pointer flex justify-between items-start gap-4 select-none" onclick="toggleAnswer('${item.id}')">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase border ${diffClass}">${item.difficulty}</span>
+                                    <div class="flex gap-1 flex-wrap">${tagsHtml}</div>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors flex items-start gap-2">
+                                    <span class="text-amber-600 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
+                                    <span>${item.question}</span>
+                                </h3>
+                            </div>
+                            <div class="text-slate-400 bg-slate-50 p-2 rounded-lg" id="icon-${item.id}">
+                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300"></i>
+                            </div>
+                        </div>
+                        
+                        <div id="answer-${item.id}" class="hidden border-t border-slate-100 bg-slate-50">
+                            <!-- Answer Tabs Nav -->
+                            <div class="flex border-b border-slate-200 bg-slate-100 px-4 pt-3 gap-2 overflow-x-auto no-scrollbar">
+                                <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-700 bg-white rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+                                    📖 Lý Thuyết
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+                                    🔧 ECU/AUTOSAR
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap">
+                                    ⚠️ Interview Trap
+                                </button>
+                            </div>
+                            
+                            <!-- Answer Content -->
+                            <div class="p-5 text-sm text-slate-700 leading-relaxed">
+                                <div id="content-${item.id}-theory" class="animate-fadeIn">
+                                    ${item.answer.theory}
+                                </div>
+                                <div id="content-${item.id}-practice" class="hidden animate-fadeIn">
+                                    ${item.answer.practice}
+                                </div>
+                                <div id="content-${item.id}-trap" class="hidden animate-fadeIn">
+                                    ${item.answer.trap}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide render failed:", e);
+            }
+        }
+
+        function toggleAnswer(id) {
+            const answerDiv = document.getElementById(`answer-${id}`);
+            const iconDiv = document.getElementById(`icon-${id}`);
+            const iconElement = iconDiv.querySelector('i') || iconDiv.querySelector('svg');
+            
+            if (answerDiv.classList.contains('hidden')) {
+                answerDiv.classList.remove('hidden');
+                iconDiv.classList.add('bg-amber-100', 'text-amber-600');
+                iconDiv.classList.remove('bg-slate-50', 'text-slate-400');
+                if (iconElement) iconElement.style.transform = 'rotate(180deg)';
+            } else {
+                answerDiv.classList.add('hidden');
+                iconDiv.classList.remove('bg-amber-100', 'text-amber-600');
+                iconDiv.classList.add('bg-slate-50', 'text-slate-400');
+                if (iconElement) iconElement.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function switchQATab(id, tab) {
+            const tabs = ['theory', 'practice', 'trap'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btn-${id}-${t}`);
+                const content = document.getElementById(`content-${id}-${t}`);
+                
+                if (t === tab) {
+                    btn.className = "px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-700 bg-white rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        function applyFilters() {
+            let filtered = qaData;
+            
+            if (currentDifficulty !== 'All') {
+                filtered = filtered.filter(item => item.difficulty === currentDifficulty);
+            }
+            
+            if (currentTag !== '') {
+                filtered = filtered.filter(item => item.tags.includes(currentTag));
+            }
+            
+            renderQACards(filtered);
+            updateFilterUI();
+        }
+
+        function filterByDifficulty(level) {
+            currentDifficulty = level;
+            applyFilters();
+        }
+
+        function filterByTag(tag) {
+            currentTag = currentTag === tag ? '' : tag; // Toggle nếu click lại
+            applyFilters();
+        }
+
+        function resetFilters() {
+            currentDifficulty = 'All';
+            currentTag = '';
+            applyFilters();
+        }
+
+        function updateFilterUI() {
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                const level = btn.getAttribute('data-level');
+                if (level === currentDifficulty) {
+                    btn.className = "px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn";
+                } else {
+                    btn.className = "px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn";
+                }
+            });
+            
+            document.querySelectorAll('.tag-btn').forEach(btn => {
+                const tag = btn.getAttribute('data-tag');
+                if (tag === currentTag) {
+                    btn.className = "px-2 py-1 text-xs font-medium rounded bg-blue-600 text-white shadow transition-colors tag-btn";
+                } else {
+                    btn.className = "px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn";
+                }
+            });
+            
+            const resetBtn = document.getElementById('reset-filter-btn');
+            if (currentDifficulty !== 'All' || currentTag !== '') {
+                resetBtn.classList.remove('hidden');
+            } else {
+                resetBtn.classList.add('hidden');
+            }
+        }
+
         const segmentData = {
             arbitration: {
                 title: "Arbitration Phase (Phân Xử Đồng Tốc)",
@@ -340,6 +600,9 @@
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-compare').addEventListener('click', () => switchTab('compare'));
             document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
+
+            // Init Q&A Cards
+            renderQACards(qaData);
 
             // Safe icon init
             try {

@@ -7,6 +7,10 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
+### Added
+- feat: Bổ sung Q&A Cluster 1 ôn nền tảng CAN Classic (CSMA/CR, Remote Frame, Overload Frame) (Item [2], widget_can_fd.html)
+- feat: Xây Accordion Q&A Component làm infrastructure Q&A tương tác với bộ lọc Tag và Difficulty (Item [1], widget_can_fd.html)
+
 ### Planned
 - Mô phỏng tương tác chạy chu kỳ truyền thông FlexRay (Interactive Cycle Simulator).
 - Bộ tính thử CRC-11 và CRC-24 trực quan.

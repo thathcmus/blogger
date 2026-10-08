@@ -42,6 +42,47 @@ graph TD
 - Viết các hàm chuyển tab (`switchTab(tabId)`) và cập nhật DOM chi tiết (`renderDetails(id)`).
 - **Quy tắc vàng**: Bọc Lucide icon hoặc thư viện ngoài trong `try ... catch` để lỗi mạng không làm đứng tương tác.
 
+### Bước 4b: Pattern Nâng Cao — Data-Driven Accordion (Q&A Widget)
+> Áp dụng khi widget có nội dung Q&A nhiều tầng cần maintain lâu dài (ví dụ: CAN FD v1.1.x+).
+
+**Nguyên tắc:** Tách biệt **UI Engine** (render một lần) và **Data Layer** (thêm dần theo thời gian). Không hardcode HTML câu hỏi — chỉ inject vào JS object array.
+
+```javascript
+// ✅ ĐÚNG: Data-driven — thêm Q&A chỉ cần thêm object vào array
+const qaData = [
+    {
+        id: "q1",
+        question: "Tại sao BRS phải nằm ở Control Field?",
+        difficulty: "intermediate",
+        tags: ["#Frame", "#BRS"],
+        answer: {
+            theory: "BRS quyết định tốc độ cho phần sau nó...",
+            practice: "MCAL: CanFdBrsEnable = TRUE trong CanControllerConfig...",
+            trap: "Nếu BRS=0 thì frame CAN FD có gì khác Classic CAN không?..."
+        }
+    }
+    // Thêm Q&A mới: chỉ thêm object, UI tự render
+];
+
+// UI Engine: render một lần, dùng mãi
+function renderQACards(data) { /* ... */ }
+function filterByTag(tag) { /* ... */ }
+function toggleAnswer(id) { /* ... */ }
+```
+
+```javascript
+// ❌ SAI: Hardcode HTML — khó maintain, phình file khi thêm nhiều Q&A
+document.getElementById('qa-section').innerHTML = `
+    <div class="card">
+        <h3>Tại sao BRS phải nằm ở Control Field?</h3>
+        <p>BRS quyết định tốc độ...</p>
+    </div>
+    <!-- 30 câu hỏi hardcode khác... -->
+`;
+```
+
+**Khi nào dùng pattern này:** Widget có > 5 Q&A items, hoặc có kế hoạch thêm dần nội dung theo thời gian (Maintenance Plan nhiều sprint).
+
 ### Bước 5: Kiểm Thử Cú Pháp & Đóng Gói
 - Chạy lệnh kiểm tra cú pháp JavaScript bằng Node.js trước khi lưu:
   ```bash
