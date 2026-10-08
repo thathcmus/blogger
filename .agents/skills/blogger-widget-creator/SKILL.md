@@ -45,7 +45,7 @@ graph TD
 ### Bước 4b: Pattern Nâng Cao — Data-Driven Accordion (Q&A Widget)
 > Áp dụng khi widget có nội dung Q&A nhiều tầng cần maintain lâu dài (ví dụ: CAN FD v1.1.x+).
 
-**Nguyên tắc:** Tách biệt **UI Engine** (render một lần) và **Data Layer** (thêm dần theo thời gian). Không hardcode HTML câu hỏi — chỉ inject vào JS object array.
+**Nguyên tắc:** Tách biệt **UI Engine** (render một lần) và **Data Layer** (thêm dần theo thời gian). Không hardcode HTML câu hỏi — chỉ inject vào JS object array. Mỗi câu hỏi bắt buộc 4 tầng: **📖 Theory → 🖥️ SystemC/C++ Modeling → 🔧 ECU/AUTOSAR Practice → ⚠️ Interview Trap (bắt buộc gồm 2 góc nhìn: 🚗 Automotive Protocol & 💻 C++/Modeling Follow-up)**.
 
 ```javascript
 // ✅ ĐÚNG: Data-driven — thêm Q&A chỉ cần thêm object vào array (Bắt buộc Song ngữ vi/en)
@@ -60,7 +60,7 @@ const qaData = [
                 theory: "BRS quyết định tốc độ cho phần sau nó...",
                 modeling: "🖥️ SystemC/C++: Mô phỏng hành vi chuyển đổi timer của BRS...",
                 practice: "MCAL: CanFdBrsEnable = TRUE trong CanControllerConfig...",
-                trap: "Nếu BRS=0 thì frame CAN FD có gì khác Classic CAN không?..."
+                trap: `<strong>🚗 Automotive / Protocol:</strong> Nếu BRS=0 thì frame CAN FD có gì khác Classic CAN không?<br><strong>💻 C++ / Modeling Follow-up:</strong> Khi mô phỏng BRS switch baudrate trong C++, làm sao ngăn tích lũy Clock Drift/Jitter qua hàng nghìn bit?`
             }
         },
         en: {
@@ -69,7 +69,7 @@ const qaData = [
                 theory: "BRS determines the baudrate for the remaining bits...",
                 modeling: "🖥️ SystemC/C++: Simulating the timer switch behavior of BRS...",
                 practice: "MCAL: CanFdBrsEnable = TRUE in CanControllerConfig...",
-                trap: "If BRS=0, how does CAN FD differ from Classic CAN?..."
+                trap: `<strong>🚗 Automotive / Protocol:</strong> If BRS=0, how does CAN FD differ from Classic CAN?<br><strong>💻 C++ / Modeling Follow-up:</strong> When modeling BRS baudrate switching in C++, how do you prevent accumulated clock drift across thousands of bits?`
             }
         }
     }

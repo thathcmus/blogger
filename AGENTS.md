@@ -83,3 +83,10 @@ Nếu lệnh trả về `Syntax OK` và không có ngoại lệ, công việc m�
 - Khi làm việc với giao thức **CAN / CAN FD**: Bắt buộc đối chiếu với **ISO 11898-1:2015**.
 - Khi làm việc với **C++**: Bắt buộc đảm bảo tính chính xác theo chuẩn C++11/C++17/C++20 (Memory Layout, VTABLE, Polymorphism, RAII).
 - Không tự ý phỏng đoán hoặc đơn giản hóa sai lệch các quy định an toàn hệ thống ô tô (ISO 26262 ASIL).
+
+- **Tiêu chuẩn cấu trúc Q&A (4 Tầng & Bẫy Kép Double-Angle)**:
+  - Bắt buộc mỗi Q&A item phải có đủ 4 tầng: `📖 Theory` → `🖥️ SystemC/C++ Modeling` → `🔧 ECU/AUTOSAR Practice` → `⚠️ Interview Trap`.
+  - Riêng tầng `⚠️ Interview Trap` bắt buộc có đủ 2 góc nhìn phản biện:
+    - 🚗 **Góc độ Automotive / Protocol:** Bẫy về timing, starvation, bus load, hardware constraints, AUTOSAR DET/Dem.
+    - 💻 **Góc độ C++ / Modeling Follow-up:** Bẫy vặn lại khi ứng viên đề cập đến SystemC / C++ (race condition, delta cycle, resolution function, bitfield memory layout/endianness, cache locality, TLM vs bit-accurate).
+  - Toàn bộ nội dung phải đồng bộ lưu trong `MAINTENANCE_PLAN.md` làm Ground Truth chuẩn trước khi đưa lên code HTML.

@@ -62,3 +62,13 @@ Tài liệu này định nghĩa các quy tắc kỹ thuật và tiêu chuẩn th
    - Không được đơn giản hóa sai bản chất (ví dụ: nhầm lẫn giữa Wakeup WUP và Startup CAS/Startup Frame; bỏ qua tính chất Active-Low của bit cờ).
 2. **Tính Trong Suốt Khi Nhúng**:
    - Mọi widget phải có file tài liệu hiện trạng tương ứng đặt tại `docs/<widget_name>/CURRENT_INFO.md` để người quản trị blog hoặc AI có thể đọc hiểu trong 30 giây.
+
+3. **Tiêu Chuẩn 4 Tầng Nội Dung & Bẫy Kép (Double-Angle Interview Trap)**:
+   - Mọi Q&A item trong các visualizer phỏng vấn kỹ thuật (CAN FD, FlexRay, C++...) bắt buộc phải có đủ 4 tầng nội dung:
+     - 📖 **Theory**: Chuẩn quốc tế (ISO, AUTOSAR, Protocol Spec).
+     - 🖥️ **SystemC/C++ Modeling**: Thiết kế kiến trúc mô phỏng, registers, FSM, TLM-2.0 / bit-accurate logic trong C++/SystemC.
+     - 🔧 **ECU/AUTOSAR Practice**: Cấu hình stack BSW thực tế (CanIf, PduR, CanSM, MCAL) hoặc thanh ghi MCU.
+     - ⚠️ **Interview Trap**: Bắt buộc triển khai **2 góc nhìn phản biện song song**:
+       - 🚗 **Góc độ Automotive / Protocol Trap:** Câu hỏi bẫy về timing, starvation, bus load, hardware limits, AUTOSAR DET/Dem.
+       - 💻 **Góc độ C++ / Modeling Follow-up:** Câu hỏi vặn lại khi ứng viên đề cập đến C++/SystemC (về race conditions, delta cycles, resolution functions, bitfield memory layout/endianness, cache locality, exception vs state transition...).
+   - Toàn bộ nội dung hoàn chỉnh phải được đồng bộ lưu trong `MAINTENANCE_PLAN.md` làm **Single Source of Truth** trước và song hành với mã nguồn HTML.
