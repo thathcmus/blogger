@@ -95,12 +95,18 @@ document.getElementById('qa-section').innerHTML = `
 
 **Khi nào dùng pattern này:** Widget có > 5 Q&A items, hoặc có kế hoạch thêm dần nội dung theo thời gian (Maintenance Plan nhiều sprint).
 
-### Bước 5: Kiểm Thử Cú Pháp & Đóng Gói
-- Chạy lệnh kiểm tra cú pháp JavaScript bằng Node.js trước khi lưu:
+### Bước 5: Kiểm Thử Cú Pháp (Verification Protocol)
+- Chạy lệnh kiểm tra cú pháp JavaScript bằng Node.js trước khi lưu (bắt buộc trả về `Syntax OK`):
   ```bash
   node -e "const fs = require('fs'); const html = fs.readFileSync('Tên_File.html', 'utf8'); const js = html.match(/<script>([\s\S]*?)<\/script>/)[1]; new Function(js); console.log('Syntax OK');"
   ```
-- Tạo file tài liệu `docs/<tên_chủ_đề>/CURRENT_INFO.md` tương ứng.
+
+### Bước 5b: Giao Thức Đồng Bộ Tài Liệu (Mandatory Doc-Sync Checklist)
+Bắt buộc thực hiện đủ 4 điểm chốt (Definition of Done - DoD) trước khi kết thúc tác vụ:
+1. `docs/<tên_widget>/CURRENT_INFO.md`: Cập nhật đặc tả, phiên bản, bản đồ mã nguồn (số dòng code thực tế).
+2. `docs/<tên_widget>/MAINTENANCE_PLAN.md`: Lưu trữ nội dung Ground Truth Q&A (nếu có sprint plan).
+3. `README.md` & `AGENTS.md`: Đồng bộ sơ đồ cây thư mục và bảng widget showcase.
+4. `CHANGELOG.md`: Ghi log phiên bản chuẩn theo Keep a Changelog.
 
 ---
 

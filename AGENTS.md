@@ -56,17 +56,26 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
    - Giữ nguyên `try ... catch` bảo vệ khi gọi thư viện ngoài (Lucide icons).
    - Đảm bảo các bảng/sơ đồ ngang luôn có `overflow-x-auto` và `no-scrollbar`.
 3. **Bước 3 (Chỉnh Sửa Mã Nguồn)**: Sử dụng các công cụ chỉnh sửa tệp để sửa đổi chính xác.
-4. **Bước 4 (Thực Thi Giao Thức Nghiệm Thu - Verification Protocol)**: Chạy kiểm tra cú pháp (xem Mục 4 bên dưới).
-5. **Bước 5 (Cập Nhật Tài Liệu)**:
-   - Cập nhật các thay đổi vào `docs/<tên_widget>/CURRENT_INFO.md` và `docs/<tên_widget>/MAINTENANCE_PLAN.md` (đồng bộ Ground Truth Q&A).
-   - Cập nhật nhật ký vào `CHANGELOG.md` dưới mục `[Unreleased]` hoặc phiên bản mới.
+4. **Bước 4 (Kiểm Tra Cú Pháp - Verification Protocol)**: Bắt buộc chạy kiểm tra cú pháp JS (xem Mục 4 bên dưới), phải trả về `Syntax OK`.
+5. **Bước 5 (Giao Thức Đồng Bộ Tài Liệu - Doc-Sync Protocol & DoD)**:
+   - Cập nhật `docs/<tên_widget>/CURRENT_INFO.md` (phiên bản, ngày cập nhật, số dòng code, kiến trúc component).
+   - Cập nhật `docs/<tên_widget>/MAINTENANCE_PLAN.md` (đồng bộ Ground Truth Q&A và đánh dấu tick tiến độ).
+   - Kiểm tra và đồng bộ lại `README.md` (bảng Showcase & sơ đồ cây thư mục) nếu có thay đổi về tính năng/kiến trúc.
+   - Ghi nhận nhật ký vào `CHANGELOG.md` dưới mục `[Unreleased]`.
 
 ### SOP-2: Khi Tạo Widget Mới
 1. **Bước 1**: Đọc kỹ hướng dẫn và sử dụng boilerplate template tại [SKILL.md](.agents/skills/blogger-widget-creator/SKILL.md).
 2. **Bước 2**: Tạo file HTML mới ở thư mục gốc (hoặc theo quy ước).
 3. **Bước 3**: Tạo thư mục tài liệu `docs/<tên_chủ_đề>/CURRENT_INFO.md` và `docs/<tên_chủ_đề>/BACKLOG.md`.
-4. **Bước 4**: Thêm widget mới vào bảng danh mục trong `README.md`.
-5. **Bước 5**: Ghi nhận vào `CHANGELOG.md`.
+4. **Bước 4**: Thêm widget mới vào bảng danh mục Showcase và sơ đồ cây thư mục trong cả `README.md` và `AGENTS.md`.
+5. **Bước 5**: Ghi nhận vào `CHANGELOG.md` và chạy Verification Protocol đảm bảo file không có lỗi cú pháp.
+
+### 🎯 Tiêu Chuẩn Hoàn Thành Bắt Buộc (Definition of Done - DoD)
+Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** nếu chưa kiểm tra đủ 4 điểm chốt (4-Point Checkpoint):
+- [ ] **Point 1 (Code & Syntax):** File HTML chạy mượt, Verification Protocol trả về `Syntax OK`.
+- [ ] **Point 2 (Ground Truth):** Lưu nội dung hoàn chỉnh vào `docs/<widget>/MAINTENANCE_PLAN.md` (nếu có sprint plan).
+- [ ] **Point 3 (Spec & Metrics):** Cập nhật `docs/<widget>/CURRENT_INFO.md` (phiên bản, số dòng code, kiến trúc mới).
+- [ ] **Point 4 (Global Sync):** Ánh xạ đồng bộ `README.md` (cây thư mục/bảng Showcase) và ghi log `CHANGELOG.md`.
 
 ---
 

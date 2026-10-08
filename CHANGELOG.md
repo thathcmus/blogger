@@ -11,6 +11,7 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 - refactor: Nâng cấp toàn diện nội dung Item [2] lên mức độ Chuyên gia (Expert Level) và cấu trúc lại toàn bộ thành chuẩn Song ngữ (Bilingual VN/EN) trong Data Layer.
 
 ### Added
+- feat: Bổ sung "Giao Thức Đồng Bộ Tài Liệu Liên Hoàn" (Mandatory Doc-Sync Protocol & DoD Checklist) vào hệ thống quy chuẩn (.agents/rules/blogger-embed-rules.md, AGENTS.md, SKILL.md) nhằm triệt tiêu hoàn toàn Documentation Drift giữa các phiên chat.
 - feat: Chuẩn hóa quy tắc "Bẫy Kép" (Double-Angle Interview Trap) gồm 🚗 Automotive/Protocol Trap & 💻 C++/Modeling Follow-up Trap vào toàn bộ hệ thống luật (.agents/rules/blogger-embed-rules.md, AGENTS.md, SKILL.md, MAINTENANCE_PLAN.md và widget_can_fd.html).
 - feat: Bổ sung tầng nội dung "🖥️ SystemC/C++ Modeling" vào cấu trúc Q&A Accordion (gồm UI Tab và Data Layer cho Item 2 và Item 3, đồng bộ vào MAINTENANCE_PLAN.md).
 - feat: Bổ sung Q&A Cluster 2 ôn tập Frame Structure (BRS & Non-linear DLC) (Item [3], widget_can_fd.html)

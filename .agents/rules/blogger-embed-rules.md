@@ -72,3 +72,11 @@ Tài liệu này định nghĩa các quy tắc kỹ thuật và tiêu chuẩn th
        - 🚗 **Góc độ Automotive / Protocol Trap:** Câu hỏi bẫy về timing, starvation, bus load, hardware limits, AUTOSAR DET/Dem.
        - 💻 **Góc độ C++ / Modeling Follow-up:** Câu hỏi vặn lại khi ứng viên đề cập đến C++/SystemC (về race conditions, delta cycles, resolution functions, bitfield memory layout/endianness, cache locality, exception vs state transition...).
    - Toàn bộ nội dung hoàn chỉnh phải được đồng bộ lưu trong `MAINTENANCE_PLAN.md` làm **Single Source of Truth** trước và song hành với mã nguồn HTML.
+
+4. **Quy Tắc Đồng Bộ Tài Liệu Bắt Buộc (Mandatory Doc-Sync Rule - Chống Documentation Drift)**:
+   - Nghiêm cấm hoàn thành tác vụ nếu chỉ sửa mã nguồn mà bỏ quên hệ thống tài liệu vệ tinh.
+   - Bất kỳ thay đổi nào tác động đến UI, Data Model hoặc logic widget đều bắt buộc phải kích hoạt quy trình đồng bộ liên hoàn:
+     - Cập nhật số dòng, phiên bản và kiến trúc tại `docs/<widget>/CURRENT_INFO.md`.
+     - Đồng bộ Ground Truth Q&A tại `docs/<widget>/MAINTENANCE_PLAN.md` (nếu widget có kế hoạch chạy sprint).
+     - Cập nhật bảng Showcase và sơ đồ cây thư mục tại `README.md` và `AGENTS.md` khi có file mới hoặc nâng cấp tính năng lớn.
+     - Ghi nhận chi tiết vào `CHANGELOG.md` dưới mục `[Unreleased]`.
