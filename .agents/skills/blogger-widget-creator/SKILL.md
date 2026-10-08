@@ -48,17 +48,29 @@ graph TD
 **Nguyên tắc:** Tách biệt **UI Engine** (render một lần) và **Data Layer** (thêm dần theo thời gian). Không hardcode HTML câu hỏi — chỉ inject vào JS object array.
 
 ```javascript
-// ✅ ĐÚNG: Data-driven — thêm Q&A chỉ cần thêm object vào array
+// ✅ ĐÚNG: Data-driven — thêm Q&A chỉ cần thêm object vào array (Bắt buộc Song ngữ vi/en)
 const qaData = [
     {
         id: "q1",
-        question: "Tại sao BRS phải nằm ở Control Field?",
         difficulty: "intermediate",
         tags: ["#Frame", "#BRS"],
-        answer: {
-            theory: "BRS quyết định tốc độ cho phần sau nó...",
-            practice: "MCAL: CanFdBrsEnable = TRUE trong CanControllerConfig...",
-            trap: "Nếu BRS=0 thì frame CAN FD có gì khác Classic CAN không?..."
+        vi: {
+            question: "Tại sao BRS phải nằm ở Control Field?",
+            answer: {
+                theory: "BRS quyết định tốc độ cho phần sau nó...",
+                modeling: "🖥️ SystemC/C++: Mô phỏng hành vi chuyển đổi timer của BRS...",
+                practice: "MCAL: CanFdBrsEnable = TRUE trong CanControllerConfig...",
+                trap: "Nếu BRS=0 thì frame CAN FD có gì khác Classic CAN không?..."
+            }
+        },
+        en: {
+            question: "Why must BRS be in the Control Field?",
+            answer: {
+                theory: "BRS determines the baudrate for the remaining bits...",
+                modeling: "🖥️ SystemC/C++: Simulating the timer switch behavior of BRS...",
+                practice: "MCAL: CanFdBrsEnable = TRUE in CanControllerConfig...",
+                trap: "If BRS=0, how does CAN FD differ from Classic CAN?..."
+            }
         }
     }
     // Thêm Q&A mới: chỉ thêm object, UI tự render

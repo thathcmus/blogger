@@ -24,31 +24,37 @@
     <div id="canfd-explorer-root" class="max-w-5xl mx-auto">
         
         <!-- Header -->
-        <div class="mb-8 text-center">
+        <div class="mb-8 text-center relative">
+            <div class="absolute right-0 top-0">
+                <button onclick="toggleLang()" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-sm font-semibold transition-colors border border-slate-300 shadow-sm">
+                    <i data-lucide="languages" class="w-4 h-4 text-blue-600"></i>
+                    <span id="lang-indicator">EN</span>
+                </button>
+            </div>
             <h1 class="text-3xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-2">
                 <i data-lucide="zap" class="text-amber-600 w-8 h-8"></i>
-                <span>CAN FD Protocol Explorer</span>
+                <span data-i18n="main_title">CAN FD Protocol Explorer</span>
             </h1>
-            <p class="text-slate-600 text-sm">Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)</p>
+            <p class="text-slate-600 text-sm" data-i18n="main_desc">Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)</p>
         </div>
 
         <!-- Navigation Tabs -->
         <div class="flex flex-wrap justify-center gap-2 mb-6 bg-white p-2 rounded-xl shadow-sm border border-slate-200 w-fit mx-auto">
             <button id="btn-tab-frame" class="px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2">
-                <i data-lucide="layout-template" class="w-4 h-4"></i> 1. Cấu Trúc Khung (Frame)
+                <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
             </button>
             <button id="btn-tab-compare" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
-                <i data-lucide="scale" class="w-4 h-4"></i> 2. So Sánh Các Thế Hệ
+                <i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="tab2">2. So Sánh Các Thế Hệ</span>
             </button>
             <button id="btn-tab-interview" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
-                <i data-lucide="help-circle" class="w-4 h-4"></i> 3. Q&A Phỏng Vấn
+                <i data-lucide="help-circle" class="w-4 h-4"></i> <span data-i18n="tab3">3. Q&A Phỏng Vấn</span>
             </button>
         </div>
 
         <!-- Tab 1 Container: Frame Format -->
         <div id="tab-frame" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
-            <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 border-slate-100">Cấu Trúc Bit Khung Truyền CAN FD (Base Frame Format)</h2>
-            <p class="text-sm text-slate-500 mb-6">Mô phỏng luồng bit thực tế trên bus (Từ trái sang phải). Click vào từng trường (field) để xem giải thích chi tiết.</p>
+            <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 border-slate-100"><span data-i18n="tab1_title">Cấu Trúc Bit Khung Truyền CAN FD (Base Frame Format)</span></h2>
+            <p class="text-sm text-slate-500 mb-6"><span data-i18n="tab1_desc">Mô phỏng luồng bit thực tế trên bus (Từ trái sang phải). Click vào từng trường (field) để xem giải thích chi tiết.</span></p>
             
             <!-- Visual Map -->
             <div class="w-full overflow-x-auto no-scrollbar pb-4 mb-6">
@@ -128,10 +134,10 @@
             <div id="field-details" class="bg-slate-50 p-5 rounded-xl border border-slate-200 min-h-[180px] transition-all">
                 <div class="flex items-center gap-2 mb-3">
                     <i data-lucide="mouse-pointer-click" class="text-amber-500"></i>
-                    <h3 class="text-lg font-bold text-slate-800">Chọn một phân đoạn phía trên để xem chi tiết</h3>
+                    <h3 class="text-lg font-bold text-slate-800"><span data-i18n="select_segment">Chọn một phân đoạn phía trên để xem chi tiết</span></h3>
                 </div>
                 <p class="text-slate-600 leading-relaxed">
-                    Widget hỗ trợ trực quan hóa điểm khác biệt lớn nhất của CAN FD so với Classic CAN: Cờ <strong class="text-red-600 font-semibold">BRS (Bit Rate Switch)</strong> giúp chuyển đổi tốc độ baudrate trong vùng Data Phase, và kích thước Payload được mở rộng lên tới 64 Bytes.
+                    <span data-i18n="segment_default">Widget hỗ trợ trực quan hóa điểm khác biệt lớn nhất của CAN FD so với Classic CAN: Cờ <strong class="text-red-600 font-semibold">BRS (Bit Rate Switch)</strong> giúp chuyển đổi tốc độ baudrate trong vùng Data Phase, và kích thước Payload được mở rộng lên tới 64 Bytes.</span>
                 </p>
             </div>
         </div>
@@ -139,13 +145,13 @@
         <!-- Tab 2 Container: Compare -->
         <div id="tab-compare" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
             <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 border-slate-100 flex items-center gap-2">
-                <i data-lucide="arrow-left-right" class="text-blue-600"></i> Sự Tiến Hóa Của Giao Thức CAN
+                <i data-lucide="arrow-left-right" class="text-blue-600"></i> <span data-i18n="tab2_title">Sự Tiến Hóa Của Giao Thức CAN</span>
             </h2>
             <div class="overflow-x-auto no-scrollbar">
                 <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead>
                         <tr class="bg-slate-100 text-slate-700 text-sm">
-                            <th class="p-4 rounded-tl-lg font-semibold border-b border-slate-200 w-1/4">Đặc tính</th>
+                            <th class="p-4 rounded-tl-lg font-semibold border-b border-slate-200 w-1/4" data-i18n="feature">Đặc tính</th>
                             <th class="p-4 font-semibold border-b border-slate-200 w-1/4">Classic CAN (2.0)</th>
                             <th class="p-4 font-semibold border-b border-amber-300 bg-amber-50 text-amber-900 w-1/4 border-x border-amber-200">CAN FD</th>
                             <th class="p-4 rounded-tr-lg font-semibold border-b border-slate-200 w-1/4">CAN XL (Mới)</th>
@@ -154,7 +160,7 @@
                     <tbody class="text-sm text-slate-600">
                         <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                             <td class="p-4 font-medium text-slate-700 flex items-center gap-2">
-                                <i data-lucide="database" class="w-4 h-4 text-slate-400"></i> Max Payload
+                                <i data-lucide="database" class="w-4 h-4 text-slate-400"></i> <span data-i18n="max_payload">Max Payload</span>
                             </td>
                             <td class="p-4">8 Bytes</td>
                             <td class="p-4 font-bold text-amber-700 bg-amber-50/50 border-x border-amber-100">64 Bytes</td>
@@ -162,7 +168,7 @@
                         </tr>
                         <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                             <td class="p-4 font-medium text-slate-700 flex items-center gap-2">
-                                <i data-lucide="gauge" class="w-4 h-4 text-slate-400"></i> Max Data Bit Rate
+                                <i data-lucide="gauge" class="w-4 h-4 text-slate-400"></i> <span data-i18n="max_rate">Max Data Bit Rate</span>
                             </td>
                             <td class="p-4">1 Mbps</td>
                             <td class="p-4 font-bold text-amber-700 bg-amber-50/50 border-x border-amber-100">8 Mbps (Thực tế ~2-5 Mbps)</td>
@@ -170,7 +176,7 @@
                         </tr>
                         <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                             <td class="p-4 font-medium text-slate-700 flex items-center gap-2">
-                                <i data-lucide="cpu" class="w-4 h-4 text-slate-400"></i> Cơ Chế Baudrate
+                                <i data-lucide="cpu" class="w-4 h-4 text-slate-400"></i> <span data-i18n="baudrate">Cơ Chế Baudrate</span>
                             </td>
                             <td class="p-4">Single Rate<br><span class="text-xs text-slate-400">(Tốc độ cố định)</span></td>
                             <td class="p-4 font-bold text-amber-700 bg-amber-50/50 border-x border-amber-100">Dual Rate<br><span class="text-xs text-amber-500 font-normal">(Chuyển đổi tốc độ qua BRS)</span></td>
@@ -178,7 +184,7 @@
                         </tr>
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="p-4 font-medium text-slate-700 flex items-center gap-2">
-                                <i data-lucide="car" class="w-4 h-4 text-slate-400"></i> Ứng dụng ô tô
+                                <i data-lucide="car" class="w-4 h-4 text-slate-400"></i> <span data-i18n="app">Ứng dụng ô tô</span>
                             </td>
                             <td class="p-4 text-xs">Cảm biến cơ bản, Body Control (Cửa, Gạt mưa, Đèn)</td>
                             <td class="p-4 font-bold text-amber-700 bg-amber-50/50 border-x border-amber-100 text-xs">Powertrain, Hệ thống phanh, Radar/Camera cơ bản, OTA Firmware</td>
@@ -196,15 +202,15 @@
         <!-- Tab 3 Container: Interview Q&A -->
         <div id="tab-interview" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
             <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 border-slate-100 flex items-center gap-2">
-                <i data-lucide="message-square-text" class="text-amber-600"></i> Ngân Hàng Câu Hỏi Phỏng Vấn
+                <i data-lucide="message-square-text" class="text-amber-600"></i> <span data-i18n="tab3_title">Ngân Hàng Câu Hỏi Phỏng Vấn</span>
             </h2>
             
             <!-- Filters -->
             <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <div class="flex flex-wrap gap-4 items-center">
-                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto">Độ khó:</div>
+                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto" data-i18n="difficulty">Độ khó:</div>
                     <div class="flex flex-wrap gap-2" id="difficulty-filters">
-                        <button onclick="filterByDifficulty('All')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn" data-level="All">Tất cả</button>
+                        <button onclick="filterByDifficulty('All')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn" data-level="All"><span data-i18n="all">Tất cả</span></button>
                         <button onclick="filterByDifficulty('Basic')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Basic">Basic</button>
                         <button onclick="filterByDifficulty('Intermediate')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Intermediate">Intermediate</button>
                         <button onclick="filterByDifficulty('Advanced')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Advanced">Advanced</button>
@@ -212,7 +218,7 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-4 items-center mt-3">
-                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto">Chủ đề:</div>
+                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto" data-i18n="topic">Chủ đề:</div>
                     <div class="flex flex-wrap gap-2" id="tag-filters">
                         <button onclick="filterByTag('#Frame')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Frame">#Frame</button>
                         <button onclick="filterByTag('#Stuffing')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Stuffing">#Stuffing</button>
@@ -223,7 +229,7 @@
                         <button onclick="filterByTag('#Diagnostics')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Diagnostics">#Diagnostics</button>
                         <button onclick="filterByTag('#SecOC')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#SecOC">#SecOC</button>
                         <button onclick="filterByTag('#Strategic')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Strategic">#Strategic</button>
-                        <button onclick="resetFilters()" class="px-2 py-1 text-xs font-medium rounded text-slate-500 hover:text-slate-700 transition-colors underline ml-auto hidden" id="reset-filter-btn">Xóa bộ lọc</button>
+                        <button onclick="resetFilters()" class="px-2 py-1 text-xs font-medium rounded text-slate-500 hover:text-slate-700 transition-colors underline ml-auto hidden" id="reset-filter-btn"><span data-i18n="clear_filter">Xóa bộ lọc</span></button>
                     </div>
                 </div>
             </div>
@@ -235,17 +241,17 @@
             
             <div id="qa-empty-state" class="hidden p-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">
                 <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 text-slate-400"></i>
-                <p>Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.</p>
-                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-colors">Xóa bộ lọc</button>
+                <p><span data-i18n="qa_empty">Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.</span></p>
+                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-colors"><span data-i18n="clear_filter">Xóa bộ lọc</span></button>
             </div>
 
             <div id="qa-wip-state" class="mt-4 p-5 border-l-4 border-amber-500 bg-amber-50 rounded-r-xl">
                 <div class="flex items-center gap-3 mb-2 text-amber-800">
                     <i data-lucide="construction" class="w-6 h-6"></i>
-                    <h3 class="font-bold text-lg">Chuyên mục đang được biên soạn</h3>
+                    <h3 class="font-bold text-lg"><span data-i18n="qa_wip_title">Chuyên mục đang được biên soạn</span></h3>
                 </div>
                 <p class="text-amber-700 text-sm leading-relaxed ml-9">
-                    Nội dung phỏng vấn chuyên sâu cho CAN FD đang được cập nhật dần theo từng Phase. Các câu hỏi sẽ sớm xuất hiện tại đây.
+                    <span data-i18n="qa_wip_desc">Nội dung phỏng vấn chuyên sâu cho CAN FD đang được cập nhật dần theo từng Phase. Các câu hỏi sẽ sớm xuất hiện tại đây.</span>
                 </p>
             </div>
         </div>
@@ -254,45 +260,204 @@
 
     <!-- SCRIPT ĐIỀU KHIỂN (VANILLA JS FAULT-TOLERANT) -->
     <script>
-        // DATA LAYER CHO Q&A
+        
+        let currentLang = 'vi';
+
+        const i18n = {
+            vi: {
+                main_title: "CAN FD Protocol Explorer",
+                main_desc: "Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)",
+                tab1: "1. Cấu Trúc Khung (Frame)",
+                tab2: "2. So Sánh Các Thế Hệ",
+                tab3: "3. Q&A Phỏng Vấn",
+                tab1_title: "Cấu Trúc Bit Khung Truyền CAN FD (Base Frame Format)",
+                tab1_desc: "Mô phỏng luồng bit thực tế trên bus (Từ trái sang phải). Click vào từng trường (field) để xem giải thích chi tiết.",
+                select_segment: "Chọn một phân đoạn phía trên để xem chi tiết",
+                segment_default: "Widget hỗ trợ trực quan hóa điểm khác biệt lớn nhất của CAN FD so với Classic CAN: Cờ <strong class='text-red-600 font-semibold'>BRS (Bit Rate Switch)</strong> giúp chuyển đổi tốc độ baudrate trong vùng Data Phase, và kích thước Payload được mở rộng lên tới 64 Bytes.",
+                tab2_title: "Sự Tiến Hóa Của Giao Thức CAN",
+                feature: "Đặc tính",
+                max_payload: "Max Payload",
+                max_rate: "Max Data Bit Rate",
+                baudrate: "Cơ Chế Baudrate",
+                app: "Ứng dụng ô tô",
+                tab3_title: "Ngân Hàng Câu Hỏi Phỏng Vấn",
+                difficulty: "Độ khó:",
+                topic: "Chủ đề:",
+                all: "Tất cả",
+                clear_filter: "Xóa bộ lọc",
+                qa_empty: "Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.",
+                qa_wip_title: "Chuyên mục đang được biên soạn",
+                qa_wip_desc: "Nội dung phỏng vấn chuyên sâu cho CAN FD đang được cập nhật dần theo từng Phase. Các câu hỏi sẽ sớm xuất hiện tại đây.",
+                qa_theory: "📖 Lý Thuyết",
+                qa_modeling: "🖥️ SystemC/C++ Modeling",
+                qa_practice: "🔧 ECU/AUTOSAR",
+                qa_trap: "⚠️ Interview Trap"
+            },
+            en: {
+                main_title: "CAN FD Protocol Explorer",
+                main_desc: "Visualizing Frame Structure at the bit level and the Bit Rate Switch (BRS) mechanism",
+                tab1: "1. Frame Structure",
+                tab2: "2. Generation Comparison",
+                tab3: "3. Interview Q&A",
+                tab1_title: "CAN FD Base Frame Format",
+                tab1_desc: "Simulating the actual bitstream on the bus (Left to Right). Click on each field to see detailed explanations.",
+                select_segment: "Select a segment above to view details",
+                segment_default: "This widget visualizes the biggest difference between CAN FD and Classic CAN: The <strong class='text-red-600 font-semibold'>BRS (Bit Rate Switch)</strong> flag enables baudrate switching in the Data Phase, and Payload size is expanded up to 64 Bytes.",
+                tab2_title: "Evolution of CAN Protocol",
+                feature: "Feature",
+                max_payload: "Max Payload",
+                max_rate: "Max Data Bit Rate",
+                baudrate: "Baudrate Mechanism",
+                app: "Automotive App",
+                tab3_title: "Interview Q&A Bank",
+                difficulty: "Difficulty:",
+                topic: "Topic:",
+                all: "All",
+                clear_filter: "Clear filters",
+                qa_empty: "No questions found matching the current filters.",
+                qa_wip_title: "Section Under Construction",
+                qa_wip_desc: "Deep-dive interview content for CAN FD is being gradually updated across Phases. Questions will appear here soon.",
+                qa_theory: "📖 Theory",
+                qa_modeling: "🖥️ SystemC/C++ Modeling",
+                qa_practice: "🔧 ECU/AUTOSAR",
+                qa_trap: "⚠️ Interview Trap"
+            }
+        };
+
+        // DATA LAYER CHO Q&A (BILINGUAL)
         const qaData = [
             {
                 id: "q_can_foundation_1",
-                question: "CSMA/CR hoạt động thế nào? Tại sao CAN không bị collision như Ethernet?",
                 difficulty: "Basic",
                 tags: ["#Frame"],
-                answer: {
-                    theory: "<strong>Carrier Sense Multiple Access / Collision Resolution:</strong> Các node đồng thời gửi bit, bit Dominant (0) đè Recessive (1). Node nào phát Recessive nhưng đọc lại trên bus thấy Dominant &rarr; biết mình thua &rarr; ngừng phát ngay lập tức.",
-                    practice: "<strong>ECU:</strong> Quá trình Arbitration hoàn toàn do CAN Controller hardware xử lý. Software không can thiệp được. Application/COM chỉ nhận được callback <code>TxConfirmation</code> sau khi node thắng arbitration và phát thành công.",
-                    trap: "<strong>Node thua arbitration có mất dữ liệu không?</strong><br>&rarr; Không. Nó sẽ tự động retry ở IFS (Interframe Space) tiếp theo. Dữ liệu vẫn nằm an toàn trong HW Tx buffer."
+                vi: {
+                    question: "CSMA/CR hoạt động thế nào? Tại sao CAN không bị collision như Ethernet?",
+                    answer: {
+                        theory: "<strong>Carrier Sense Multiple Access / Collision Resolution:</strong> Các node đồng thời gửi bit, bit Dominant (0) đè Recessive (1). Node nào phát Recessive nhưng đọc lại trên bus thấy Dominant &rarr; biết mình thua &rarr; ngừng phát ngay lập tức.",
+                        practice: "<strong>ECU:</strong> Quá trình Arbitration hoàn toàn do CAN Controller hardware xử lý. Software không can thiệp được. Application/COM chỉ nhận được callback <code>TxConfirmation</code> sau khi node thắng arbitration và phát thành công.",
+                        trap: "<strong>Node thua arbitration có mất dữ liệu không?</strong><br>&rarr; Không. Nó sẽ tự động retry ở IFS (Interframe Space) tiếp theo. Dữ liệu vẫn nằm an toàn trong HW Tx buffer."
+                    }
+                },
+                en: {
+                    question: "How does CSMA/CR work? Why does CAN avoid collisions unlike Ethernet?",
+                    answer: {
+                        theory: "<strong>Carrier Sense Multiple Access / Collision Resolution:</strong> Nodes transmit simultaneously; Dominant bits (0) overwrite Recessive bits (1). A node transmitting Recessive but reading Dominant knows it lost arbitration and immediately stops transmitting.",
+                        practice: "<strong>ECU:</strong> The Arbitration process is handled entirely by the CAN Controller hardware. Software cannot intervene. Application/COM only receives a <code>TxConfirmation</code> callback after winning arbitration and successfully transmitting.",
+                        trap: "<strong>Does a node lose data if it loses arbitration?</strong><br>&rarr; No. It will automatically retry at the next IFS (Interframe Space). The data remains safely in the HW Tx buffer."
+                    }
                 }
             },
             {
                 id: "q_can_foundation_2",
-                question: "Remote Frame trong CAN 2.0 là gì? CAN FD xử lý thế nào?",
                 difficulty: "Intermediate",
                 tags: ["#Frame"],
-                answer: {
-                    theory: "<strong>Remote Frame:</strong> Là cơ chế một node yêu cầu node khác phát Data Frame có cùng ID. <strong>CAN FD:</strong> Đã loại bỏ hoàn toàn Remote Frame (bit RRS thay thế cho RTR, và luôn mang giá trị Dominant). Tính năng này bị loại bỏ vì không phù hợp với thiết kế dual-rate.",
-                    practice: "<strong>AUTOSAR:</strong> Nếu cấu hình <code>CanIfTxPduType = REMOTE</code> trong một node CAN FD, Tool sẽ báo lỗi DET hoặc lỗi configuration ngay lúc compile.",
-                    trap: "<strong>Tại sao CAN FD không hỗ trợ Remote Frame?</strong><br>&rarr; Vì Remote Frame được gửi ở tốc độ nền (Nominal rate), nhưng Data Frame phản hồi lại có thể ở tốc độ cao (Data rate) &rarr; Timing cực kỳ phức tạp, không đảm bảo tính deterministic (thời gian thực)."
+                vi: {
+                    question: "Remote Frame trong CAN 2.0 là gì? CAN FD xử lý thế nào?",
+                    answer: {
+                        theory: "<strong>Remote Frame:</strong> Là cơ chế một node yêu cầu node khác phát Data Frame có cùng ID. <strong>CAN FD:</strong> Đã loại bỏ hoàn toàn Remote Frame (bit RRS thay thế cho RTR, và luôn mang giá trị Dominant). Tính năng này bị loại bỏ vì không phù hợp với thiết kế dual-rate.",
+                        practice: "<strong>AUTOSAR:</strong> Nếu cấu hình <code>CanIfTxPduType = REMOTE</code> trong một node CAN FD, Tool sẽ báo lỗi DET hoặc lỗi configuration ngay lúc compile.",
+                        trap: "<strong>Tại sao CAN FD không hỗ trợ Remote Frame?</strong><br>&rarr; Vì Remote Frame được gửi ở tốc độ nền (Nominal rate), nhưng Data Frame phản hồi lại có thể ở tốc độ cao (Data rate) &rarr; Timing cực kỳ phức tạp, không đảm bảo tính deterministic (thời gian thực)."
+                    }
+                },
+                en: {
+                    question: "What is a Remote Frame in CAN 2.0? How does CAN FD handle it?",
+                    answer: {
+                        theory: "<strong>Remote Frame:</strong> A mechanism where a node requests another node to transmit a Data Frame with the same ID. <strong>CAN FD:</strong> Remote Frames are completely removed (the RRS bit replaces RTR and is always Dominant). This feature was removed because it is incompatible with the dual-rate design.",
+                        practice: "<strong>AUTOSAR:</strong> If <code>CanIfTxPduType = REMOTE</code> is configured in a CAN FD node, the Tool will report a DET or configuration error at compile time.",
+                        trap: "<strong>Why doesn't CAN FD support Remote Frames?</strong><br>&rarr; Because the Remote Frame is sent at the Nominal rate, but the responding Data Frame could be at the Data rate &rarr; Timing becomes extremely complex, breaking determinism (real-time guarantees)."
+                    }
                 }
             },
             {
                 id: "q_can_foundation_3",
-                question: "Overload Frame khác Error Frame thế nào?",
                 difficulty: "Intermediate",
                 tags: ["#Error"],
-                answer: {
-                    theory: "<strong>Overload Frame:</strong> Node phát để xin thêm thời gian xử lý (trước hoặc giữa các frames).<br><strong>Error Frame:</strong> Phát ra khi phát hiện lỗi trên bus.<br>Cả hai đều sử dụng 6 bit Dominant liên tiếp phá vỡ rule bit-stuffing, nhưng context timing của chúng khác nhau.",
-                    practice: "<strong>Modern ECU:</strong> Overload Frame cực kỳ hiếm gặp trong hệ thống AUTOSAR vì hardware buffer đủ lớn và CPU đủ mạnh. Nếu bạn thấy Overload Frame trên trace &rarr; Dấu hiệu ECU đang bị quá tải nghiêm trọng.",
-                    trap: "<strong>CAN FD còn dùng Overload Frame không?</strong><br>&rarr; Có, nhưng nó chỉ được phép sinh ra và hoạt động ở tốc độ nền (Nominal rate)."
+                vi: {
+                    question: "Overload Frame khác Error Frame thế nào?",
+                    answer: {
+                        theory: "<strong>Overload Frame:</strong> Node phát để xin thêm thời gian xử lý (trước hoặc giữa các frames).<br><strong>Error Frame:</strong> Phát ra khi phát hiện lỗi trên bus.<br>Cả hai đều sử dụng 6 bit Dominant liên tiếp phá vỡ rule bit-stuffing, nhưng context timing của chúng khác nhau.",
+                        practice: "<strong>Modern ECU:</strong> Overload Frame cực kỳ hiếm gặp trong hệ thống AUTOSAR vì hardware buffer đủ lớn và CPU đủ mạnh. Nếu bạn thấy Overload Frame trên trace &rarr; Dấu hiệu ECU đang bị quá tải nghiêm trọng.",
+                        trap: "<strong>CAN FD còn dùng Overload Frame không?</strong><br>&rarr; Có, nhưng nó chỉ được phép sinh ra và hoạt động ở tốc độ nền (Nominal rate)."
+                    }
+                },
+                en: {
+                    question: "How does an Overload Frame differ from an Error Frame?",
+                    answer: {
+                        theory: "<strong>Overload Frame:</strong> Transmitted by a node to request extra processing time (before or between frames).<br><strong>Error Frame:</strong> Transmitted when a bus error is detected.<br>Both use 6 consecutive Dominant bits violating the bit-stuffing rule, but their timing contexts are different.",
+                        practice: "<strong>Modern ECU:</strong> Overload Frames are extremely rare in AUTOSAR systems because hardware buffers are large and CPUs are powerful. Seeing an Overload Frame on a trace &rarr; A sign of severe ECU overload.",
+                        trap: "<strong>Does CAN FD still use Overload Frames?</strong><br>&rarr; Yes, but they are only allowed to be generated and operate at the Nominal rate."
+                    }
+                }
+            },
+            {
+                id: "q_can_fd_brs_1",
+                difficulty: "Advanced",
+                tags: ["#Frame", "#BitTiming"],
+                vi: {
+                    question: "Vị trí của BRS (Bit Rate Switch) nằm ở đâu? Tại sao không đặt ở đầu frame?",
+                    answer: {
+                        theory: "<strong>BRS không thể đặt ở đầu frame (vùng Arbitration).</strong> Quá trình phân xử bắt buộc phải chạy ở tốc độ thấp (Nominal Rate, VD: 500kbps) để tín hiệu điện có đủ thời gian lan truyền (propagation delay) đến node xa nhất và dội ngược lại trong giới hạn 1 bit-time. Chỉ khi phân xử xong, xác định được duy nhất 1 node làm chủ bus, BRS mới được bật (Recessive) để kích hoạt tốc độ cao (Data Rate, VD: 5Mbps).",
+                        practice: "<strong>ECU/AUTOSAR:</strong> Cấp độ Hardware, CAN Controller chứa 2 thanh ghi Timer độc lập: Nominal Bit Timing và Data Bit Timing. Khi cờ BRS được set, mạch Multiplexer bên trong Silicon tự động switch clock sang thanh ghi Data Bit Timing ở sườn xung tiếp theo.",
+                        trap: "<strong>Trong CAN FD, vùng ACK bit được truyền ở tốc độ nào?</strong><br>&rarr; Bắt buộc phải hạ về Nominal Rate tại bit CRC Delimiter. Vì lúc này, TẤT CẢ các node trên mạng (kể cả node rất xa) đều phải báo ACK cùng lúc. Nếu chạy tốc độ cao, tín hiệu ACK sẽ chồng chéo và bị lệch pha hoàn toàn do delay đường dây."
+                    }
+                },
+                en: {
+                    question: "Where is the BRS (Bit Rate Switch) located? Why can't it be placed at the start of the frame?",
+                    answer: {
+                        theory: "<strong>BRS cannot be placed at the start of the frame.</strong> Arbitration must run at a low speed (Nominal Rate) so the electrical signal has enough time to propagate to the furthest node and back within 1 bit-time. Only after arbitration concludes and a single transmitting node is established can BRS be set (Recessive) to trigger the high speed (Data Rate).",
+                        practice: "<strong>ECU/AUTOSAR:</strong> At the hardware level, the CAN Controller contains two independent Timer registers: Nominal and Data Bit Timing. When the BRS flag is read, an internal multiplexer in the silicon seamlessly switches the clock source at the next pulse edge.",
+                        trap: "<strong>In CAN FD, at what speed is the ACK slot transmitted?</strong><br>&rarr; It strictly slows down to the Nominal Rate at the CRC Delimiter bit. All nodes (even distant ones) must assert ACK simultaneously. At high speed, propagation delays would cause massive phase shifts and collisions during the ACK slot."
+                    }
+                }
+            },
+            {
+                id: "q_can_fd_dlc_1",
+                difficulty: "Intermediate",
+                tags: ["#Frame"],
+                vi: {
+                    question: "Quy luật Non-linear DLC (Data Length Code) hoạt động như thế nào?",
+                    answer: {
+                        theory: "<strong>Do CAN 2.0 giới hạn DLC ở 4 bit</strong> (từ 0000 đến 1111, tức max giá trị là 15), nó không thể đếm tuyến tính đến 64 byte. Để tương thích ngược cấu trúc Header, CAN FD giữ nguyên 4 bit này nhưng ánh xạ phi tuyến tính: DLC từ 0-8 giữ nguyên ý nghĩa (0-8 byte). Nhưng từ 9-15 lần lượt đại diện cho 12, 16, 20, 24, 32, 48, 64 bytes.",
+                        practice: "<strong>ECU/AUTOSAR:</strong> Tại layer <code>CanIf</code> (CAN Interface), nếu tầng COM đẩy xuống một PDU có độ dài thực tế là 10 bytes, <code>CanIf</code> sẽ phải kích hoạt cơ chế Padding (chèn thêm byte rác, thường là 0x00 hoặc 0xCC) để nâng payload lên mức hợp lệ gần nhất là 12 bytes (tương ứng DLC=9).",
+                        trap: "<strong>Nếu SWC gửi gói tin dài chính xác 13 bytes xuống bus CAN FD, điều gì sẽ xảy ra?</strong><br>&rarr; Mạng CAN FD không thể truyền chính xác 13 bytes. Gói tin sẽ bị ép lên mức DLC=10 (tương ứng 16 bytes payload), trong đó chứa 13 bytes data thực và 3 bytes padding do AUTOSAR BSW tự chèn vào."
+                    }
+                },
+                en: {
+                    question: "How does the Non-linear DLC (Data Length Code) rule work?",
+                    answer: {
+                        theory: "<strong>Since CAN 2.0 limits DLC to 4 bits</strong> (0 to 15), it cannot count linearly to 64 bytes. To maintain Header compatibility, CAN FD maps values non-linearly: DLC 0-8 means 0-8 bytes. However, DLC 9-15 map to 12, 16, 20, 24, 32, 48, and 64 bytes respectively.",
+                        practice: "<strong>ECU/AUTOSAR:</strong> In the <code>CanIf</code> layer, if the COM layer pushes a PDU of 10 bytes, <code>CanIf</code> must trigger Padding (inserting dummy bytes like 0x00 or 0xCC) to reach the nearest valid payload size of 12 bytes (DLC=9).",
+                        trap: "<strong>If an SWC requests to send exactly 13 bytes, what happens on the bus?</strong><br>&rarr; CAN FD cannot physically transmit a 13-byte frame. It will be padded to DLC=10 (16 bytes payload), containing 13 bytes of actual data and 3 bytes of padding inserted by the AUTOSAR BSW."
+                    }
                 }
             }
         ];
 
         let currentDifficulty = 'All';
         let currentTag = '';
+        let currentSegment = null;
+        const qaState = {};
+
+        function applyI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    el.innerHTML = i18n[currentLang][key];
+                }
+            });
+            document.getElementById('lang-indicator').textContent = currentLang === 'vi' ? 'EN' : 'VN';
+            
+            // Re-render components with dynamic text
+            applyFilters();
+            if (currentSegment) {
+                selectSegment(currentSegment);
+            }
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'vi' ? 'en' : 'vi';
+            applyI18n();
+        }
 
         function renderQACards(data) {
             const container = document.getElementById('qa-container');
@@ -302,13 +467,11 @@
             container.innerHTML = '';
             
             if (data.length === 0 && qaData.length === 0) {
-                // Hoàn toàn chưa có data
                 container.classList.add('hidden');
                 emptyState.classList.add('hidden');
                 if (wipState) wipState.classList.remove('hidden');
                 return;
             } else if (data.length === 0 && qaData.length > 0) {
-                // Có data nhưng filter không trúng
                 container.classList.add('hidden');
                 emptyState.classList.remove('hidden');
                 if (wipState) wipState.classList.add('hidden');
@@ -332,6 +495,28 @@
                 
                 let tagsHtml = item.tags.map(tag => `<span class="px-2 py-0.5 text-[10px] font-medium bg-slate-100 text-slate-600 rounded border border-slate-200">${tag}</span>`).join('');
 
+                const content = item[currentLang];
+                const labels = i18n[currentLang];
+                
+                // Lấy trạng thái đã lưu, nếu chưa có thì mặc định đóng & tab theory
+                const state = qaState[item.id] || { expanded: false, tab: 'theory' };
+                const answerHidden = state.expanded ? '' : 'hidden';
+                const iconClasses = state.expanded ? 'text-amber-600 bg-amber-100' : 'text-slate-400 bg-slate-50';
+                const iconStyle = state.expanded ? 'style="transform: rotate(180deg);"' : '';
+                
+                const activeBtnClass = "px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-700 bg-white rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                const inactiveBtnClass = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                
+                const theoryBtn = state.tab === 'theory' ? activeBtnClass : inactiveBtnClass;
+                const modelingBtn = state.tab === 'modeling' ? activeBtnClass : inactiveBtnClass;
+                const practiceBtn = state.tab === 'practice' ? activeBtnClass : inactiveBtnClass;
+                const trapBtn = state.tab === 'trap' ? activeBtnClass : inactiveBtnClass;
+                
+                const theoryContent = state.tab === 'theory' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+                const modelingContent = state.tab === 'modeling' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+                const practiceContent = state.tab === 'practice' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+                const trapContent = state.tab === 'trap' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+
                 const cardHtml = `
                     <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm transition-all hover:border-amber-300">
                         <div class="p-4 cursor-pointer flex justify-between items-start gap-4 select-none" onclick="toggleAnswer('${item.id}')">
@@ -342,38 +527,38 @@
                                 </div>
                                 <h3 class="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors flex items-start gap-2">
                                     <span class="text-amber-600 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
-                                    <span>${item.question}</span>
+                                    <span>${content.question}</span>
                                 </h3>
                             </div>
-                            <div class="text-slate-400 bg-slate-50 p-2 rounded-lg" id="icon-${item.id}">
-                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300"></i>
+                            <div class="p-2 rounded-lg ${iconClasses}" id="icon-${item.id}">
+                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" ${iconStyle}></i>
                             </div>
                         </div>
                         
-                        <div id="answer-${item.id}" class="hidden border-t border-slate-100 bg-slate-50">
+                        <div id="answer-${item.id}" class="${answerHidden} border-t border-slate-100 bg-slate-50">
                             <!-- Answer Tabs Nav -->
                             <div class="flex border-b border-slate-200 bg-slate-100 px-4 pt-3 gap-2 overflow-x-auto no-scrollbar">
-                                <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-700 bg-white rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap">
-                                    📖 Lý Thuyết
+                                <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
+                                    ${labels.qa_theory}
                                 </button>
-                                <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap">
-                                    🔧 ECU/AUTOSAR
+                                <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="${practiceBtn}">
+                                    ${labels.qa_practice}
                                 </button>
-                                <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap">
-                                    ⚠️ Interview Trap
+                                <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="${trapBtn}">
+                                    ${labels.qa_trap}
                                 </button>
                             </div>
                             
                             <!-- Answer Content -->
                             <div class="p-5 text-sm text-slate-700 leading-relaxed">
-                                <div id="content-${item.id}-theory" class="animate-fadeIn">
-                                    ${item.answer.theory}
+                                <div id="content-${item.id}-theory" class="${theoryContent}">
+                                    ${content.answer.theory}
                                 </div>
-                                <div id="content-${item.id}-practice" class="hidden animate-fadeIn">
-                                    ${item.answer.practice}
+                                <div id="content-${item.id}-practice" class="${practiceContent}">
+                                    ${content.answer.practice}
                                 </div>
-                                <div id="content-${item.id}-trap" class="hidden animate-fadeIn">
-                                    ${item.answer.trap}
+                                <div id="content-${item.id}-trap" class="${trapContent}">
+                                    ${content.answer.trap}
                                 </div>
                             </div>
                         </div>
@@ -390,25 +575,29 @@
         }
 
         function toggleAnswer(id) {
+            if (!qaState[id]) qaState[id] = { expanded: false, tab: 'theory' };
             const answerDiv = document.getElementById(`answer-${id}`);
             const iconDiv = document.getElementById(`icon-${id}`);
             const iconElement = iconDiv.querySelector('i') || iconDiv.querySelector('svg');
             
             if (answerDiv.classList.contains('hidden')) {
                 answerDiv.classList.remove('hidden');
-                iconDiv.classList.add('bg-amber-100', 'text-amber-600');
-                iconDiv.classList.remove('bg-slate-50', 'text-slate-400');
+                iconDiv.className = 'p-2 rounded-lg text-amber-600 bg-amber-100';
                 if (iconElement) iconElement.style.transform = 'rotate(180deg)';
+                qaState[id].expanded = true;
             } else {
                 answerDiv.classList.add('hidden');
-                iconDiv.classList.remove('bg-amber-100', 'text-amber-600');
-                iconDiv.classList.add('bg-slate-50', 'text-slate-400');
+                iconDiv.className = 'p-2 rounded-lg text-slate-400 bg-slate-50';
                 if (iconElement) iconElement.style.transform = 'rotate(0deg)';
+                qaState[id].expanded = false;
             }
         }
 
         function switchQATab(id, tab) {
-            const tabs = ['theory', 'practice', 'trap'];
+            if (!qaState[id]) qaState[id] = { expanded: true, tab: 'theory' };
+            qaState[id].tab = tab;
+            
+            const tabs = ['theory', 'modeling', 'practice', 'trap'];
             
             tabs.forEach(t => {
                 const btn = document.getElementById(`btn-${id}-${t}`);
@@ -484,61 +673,118 @@
 
         const segmentData = {
             arbitration: {
-                title: "Arbitration Phase (Phân Xử Đồng Tốc)",
                 icon: "shield",
                 color: "text-indigo-600",
-                desc: `<ul class="space-y-2">
-                        <li><strong>SOF (Start of Frame - 1 bit):</strong> Bit báo hiệu bắt đầu khung truyền (Dominant - 0). Mọi node trên mạng dùng bit này để đồng bộ ban đầu (Hard Sync).</li>
-                        <li><strong>ID (Identifier - 11 bit):</strong> Định danh khung truyền. Node nào có ID nhỏ hơn sẽ chiến thắng phân xử và được quyền phát do đặc tính "Dominant (0) đè Recessive (1)".</li>
-                        <li><strong>RRS (Remote Request Substitution - 1 bit):</strong> Ở CAN FD không còn Remote Frame, bit này thay thế RTR và luôn mang giá trị Dominant (0).</li>
-                        <li><strong>IDE (Identifier Extension - 1 bit):</strong> Xác định đây là Base frame (0) hay Extended 29-bit frame (1).</li>
-                       </ul>
-                       <p class="mt-3 p-2 bg-indigo-50 rounded text-indigo-900 border border-indigo-100"><strong>Tốc độ:</strong> Giai đoạn này bắt buộc chạy ở tốc độ <em>Nominal Bit Rate</em> (Ví dụ 500 kbps) để đảm bảo tín hiệu đủ thời gian lan truyền trên toàn xe trong quá trình phân xử.</p>`
+                vi: {
+                    title: "Arbitration Phase (Phân Xử Đồng Tốc)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>SOF (Start of Frame - 1 bit):</strong> Bit báo hiệu bắt đầu khung truyền (Dominant - 0). Mọi node trên mạng dùng bit này để đồng bộ ban đầu (Hard Sync).</li>
+                            <li><strong>ID (Identifier - 11 bit):</strong> Định danh khung truyền. Node nào có ID nhỏ hơn sẽ chiến thắng phân xử và được quyền phát do đặc tính "Dominant (0) đè Recessive (1)".</li>
+                            <li><strong>RRS (Remote Request Substitution - 1 bit):</strong> Ở CAN FD không còn Remote Frame, bit này thay thế RTR và luôn mang giá trị Dominant (0).</li>
+                            <li><strong>IDE (Identifier Extension - 1 bit):</strong> Xác định đây là Base frame (0) hay Extended 29-bit frame (1).</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-indigo-50 rounded text-indigo-900 border border-indigo-100"><strong>Tốc độ:</strong> Giai đoạn này bắt buộc chạy ở tốc độ <em>Nominal Bit Rate</em> (Ví dụ 500 kbps) để đảm bảo tín hiệu đủ thời gian lan truyền trên toàn xe trong quá trình phân xử.</p>`
+                },
+                en: {
+                    title: "Arbitration Phase",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>SOF (Start of Frame - 1 bit):</strong> Signifies the start of transmission (Dominant - 0). All nodes use this bit for initial synchronization (Hard Sync).</li>
+                            <li><strong>ID (Identifier - 11 bit):</strong> Frame identifier. The node with the lower ID wins arbitration due to the "Dominant (0) overwrites Recessive (1)" characteristic.</li>
+                            <li><strong>RRS (Remote Request Substitution - 1 bit):</strong> CAN FD no longer has Remote Frames; this bit replaces RTR and is always Dominant (0).</li>
+                            <li><strong>IDE (Identifier Extension - 1 bit):</strong> Determines if this is a Base frame (0) or Extended 29-bit frame (1).</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-indigo-50 rounded text-indigo-900 border border-indigo-100"><strong>Speed:</strong> This phase must run at the <em>Nominal Bit Rate</em> (e.g., 500 kbps) to ensure signals have enough time to propagate across the entire vehicle during arbitration.</p>`
+                }
             },
             control: {
-                title: "Control Field & Bí Mật Tăng Tốc (BRS)",
                 icon: "settings",
                 color: "text-amber-600",
-                desc: `<ul class="space-y-2">
-                        <li><strong>FDF (FD Format - 1 bit):</strong> Bit xác định đây là CAN FD. Mang giá trị Recessive (1) để phân biệt với Classic CAN (có giá trị 0).</li>
-                        <li><strong>res (Reserved - 1 bit):</strong> Bit dự trữ, luôn là Dominant (0).</li>
-                        <li><strong>BRS (Bit Rate Switch - 1 bit): <span class="text-red-600 font-bold bg-red-50 px-1 rounded">TRÁI TIM CAN FD</span></strong> 
-                            Nếu BRS = 1 (Recessive), ngay sau bit này toàn bộ các bit tiếp theo (Data, CRC) sẽ được truyền ở tốc độ cao <em>Data Bit Rate</em> (VD: 2 Mbps, 5 Mbps). Nếu BRS = 0, tốc độ không đổi.</li>
-                        <li><strong>ESI (Error State Indicator - 1 bit):</strong> Chỉ báo trạng thái lỗi của node phát (0 = Error Active, 1 = Error Passive).</li>
-                        <li><strong>DLC (Data Length Code - 4 bit):</strong> Do chỉ có 4 bit (giá trị max = 15), các giá trị từ 9-15 được CAN FD quy ước lại thành số byte phi tuyến tính: 12, 16, 20, 24, 32, 48, 64 Bytes.</li>
-                       </ul>`
+                vi: {
+                    title: "Control Field & Bí Mật Tăng Tốc (BRS)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>FDF (FD Format - 1 bit):</strong> Bit xác định đây là CAN FD. Mang giá trị Recessive (1) để phân biệt với Classic CAN (có giá trị 0).</li>
+                            <li><strong>res (Reserved - 1 bit):</strong> Bit dự trữ, luôn là Dominant (0).</li>
+                            <li><strong>BRS (Bit Rate Switch - 1 bit): <span class="text-red-600 font-bold bg-red-50 px-1 rounded">TRÁI TIM CAN FD</span></strong> 
+                                Nếu BRS = 1 (Recessive), ngay sau bit này toàn bộ các bit tiếp theo (Data, CRC) sẽ được truyền ở tốc độ cao <em>Data Bit Rate</em> (VD: 2 Mbps, 5 Mbps). Nếu BRS = 0, tốc độ không đổi.</li>
+                            <li><strong>ESI (Error State Indicator - 1 bit):</strong> Chỉ báo trạng thái lỗi của node phát (0 = Error Active, 1 = Error Passive).</li>
+                            <li><strong>DLC (Data Length Code - 4 bit):</strong> Do chỉ có 4 bit (giá trị max = 15), các giá trị từ 9-15 được CAN FD quy ước lại thành số byte phi tuyến tính: 12, 16, 20, 24, 32, 48, 64 Bytes.</li>
+                           </ul>`
+                },
+                en: {
+                    title: "Control Field & Speed Secret (BRS)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>FDF (FD Format - 1 bit):</strong> Determines this is CAN FD. Set to Recessive (1) to distinguish it from Classic CAN (which is 0).</li>
+                            <li><strong>res (Reserved - 1 bit):</strong> Reserved bit, always Dominant (0).</li>
+                            <li><strong>BRS (Bit Rate Switch - 1 bit): <span class="text-red-600 font-bold bg-red-50 px-1 rounded">HEART OF CAN FD</span></strong> 
+                                If BRS = 1 (Recessive), immediately after this bit, all subsequent bits (Data, CRC) are transmitted at the high <em>Data Bit Rate</em> (e.g., 2 Mbps, 5 Mbps). If BRS = 0, the speed remains unchanged.</li>
+                            <li><strong>ESI (Error State Indicator - 1 bit):</strong> Indicates the error state of the transmitting node (0 = Error Active, 1 = Error Passive).</li>
+                            <li><strong>DLC (Data Length Code - 4 bit):</strong> With only 4 bits (max value = 15), values from 9-15 are mapped non-linearly to byte lengths in CAN FD: 12, 16, 20, 24, 32, 48, 64 Bytes.</li>
+                           </ul>`
+                }
             },
             data: {
-                title: "Data Phase (Dữ Liệu Tốc Độ Cao)",
                 icon: "database",
                 color: "text-emerald-600",
-                desc: `<p class="mb-2">Đây là phần payload (nội dung thực) mang dữ liệu cảm biến, lệnh điều khiển hoặc firmware.</p>
-                       <ul class="space-y-2">
-                        <li><strong>Kích thước:</strong> Nhờ thuật toán DLC mới, Payload mở rộng lên tối đa <strong>64 Bytes</strong>.</li>
-                        <li><strong>Tốc độ:</strong> Nếu cờ BRS bật, toàn bộ dữ liệu này bắn qua bus với tốc độ <em>Data Bit Rate</em> cực nhanh. Đoạn này không có cơ chế phân xử nên không sợ trễ lan truyền, tín hiệu có thể bay vèo vèo.</li>
-                        <li><strong>Ý nghĩa:</strong> 64 byte đủ để chứa các chữ ký bảo mật MAC mã hóa (dành cho SecOC - Secure Onboard Communication) mà không cần phải cắt nhỏ (Fragment) thành nhiều frame như CAN 2.0.</li>
-                       </ul>`
+                vi: {
+                    title: "Data Phase (Dữ Liệu Tốc Độ Cao)",
+                    desc: `<p class="mb-2">Đây là phần payload (nội dung thực) mang dữ liệu cảm biến, lệnh điều khiển hoặc firmware.</p>
+                           <ul class="space-y-2">
+                            <li><strong>Kích thước:</strong> Nhờ thuật toán DLC mới, Payload mở rộng lên tối đa <strong>64 Bytes</strong>.</li>
+                            <li><strong>Tốc độ:</strong> Nếu cờ BRS bật, toàn bộ dữ liệu này bắn qua bus với tốc độ <em>Data Bit Rate</em> cực nhanh. Đoạn này không có cơ chế phân xử nên không sợ trễ lan truyền, tín hiệu có thể bay vèo vèo.</li>
+                            <li><strong>Ý nghĩa:</strong> 64 byte đủ để chứa các chữ ký bảo mật MAC mã hóa (dành cho SecOC - Secure Onboard Communication) mà không cần phải cắt nhỏ (Fragment) thành nhiều frame như CAN 2.0.</li>
+                           </ul>`
+                },
+                en: {
+                    title: "Data Phase (High-Speed Data)",
+                    desc: `<p class="mb-2">This is the payload containing actual sensor data, control commands, or firmware.</p>
+                           <ul class="space-y-2">
+                            <li><strong>Size:</strong> Thanks to the new DLC algorithm, Payload is expanded up to <strong>64 Bytes</strong>.</li>
+                            <li><strong>Speed:</strong> If the BRS flag is set, all this data shoots across the bus at the extremely fast <em>Data Bit Rate</em>. There is no arbitration here, so propagation delay is not a concern, allowing signals to fly.</li>
+                            <li><strong>Significance:</strong> 64 bytes is enough to hold encrypted MAC security signatures (for SecOC - Secure Onboard Communication) without needing to fragment into multiple frames like CAN 2.0.</li>
+                           </ul>`
+                }
             },
             crc: {
-                title: "CRC Field (Kiểm Tra Lỗi Khắt Khe Hơn)",
                 icon: "check-circle",
                 color: "text-purple-600",
-                desc: `<p class="mb-2">Do payload tăng lên 64 bytes, CAN FD phải thiết kế lại cơ chế kiểm tra lỗi để tránh tỉ lệ rủi ro lỗi không phát hiện được.</p>
-                       <ul class="space-y-2">
-                        <li><strong>SBC (Stuff Bit Count - 4 bit):</strong> Trường mới thêm vào để đếm số lượng Stuff Bit đã được chèn vào trước đó, kết hợp bit Parity bảo vệ. Giúp node nhận bắt lỗi đồng bộ tốt hơn.</li>
-                        <li><strong>CRC Sequence (17 hoặc 21 bit):</strong> Nếu Payload &le; 16 bytes thì dùng đa thức CRC-17. Nếu Payload &gt; 16 bytes thì dùng CRC-21.</li>
-                        <li><strong>DEL (CRC Delimiter - 1 bit):</strong> Cột mốc <strong>Giảm tốc</strong>. Ngay tại bit này (có giá trị Recessive - 1), node tự động hạ xung nhịp trở về lại <em>Nominal Bit Rate</em> ban đầu.</li>
-                       </ul>`
+                vi: {
+                    title: "CRC Field (Kiểm Tra Lỗi Khắt Khe Hơn)",
+                    desc: `<p class="mb-2">Do payload tăng lên 64 bytes, CAN FD phải thiết kế lại cơ chế kiểm tra lỗi để tránh tỉ lệ rủi ro lỗi không phát hiện được.</p>
+                           <ul class="space-y-2">
+                            <li><strong>SBC (Stuff Bit Count - 4 bit):</strong> Trường mới thêm vào để đếm số lượng Stuff Bit đã được chèn vào trước đó, kết hợp bit Parity bảo vệ. Giúp node nhận bắt lỗi đồng bộ tốt hơn.</li>
+                            <li><strong>CRC Sequence (17 hoặc 21 bit):</strong> Nếu Payload &le; 16 bytes thì dùng đa thức CRC-17. Nếu Payload &gt; 16 bytes thì dùng CRC-21.</li>
+                            <li><strong>DEL (CRC Delimiter - 1 bit):</strong> Cột mốc <strong>Giảm tốc</strong>. Ngay tại bit này (có giá trị Recessive - 1), node tự động hạ xung nhịp trở về lại <em>Nominal Bit Rate</em> ban đầu.</li>
+                           </ul>`
+                },
+                en: {
+                    title: "CRC Field (Stricter Error Checking)",
+                    desc: `<p class="mb-2">With payload increasing to 64 bytes, CAN FD had to redesign its error-checking mechanism to avoid undetectable error risks.</p>
+                           <ul class="space-y-2">
+                            <li><strong>SBC (Stuff Bit Count - 4 bit):</strong> A new field added to count the number of inserted Stuff Bits, combined with a Parity protection bit. Helps receiving nodes detect synchronization errors better.</li>
+                            <li><strong>CRC Sequence (17 or 21 bits):</strong> If Payload &le; 16 bytes, the CRC-17 polynomial is used. If Payload &gt; 16 bytes, CRC-21 is used.</li>
+                            <li><strong>DEL (CRC Delimiter - 1 bit):</strong> The <strong>Slowdown</strong> milestone. Exactly at this bit (which is Recessive - 1), nodes automatically reduce their clock back to the original <em>Nominal Bit Rate</em>.</li>
+                           </ul>`
+                }
             },
             ack: {
-                title: "ACK & EOF (Kết Thúc Frame)",
                 icon: "flag",
                 color: "text-slate-600",
-                desc: `<ul class="space-y-2">
-                        <li><strong>ACK Slot (1 bit) & ACK Delimiter (1 bit):</strong> Node phát gửi ACK Slot là Recessive (1). Bất kỳ node nào trên bus nhận được frame đúng CRC sẽ đè bit Dominant (0) vào ACK Slot này để báo "Tôi đã nhận thành công".</li>
-                        <li><strong>EOF (End Of Frame - 7 bit):</strong> Chuỗi 7 bit Recessive (1) liên tiếp đánh dấu khung truyền đã kết thúc trọn vẹn, không có hiện tượng Stuff Bit ở khu vực này.</li>
-                       </ul>
-                       <p class="mt-3 p-2 bg-slate-100 rounded text-slate-700 border border-slate-200">Khu vực này chạy ở <em>Nominal Bit Rate</em> để đảm bảo mọi node (dù ở xa nhất) đều đủ thời gian ghi đè ACK và nhận biết EOF kết thúc frame.</p>`
+                vi: {
+                    title: "ACK & EOF (Kết Thúc Frame)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>ACK Slot (1 bit) & ACK Delimiter (1 bit):</strong> Node phát gửi ACK Slot là Recessive (1). Bất kỳ node nào trên bus nhận được frame đúng CRC sẽ đè bit Dominant (0) vào ACK Slot này để báo "Tôi đã nhận thành công".</li>
+                            <li><strong>EOF (End Of Frame - 7 bit):</strong> Chuỗi 7 bit Recessive (1) liên tiếp đánh dấu khung truyền đã kết thúc trọn vẹn, không có hiện tượng Stuff Bit ở khu vực này.</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-slate-100 rounded text-slate-700 border border-slate-200">Khu vực này chạy ở <em>Nominal Bit Rate</em> để đảm bảo mọi node (dù ở xa nhất) đều đủ thời gian ghi đè ACK và nhận biết EOF kết thúc frame.</p>`
+                },
+                en: {
+                    title: "ACK & EOF (End of Frame)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>ACK Slot (1 bit) & ACK Delimiter (1 bit):</strong> The transmitting node sends a Recessive (1) ACK Slot. Any node on the bus that receives the frame with correct CRC will overwrite this with a Dominant (0) bit to signal "I received it successfully."</li>
+                            <li><strong>EOF (End Of Frame - 7 bit):</strong> A sequence of 7 consecutive Recessive (1) bits marking the complete end of the frame, with no Stuff Bits occurring in this area.</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-slate-100 rounded text-slate-700 border border-slate-200">This area runs at the <em>Nominal Bit Rate</em> to ensure all nodes (even the furthest ones) have enough time to overwrite ACK and recognize the EOF.</p>`
+                }
             }
         };
 
@@ -569,6 +815,8 @@
         function selectSegment(segmentId) {
             const data = segmentData[segmentId];
             if (!data) return;
+            
+            currentSegment = segmentId;
 
             const detailBox = document.getElementById('field-details');
             
@@ -576,13 +824,14 @@
             detailBox.style.opacity = 0;
             
             setTimeout(() => {
+                const content = data[currentLang];
                 detailBox.innerHTML = `
                     <div class="flex items-center gap-2 mb-3">
                         <i data-lucide="${data.icon}" class="${data.color} w-6 h-6"></i>
-                        <h3 class="text-lg font-bold text-slate-800">${data.title}</h3>
+                        <h3 class="text-lg font-bold text-slate-800">${content.title}</h3>
                     </div>
                     <div class="text-slate-700 leading-relaxed text-sm">
-                        ${data.desc}
+                        ${content.desc}
                     </div>
                 `;
                 detailBox.style.opacity = 1;
@@ -600,6 +849,9 @@
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-compare').addEventListener('click', () => switchTab('compare'));
             document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
+
+            // Init Language
+            applyI18n();
 
             // Init Q&A Cards
             renderQACards(qaData);
