@@ -84,20 +84,27 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
 ## 4. Bản Đồ Mã Nguồn (Source Code Architecture)
 
 * **Dòng 1 – 29**: HTML Head, CDN scripts (Tailwind, Lucide, Firebase App/Auth/Firestore Compat v10.14.1), CSS keyframes (`fadeIn`, `no-scrollbar`).
-* **Dòng 30 – 48**: Root container `#canfd-explorer-root`, Header, User Auth bar (`#auth-header-container`) và nút chuyển ngữ (`#lang-indicator`).
-* **Dòng 49 – 95**: Modal Google Sign-In & Firebase Auth (`#google-auth-modal`), nút đăng nhập thật qua Firebase popup Google và hướng dẫn xử lý tên miền ủy quyền.
-* **Dòng 96 – 108**: Thanh điều hướng 3 Tabs chính (`#btn-tab-frame`, `#btn-tab-compare`, `#btn-tab-interview`).
-* **Dòng 109 – 230**: Cụm giao diện Tab 1 (Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`).
-* **Dòng 231 – 298**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
-* **Dòng 299 – 335**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi Q&A) chứa hệ thống các nút lọc khó/dễ, lọc tags và `div#qa-container`.
+* **Dòng 30 – 53**: Root container `#canfd-explorer-root`, Header, User Auth bar (`#auth-header-container`) và nút chuyển ngữ (`#lang-indicator`).
+* **Dòng 54 – 99**: Modal Google Sign-In & Firebase Auth (`#google-auth-modal`), nút đăng nhập thật qua Firebase popup Google và hướng dẫn xử lý tên miền ủy quyền.
+* **Dòng 100 – 160**: **Smart Top Navigation & Filter Container** (`#smart-nav-container` - `sticky top-2 z-40`): Gom 3 Tab điều hướng chính (`#main-nav-tabs`) và cụm Tiêu đề Ngân hàng câu hỏi + Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`) vào chung một container trượt thông minh.
+* **Dòng 161 – 280**: Cụm giao diện Tab 1 (Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`).
+* **Dòng 281 – 305**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
+* **Dòng 306 – 335**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi Q&A) chứa `div#qa-container`, empty state và WIP banner.
 * **Dòng 336 – 460**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn và Google Sign-In.
 * **Dòng 461 – 600**: Data Layer `qaData`: Mảng Object song ngữ chứa 4 tầng kiến thức chuẩn ISO 11898-1 và bẫy kép.
 * **Dòng 601 – 625**: Cấu hình Firebase (`firebaseConfig`), khởi tạo SDK.
 * **Dòng 626 – 830**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
 * **Dòng 831 – 1320**: Controller render UI thảo luận (`renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes.
-* **Dòng 1321 – 1515**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
-* **Dòng 1516 – 1960**: Data & Handlers cho Segment Frame và So sánh thế hệ.
-* **Dòng 1961 – 1987**: Sự kiện `DOMContentLoaded`, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons.
+* **Dòng 1321 – 1575**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
+* **Dòng 1576 – 1730**: Controller Q&A Accordion & Sticky Block (`renderQACards()`, `toggleAnswer()`):
+  - **Khối Sticky Toàn Diện (`.qa-card-sticky-block`)**: Tích hợp chặt chẽ [Tiêu đề câu hỏi] + [Thanh 4 Tab] + [Nội dung câu trả lời `max-h-[220px] overflow-y-auto`] vào 1 container sticky duy nhất, luôn giữ lại liền kề sau câu hỏi khi người đọc cuộn xuống xem bình luận.
+  - **Single-Open Accordion**: Tự động thu gọn các câu hỏi khác khi mở 1 câu hỏi mới, tránh chồng chéo nội dung.
+* **Dòng 1731 – 1910**: **Smart Scroll Navigation Controller** (`getSmartNavHeight()`, `updateStickyBlockOffsets()`, `setSmartNavVisibility()`, `handleSmartScroll()`):
+  - **Tính toán chiều cao thực tế động (`getSmartNavHeight()`)**: Tự động đo đạc kích thước thực tế của `#smart-nav-container`, gán tọa độ `top: (navHeight + 12)px` khi nav hiện, triệt tiêu 100% tình trạng đè lên câu hỏi khi cuộn lên hoặc kéo xuống cuối.
+  - **Tua xuống (Scroll Down)**: Ẩn mượt mà `#smart-nav-container`, khối sticky câu hỏi tự động dời lên sát đỉnh (`top: 8px`), bình luận cuộn mượt mà phía dưới.
+  - **Tua lên 1 xíu (Scroll Up) & Cuối trang (At Bottom)**: Trượt hiện lại 6 mục điều hướng, câu hỏi tự động dời xuống vị trí liền kề ngay sau mà không bị che khuất.
+* **Dòng 1911 – 2122**: Data & Handlers cho Segment Frame và So sánh thế hệ.
+* **Dòng 2123 – 2235**: `switchTab()`, sự kiện `DOMContentLoaded`, lắng nghe cuộn `window.scroll`, resize cửa sổ, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons.
 
 ---
 

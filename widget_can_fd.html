@@ -14,10 +14,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <style>
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        .animate-fadeIn { animation: fadeIn 0.35s ease-out forwards; }
+        .animate-fadeIn { animation: fadeIn 0.25s ease-out; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -98,17 +98,61 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
-        <div class="flex flex-wrap justify-center gap-2 mb-6 bg-white p-2 rounded-xl shadow-sm border border-slate-200 w-fit mx-auto">
-            <button id="btn-tab-frame" class="px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2">
-                <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
-            </button>
-            <button id="btn-tab-compare" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
-                <i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="tab2">2. So Sánh Các Thế Hệ</span>
-            </button>
-            <button id="btn-tab-interview" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
-                <i data-lucide="help-circle" class="w-4 h-4"></i> <span data-i18n="tab3">3. Q&A Phỏng Vấn</span>
-            </button>
+        <!-- Smart Top Navigation & Filter Container (Sticky Top với Smart Hide/Show khi cuộn) -->
+        <div id="smart-nav-container" class="sticky top-2 z-40 w-full mb-6 transition-transform duration-300 ease-out">
+            <!-- 3 Tab Điều Hướng Chính -->
+            <div id="main-nav-tabs" class="flex flex-wrap justify-center gap-2 mb-3 bg-white/95 backdrop-blur-md p-2 rounded-xl shadow-md border border-slate-200 w-fit mx-auto transition-colors">
+                <button id="btn-tab-frame" class="px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2">
+                    <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
+                </button>
+                <button id="btn-tab-compare" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
+                    <i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="tab2">2. So Sánh Các Thế Hệ</span>
+                </button>
+                <button id="btn-tab-interview" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
+                    <i data-lucide="help-circle" class="w-4 h-4"></i> <span data-i18n="tab3">3. Q&A Phỏng Vấn</span>
+                </button>
+            </div>
+
+            <!-- Cụm Tiêu Đề & Bộ Lọc Tab 3 (Chỉ hiện khi ở Tab 3 Interview Q&A) -->
+            <div id="qa-filter-header-group" class="hidden bg-white/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-200/90 shadow-md">
+                <div class="flex items-center justify-between border-b pb-2 mb-2.5 border-slate-100">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="message-square-text" class="text-amber-600 w-5 h-5"></i>
+                        <span data-i18n="tab3_title">Ngân Hàng Câu Hỏi Phỏng Vấn</span>
+                    </h2>
+                    <button onclick="resetFilters()" class="text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors underline hidden" id="reset-filter-btn">
+                        <span data-i18n="clear_filter">Xóa bộ lọc</span>
+                    </button>
+                </div>
+                
+                <!-- Filters Box -->
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+                    <div class="flex flex-wrap gap-2.5 items-center">
+                        <div class="font-semibold text-xs text-slate-700 shrink-0" data-i18n="difficulty">Độ khó:</div>
+                        <div class="flex flex-wrap gap-1.5" id="difficulty-filters">
+                            <button onclick="filterByDifficulty('All')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn" data-level="All"><span data-i18n="all">Tất cả</span></button>
+                            <button onclick="filterByDifficulty('Basic')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Basic">Basic</button>
+                            <button onclick="filterByDifficulty('Intermediate')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Intermediate">Intermediate</button>
+                            <button onclick="filterByDifficulty('Advanced')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Advanced">Advanced</button>
+                            <button onclick="filterByDifficulty('Senior')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Senior">Senior</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2.5 items-center mt-2 pt-2 border-t border-slate-200/60">
+                        <div class="font-semibold text-xs text-slate-700 shrink-0" data-i18n="topic">Chủ đề:</div>
+                        <div class="flex flex-wrap gap-1.5" id="tag-filters">
+                            <button onclick="filterByTag('#Frame')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Frame">#Frame</button>
+                            <button onclick="filterByTag('#Stuffing')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Stuffing">#Stuffing</button>
+                            <button onclick="filterByTag('#BitTiming')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#BitTiming">#BitTiming</button>
+                            <button onclick="filterByTag('#Error')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Error">#Error</button>
+                            <button onclick="filterByTag('#AUTOSAR')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#AUTOSAR">#AUTOSAR</button>
+                            <button onclick="filterByTag('#Physical')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Physical">#Physical</button>
+                            <button onclick="filterByTag('#Diagnostics')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Diagnostics">#Diagnostics</button>
+                            <button onclick="filterByTag('#SecOC')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#SecOC">#SecOC</button>
+                            <button onclick="filterByTag('#Strategic')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Strategic">#Strategic</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Tab 1 Container: Frame Format -->
@@ -261,39 +305,6 @@
 
         <!-- Tab 3 Container: Interview Q&A -->
         <div id="tab-interview" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
-            <h2 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 border-slate-100 flex items-center gap-2">
-                <i data-lucide="message-square-text" class="text-amber-600"></i> <span data-i18n="tab3_title">Ngân Hàng Câu Hỏi Phỏng Vấn</span>
-            </h2>
-            
-            <!-- Filters -->
-            <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div class="flex flex-wrap gap-4 items-center">
-                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto" data-i18n="difficulty">Độ khó:</div>
-                    <div class="flex flex-wrap gap-2" id="difficulty-filters">
-                        <button onclick="filterByDifficulty('All')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn" data-level="All"><span data-i18n="all">Tất cả</span></button>
-                        <button onclick="filterByDifficulty('Basic')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Basic">Basic</button>
-                        <button onclick="filterByDifficulty('Intermediate')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Intermediate">Intermediate</button>
-                        <button onclick="filterByDifficulty('Advanced')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Advanced">Advanced</button>
-                        <button onclick="filterByDifficulty('Senior')" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Senior">Senior</button>
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-4 items-center mt-3">
-                    <div class="font-semibold text-sm text-slate-700 w-full md:w-auto" data-i18n="topic">Chủ đề:</div>
-                    <div class="flex flex-wrap gap-2" id="tag-filters">
-                        <button onclick="filterByTag('#Frame')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Frame">#Frame</button>
-                        <button onclick="filterByTag('#Stuffing')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Stuffing">#Stuffing</button>
-                        <button onclick="filterByTag('#BitTiming')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#BitTiming">#BitTiming</button>
-                        <button onclick="filterByTag('#Error')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Error">#Error</button>
-                        <button onclick="filterByTag('#AUTOSAR')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#AUTOSAR">#AUTOSAR</button>
-                        <button onclick="filterByTag('#Physical')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Physical">#Physical</button>
-                        <button onclick="filterByTag('#Diagnostics')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Diagnostics">#Diagnostics</button>
-                        <button onclick="filterByTag('#SecOC')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#SecOC">#SecOC</button>
-                        <button onclick="filterByTag('#Strategic')" class="px-2 py-1 text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Strategic">#Strategic</button>
-                        <button onclick="resetFilters()" class="px-2 py-1 text-xs font-medium rounded text-slate-500 hover:text-slate-700 transition-colors underline ml-auto hidden" id="reset-filter-btn"><span data-i18n="clear_filter">Xóa bộ lọc</span></button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Q&A List Container -->
             <div id="qa-container" class="space-y-4">
                 <!-- Data-driven Q&A cards will be injected here -->
@@ -1633,63 +1644,73 @@
                     ? 'bg-amber-50 text-amber-700 border-amber-200' 
                     : 'bg-slate-100 text-slate-500 border-slate-200';
 
+                const initialStickyTop = isSmartNavHidden ? '8px' : ((getSmartNavHeight() + 12) + 'px');
+
                 const cardHtml = `
-                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm transition-all hover:border-amber-300">
-                        <div class="p-4 cursor-pointer flex justify-between items-start gap-4 select-none" onclick="toggleAnswer('${item.id}')">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-2 flex-wrap">
-                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase border ${diffClass}">${item.difficulty}</span>
-                                    <div class="flex gap-1 flex-wrap">${tagsHtml}</div>
-                                    <span id="card-comment-badge-${item.id}" class="px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${cardCommentBadgeClass}" title="Số lượt ghi chú & thảo luận">
-                                        <i data-lucide="message-square" class="w-3 h-3 text-amber-600"></i>
-                                        <span>${commentCount}</span>
-                                    </span>
-                                </div>
-                                <h3 class="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors flex items-start gap-2">
-                                    <span class="text-amber-600 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
-                                    <span>${content.question}</span>
-                                </h3>
-                            </div>
-                            <div class="p-2 rounded-lg ${iconClasses}" id="icon-${item.id}">
-                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" ${iconStyle}></i>
-                            </div>
-                        </div>
-                        
-                        <div id="answer-${item.id}" class="${answerHidden} border-t border-slate-100 bg-slate-50">
-                            <!-- Answer Tabs Nav: Đúng 4 Tab nội dung cốt lõi -->
-                            <div class="flex border-b border-slate-200 bg-slate-100 px-4 pt-3 gap-2 overflow-x-auto no-scrollbar">
-                                <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
-                                    ${labels.qa_theory}
-                                </button>
-                                <button onclick="switchQATab('${item.id}', 'modeling')" id="btn-${item.id}-modeling" class="${modelingBtn}">
-                                    ${labels.qa_modeling}
-                                </button>
-                                <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="${practiceBtn}">
-                                    ${labels.qa_practice}
-                                </button>
-                                <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="${trapBtn}">
-                                    ${labels.qa_trap}
-                                </button>
-                            </div>
+                    <div id="qa-card-${item.id}" class="border border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-amber-300">
+                        <!-- KHỐI STICKY TOÀN DIỆN: GIỮ LẠI [CÂU HỎI + 4 TABS + CÂU TRẢ LỜI] LIỀN KỀ NHAU KHI CUỘN -->
+                        <div id="qa-sticky-block-${item.id}" class="qa-card-sticky-block sticky z-20 bg-white rounded-xl transition-all duration-300 ${state.expanded ? 'rounded-t-xl border-b border-slate-200 shadow-xs' : ''}" style="top: ${initialStickyTop};">
                             
-                            <!-- Answer Content (Hiển thị tab tương ứng) -->
-                            <div class="p-5 text-sm text-slate-700 leading-relaxed bg-white">
-                                <div id="content-${item.id}-theory" class="${theoryContent}">
-                                    ${content.answer.theory}
+                            <!-- Tiêu đề câu hỏi -->
+                            <div class="qa-card-header p-4 cursor-pointer flex justify-between items-start gap-4 select-none ${state.expanded ? 'border-b border-slate-100' : ''}" onclick="toggleAnswer('${item.id}')">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase border ${diffClass}">${item.difficulty}</span>
+                                        <div class="flex gap-1 flex-wrap">${tagsHtml}</div>
+                                        <span id="card-comment-badge-${item.id}" class="px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${cardCommentBadgeClass}" title="Số lượt ghi chú & thảo luận">
+                                            <i data-lucide="message-square" class="w-3 h-3 text-amber-600"></i>
+                                            <span>${commentCount}</span>
+                                        </span>
+                                    </div>
+                                    <h3 class="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors flex items-start gap-2">
+                                        <span class="text-amber-600 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
+                                        <span>${content.question}</span>
+                                    </h3>
                                 </div>
-                                <div id="content-${item.id}-modeling" class="${modelingContent}">
-                                    ${content.answer.modeling || ''}
-                                </div>
-                                <div id="content-${item.id}-practice" class="${practiceContent}">
-                                    ${content.answer.practice}
-                                </div>
-                                <div id="content-${item.id}-trap" class="${trapContent}">
-                                    ${content.answer.trap}
+                                <div class="p-2 rounded-lg ${iconClasses}" id="icon-${item.id}">
+                                    <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" ${iconStyle}></i>
                                 </div>
                             </div>
 
-                            <!-- MỤC THẢO LUẬN & GHI CHÚ NẰM TRỰC TIẾP DƯỚI CÂU TRẢ LỜI CỦA CẢ 4 TAB -->
-                            <div id="discussion-wrapper-${item.id}" class="border-t-2 border-slate-200/90 bg-slate-50/90 p-4 sm:p-5 rounded-b-xl">
+                            <!-- 4 Tab Bar & Answer Content: GIỮ LẠI LIỀN KỀ NGAY SAU CÂU HỎI KHI TUA XUỐNG -->
+                            <div id="qa-expanded-body-${item.id}" class="${answerHidden}">
+                                <!-- Answer Tabs Nav: Đúng 4 Tab nội dung cốt lõi -->
+                                <div class="flex border-b border-slate-200 bg-slate-100/90 px-4 pt-2.5 gap-2 overflow-x-auto no-scrollbar">
+                                    <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
+                                        ${labels.qa_theory}
+                                    </button>
+                                    <button onclick="switchQATab('${item.id}', 'modeling')" id="btn-${item.id}-modeling" class="${modelingBtn}">
+                                        ${labels.qa_modeling}
+                                    </button>
+                                    <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="${practiceBtn}">
+                                        ${labels.qa_practice}
+                                    </button>
+                                    <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="${trapBtn}">
+                                        ${labels.qa_trap}
+                                    </button>
+                                </div>
+                                
+                                <!-- Answer Content Box: Có max-height + overflow-y-auto để không chiếm quá nhiều màn hình, cuộn mượt mà -->
+                                <div class="p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed bg-white max-h-[220px] overflow-y-auto">
+                                    <div id="content-${item.id}-theory" class="${theoryContent}">
+                                        ${content.answer.theory}
+                                    </div>
+                                    <div id="content-${item.id}-modeling" class="${modelingContent}">
+                                        ${content.answer.modeling || ''}
+                                    </div>
+                                    <div id="content-${item.id}-practice" class="${practiceContent}">
+                                        ${content.answer.practice}
+                                    </div>
+                                    <div id="content-${item.id}-trap" class="${trapContent}">
+                                        ${content.answer.trap}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KHỐI THẢO LUẬN & GHI CHÚ: NẰM LIỀN KỀ BÊN DƯỚI KHỐI STICKY, CUỘN TỰ DO -->
+                        <div id="answer-discussion-${item.id}" class="${answerHidden}">
+                            <div id="discussion-wrapper-${item.id}" class="bg-slate-50/90 p-4 sm:p-5 rounded-b-xl border-t border-slate-200">
                                 <div id="content-${item.id}-comments"></div>
                             </div>
                         </div>
@@ -1708,22 +1729,186 @@
             }
         }
 
+        // --- BỘ ĐIỀU KHIỂN SMART STICKY NAV & CÂU HỎI LIỀN KỀ (100% KHÔNG ĐÈ NHAU) ---
+        let lastScrollY = window.pageYOffset || document.documentElement.scrollTop;
+        let isSmartNavHidden = false;
+        let isScrollTicking = false;
+
+        function getSmartNavHeight() {
+            const navContainer = document.getElementById('smart-nav-container');
+            if (!navContainer) return 0;
+            return navContainer.offsetHeight || 0;
+        }
+
+        function updateStickyBlockOffsets() {
+            const navHeight = getSmartNavHeight();
+            const targetTop = isSmartNavHidden ? '8px' : ((navHeight + 12) + 'px');
+            document.querySelectorAll('.qa-card-sticky-block').forEach(b => {
+                b.style.top = targetTop;
+            });
+        }
+
+        function setSmartNavVisibility(visible) {
+            const navContainer = document.getElementById('smart-nav-container');
+
+            if (visible) {
+                isSmartNavHidden = false;
+                if (navContainer) {
+                    navContainer.classList.remove('-translate-y-[130%]', 'opacity-0', 'pointer-events-none');
+                    navContainer.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+                }
+            } else {
+                isSmartNavHidden = true;
+                if (navContainer) {
+                    navContainer.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+                    navContainer.classList.add('-translate-y-[130%]', 'opacity-0', 'pointer-events-none');
+                }
+            }
+            updateStickyBlockOffsets();
+        }
+
+        function handleSmartScroll() {
+            const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // 1. Nếu ở sát đỉnh trang (< 80px) -> Luôn hiện đầy đủ 6 mục điều hướng
+            if (currentScrollY <= 80) {
+                if (isSmartNavHidden) setSmartNavVisibility(true);
+                lastScrollY = currentScrollY;
+                return;
+            }
+
+            // 2. Nếu ở phần cuối trang -> Luôn hiện đầy đủ 6 mục điều hướng (liền kề trên, không đè câu hỏi)
+            const isAtBottom = (windowHeight + currentScrollY) >= (documentHeight - 45);
+            if (isAtBottom) {
+                if (isSmartNavHidden) setSmartNavVisibility(true);
+                lastScrollY = currentScrollY;
+                return;
+            }
+
+            // 3. Tính độ dịch chuyển cuộn
+            const deltaY = currentScrollY - lastScrollY;
+            
+            // Ngưỡng tối thiểu (8px) để triệt tiêu rung khi dừng cuộn
+            if (Math.abs(deltaY) < 8) {
+                return;
+            }
+
+            if (deltaY > 0) {
+                // Cuộn XUỐNG: Ẩn 6 mục điều hướng, chỉ giữ lại câu hỏi + 4 tabs + câu trả lời và comment
+                if (!isSmartNavHidden) {
+                    setSmartNavVisibility(false);
+                }
+            } else {
+                // Cuộn LÊN 1 xíu: Hiện lại ngay 6 mục điều hướng
+                if (isSmartNavHidden) {
+                    setSmartNavVisibility(true);
+                }
+            }
+
+            lastScrollY = currentScrollY;
+        }
+
         function toggleAnswer(id) {
             if (!qaState[id]) qaState[id] = { expanded: false, tab: 'theory' };
-            const answerDiv = document.getElementById(`answer-${id}`);
+            const expandedBody = document.getElementById(`qa-expanded-body-${id}`);
+            const discussionSection = document.getElementById(`answer-discussion-${id}`);
             const iconDiv = document.getElementById(`icon-${id}`);
-            const iconElement = iconDiv.querySelector('i') || iconDiv.querySelector('svg');
+            const cardEl = document.getElementById(`qa-card-${id}`);
+            const stickyBlock = document.getElementById(`qa-sticky-block-${id}`);
+            const willExpand = expandedBody ? expandedBody.classList.contains('hidden') : false;
             
-            if (answerDiv.classList.contains('hidden')) {
-                answerDiv.classList.remove('hidden');
-                iconDiv.className = 'p-2 rounded-lg text-amber-600 bg-amber-100';
+            if (willExpand) {
+                // Ý 3: Tự động un-expand tất cả các câu hỏi khác
+                qaData.forEach(item => {
+                    if (item.id !== id) {
+                        const otherExp = document.getElementById(`qa-expanded-body-${item.id}`);
+                        const otherDisc = document.getElementById(`answer-discussion-${item.id}`);
+                        const otherIcon = document.getElementById(`icon-${item.id}`);
+                        const otherSticky = document.getElementById(`qa-sticky-block-${item.id}`);
+                        const otherHeader = otherSticky ? otherSticky.querySelector('.qa-card-header') : null;
+
+                        if (otherExp && !otherExp.classList.contains('hidden')) {
+                            otherExp.classList.add('hidden');
+                        }
+                        if (otherDisc && !otherDisc.classList.contains('hidden')) {
+                            otherDisc.classList.add('hidden');
+                        }
+                        if (otherIcon) {
+                            otherIcon.className = 'p-2 rounded-lg text-slate-400 bg-slate-50';
+                            const otherIconEl = otherIcon.querySelector('i') || otherIcon.querySelector('svg');
+                            if (otherIconEl) otherIconEl.style.transform = 'rotate(0deg)';
+                        }
+                        if (otherSticky) {
+                            otherSticky.classList.remove('rounded-t-xl', 'border-b', 'border-slate-200', 'shadow-xs');
+                            otherSticky.classList.add('rounded-xl');
+                        }
+                        if (otherHeader) {
+                            otherHeader.classList.remove('border-b', 'border-slate-100');
+                        }
+                        if (!qaState[item.id]) qaState[item.id] = { expanded: false, tab: 'theory' };
+                        qaState[item.id].expanded = false;
+                    }
+                });
+
+                // Mở câu hỏi hiện tại
+                if (expandedBody) expandedBody.classList.remove('hidden');
+                if (discussionSection) discussionSection.classList.remove('hidden');
+                if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-amber-600 bg-amber-100';
+                const iconElement = iconDiv ? (iconDiv.querySelector('i') || iconDiv.querySelector('svg')) : null;
                 if (iconElement) iconElement.style.transform = 'rotate(180deg)';
+                
+                if (stickyBlock) {
+                    stickyBlock.classList.remove('rounded-xl');
+                    stickyBlock.classList.add('rounded-t-xl', 'border-b', 'border-slate-200', 'shadow-xs');
+                    const headerEl = stickyBlock.querySelector('.qa-card-header');
+                    if (headerEl) headerEl.classList.add('border-b', 'border-slate-100');
+                }
                 qaState[id].expanded = true;
+
+                // Neo mượt mà vị trí câu hỏi đang mở ngay tầm mắt người đọc
+                if (cardEl) {
+                    requestAnimationFrame(() => {
+                        const navOffset = isSmartNavHidden ? 12 : (getSmartNavHeight() + 16);
+                        const cardTopInDoc = cardEl.getBoundingClientRect().top + window.pageYOffset;
+                        const targetScrollY = Math.max(0, cardTopInDoc - navOffset);
+                        
+                        window.scrollTo({
+                            top: targetScrollY,
+                            behavior: 'smooth'
+                        });
+                    });
+                }
             } else {
-                answerDiv.classList.add('hidden');
-                iconDiv.className = 'p-2 rounded-lg text-slate-400 bg-slate-50';
+                // Thu gọn câu hỏi hiện tại
+                if (expandedBody) expandedBody.classList.add('hidden');
+                if (discussionSection) discussionSection.classList.add('hidden');
+                if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-slate-400 bg-slate-50';
+                const iconElement = iconDiv ? (iconDiv.querySelector('i') || iconDiv.querySelector('svg')) : null;
                 if (iconElement) iconElement.style.transform = 'rotate(0deg)';
+                
+                if (stickyBlock) {
+                    stickyBlock.classList.remove('rounded-t-xl', 'border-b', 'border-slate-200', 'shadow-xs');
+                    stickyBlock.classList.add('rounded-xl');
+                    const headerEl = stickyBlock.querySelector('.qa-card-header');
+                    if (headerEl) headerEl.classList.remove('border-b', 'border-slate-100');
+                }
                 qaState[id].expanded = false;
+
+                // Nếu người dùng đang cuộn sâu bên dưới câu trả lời/comment khi bấm đóng,
+                // neo nhẹ góc nhìn về lại thẻ câu hỏi vừa đóng để không bị hẫng
+                if (cardEl) {
+                    const rect = cardEl.getBoundingClientRect();
+                    if (rect.top < 65) {
+                        const navOffset = isSmartNavHidden ? 12 : (getSmartNavHeight() + 16);
+                        const cardTopInDoc = cardEl.getBoundingClientRect().top + window.pageYOffset;
+                        window.scrollTo({
+                            top: Math.max(0, cardTopInDoc - navOffset),
+                            behavior: 'smooth'
+                        });
+                    }
+                }
             }
         }
 
@@ -1773,6 +1958,7 @@
             
             renderQACards(filtered);
             updateFilterUI();
+            updateStickyBlockOffsets();
         }
 
         function filterByDifficulty(level) {
@@ -1951,6 +2137,19 @@
             document.getElementById(`tab-${targetId}`).classList.remove('hidden');
             document.getElementById(`btn-tab-${targetId}`).className = "px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2";
 
+            // Hiển thị hoặc ẩn bộ lọc Tab 3 bên trong smart-nav-container
+            const filterGroup = document.getElementById('qa-filter-header-group');
+            if (filterGroup) {
+                if (targetId === 'interview') {
+                    filterGroup.classList.remove('hidden');
+                } else {
+                    filterGroup.classList.add('hidden');
+                }
+            }
+
+            // Luôn hiện navigation khi chuyển đổi tab và đồng bộ offset sticky
+            setSmartNavVisibility(true);
+
             // Safe icon reload
             try {
                 if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1996,6 +2195,22 @@
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-compare').addEventListener('click', () => switchTab('compare'));
             document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
+
+            // Gắn sự kiện Smart Scroll (Ẩn khi cuộn xuống, hiện khi cuộn lên hoặc ở đáy trang)
+            window.addEventListener('scroll', () => {
+                if (!isScrollTicking) {
+                    requestAnimationFrame(() => {
+                        handleSmartScroll();
+                        isScrollTicking = false;
+                    });
+                    isScrollTicking = true;
+                }
+            }, { passive: true });
+
+            // Cập nhật vị trí sticky khi resize cửa sổ
+            window.addEventListener('resize', () => {
+                updateStickyBlockOffsets();
+            });
 
             // Init Language
             applyI18n();
