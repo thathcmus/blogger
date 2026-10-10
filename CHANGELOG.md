@@ -7,10 +7,26 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
-### Changed
-- refactor: Nâng cấp toàn diện nội dung Item [2] lên mức độ Chuyên gia (Expert Level) và cấu trúc lại toàn bộ thành chuẩn Song ngữ (Bilingual VN/EN) trong Data Layer.
-
 ### Added
+- **Tích hợp Firebase Live Auth & Cloud Firestore Database (`widget_can_fd.html`)**:
+  - Tích hợp bộ thư viện Firebase Compat SDKs (v10.14.1: App, Auth, Firestore) bảo toàn kiến trúc Single-File Zero-Build khi nhúng Blogger hoặc host trên GitHub Pages.
+  - Kết nối Firebase Project `tech-blogger-widgets` theo cấu hình chính thức từ tác giả.
+  - Cài đặt tính năng **Google Sign-In Popup** (`firebase.auth().signInWithPopup()`): Độc giả và tác giả đăng nhập trực tiếp bằng tài khoản Google thật để tham gia thảo luận, trả lời và like.
+  - Tự động xác thực tài khoản tác giả `thathcmus@gmail.com` &rarr; cấp quyền **⭐ Tác Giả Blog**, cho phép soạn thảo note tác giả, bật cờ Ghim (`📌 Ghim Note`) và xóa bình luận.
+  - Tích hợp **Cloud Firestore Realtime Sync** (`canfd_comments` collection): Lắng nghe thời gian thực qua `onSnapshot`, lưu trữ độc lập trên cloud, kết hợp cache offline `localStorage`.
+  - **Chế độ Cơ sở dữ liệu Sạch (Clean State)**: Xóa sạch toàn bộ dữ liệu mẫu giả định (`SEED_COMMENTS = []`), chỉ hiển thị và đồng bộ các thảo luận thật do chính bạn và độc giả đăng nhập Google gửi lên.
+  - Xóa sạch toàn bộ các tài khoản mock/demo và dữ liệu seed thử nghiệm cũ, vận hành 100% trên nền tảng Firebase Auth và Cloud Firestore.
+- **Tái cấu trúc Khung Thảo Luận & Ghi Chú Kỹ Thuật (`widget_can_fd.html`)**:
+  - Loại bỏ sub-tab thứ 5 "Thảo luận" riêng biệt; thay vào đó, đặt **Khung Thảo Luận & Ghi Chú nằm cố định trực tiếp bên dưới câu trả lời của CẢ 4 tab** (`📖 Lý Thuyết`, `🖥️ SystemC/C++ Modeling`, `🔧 ECU/AUTOSAR`, `⚠️ Interview Trap`).
+  - Đảm bảo người đọc và tác giả khi xem bất kỳ phần nào đều có thể xem ngay thảo luận hoặc để lại concern/note kỹ thuật tương ứng mà không bị che khuất câu trả lời.
+  - Tích hợp **Context Scope Selector (Phần liên quan)**: Dropdown tự động cập nhật khớp với tab đang xem ở trên khi người dùng chuyển đổi qua lại giữa 4 tab.
+  - Tích hợp **Thanh Filter Pills**: Cho phép lọc nhanh bình luận theo từng mục (`Tất cả`, `📖 Lý Thuyết`, `🖥️ C++ Modeling`, `🔧 ECU / AUTOSAR`, `⚠️ Bẫy Phỏng Vấn`).
+  - Gắn nhãn **Scope Badge** chuyên biệt trên từng thẻ bình luận và trong banner **Ghim Note Tác Giả (Pinned Note)**.
+- **CAN FD Discussion & Pure Firebase Live Google Auth (`widget_can_fd.html`)**:
+  - Tích hợp chuẩn **Firebase Live Google Sign-In & Cloud Firestore** (`tech-blogger-widgets`) cho hệ thống thảo luận thời gian thực; loại bỏ hoàn toàn các tài khoản mock/demo thử nghiệm cũ.
+  - Hỗ trợ **Threaded Replies (Trả lời lồng nhau)**: Cho phép độc giả và tác giả trả lời trực tiếp comment của người khác với giao diện thụt lề chuẩn và mention tag `@TênNgườiNhận`.
+  - Hỗ trợ **Author Mode & Pinned Notes**: Tác giả có huy hiệu vương miện `⭐ Tác Giả Blog`, có thể viết ghi chú đính chính/kinh nghiệm và Ghim (`📌 Ghim Note`) lên đầu danh sách câu hỏi.
+  - Tương tác like & xóa bình luận chính chủ, lưu trữ thời gian thực trên Cloud Firestore và đồng bộ cache offline.
 - feat: Bổ sung "Giao Thức Đồng Bộ Tài Liệu Liên Hoàn" (Mandatory Doc-Sync Protocol & DoD Checklist) vào hệ thống quy chuẩn (.agents/rules/blogger-embed-rules.md, AGENTS.md, SKILL.md) nhằm triệt tiêu hoàn toàn Documentation Drift giữa các phiên chat.
 - feat: Chuẩn hóa quy tắc "Bẫy Kép" (Double-Angle Interview Trap) gồm 🚗 Automotive/Protocol Trap & 💻 C++/Modeling Follow-up Trap vào toàn bộ hệ thống luật (.agents/rules/blogger-embed-rules.md, AGENTS.md, SKILL.md, MAINTENANCE_PLAN.md và widget_can_fd.html).
 - feat: Bổ sung tầng nội dung "🖥️ SystemC/C++ Modeling" vào cấu trúc Q&A Accordion (gồm UI Tab và Data Layer cho Item 2 và Item 3, đồng bộ vào MAINTENANCE_PLAN.md).

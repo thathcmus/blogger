@@ -8,6 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase Compat SDKs (v10.14.1) for zero-build standalone Blogger embed -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
@@ -25,7 +29,11 @@
         
         <!-- Header -->
         <div class="mb-8 text-center relative">
-            <div class="absolute right-0 top-0">
+            <div class="flex flex-wrap items-center justify-end gap-2 md:absolute md:right-0 md:top-0 mb-3 md:mb-0">
+                <!-- User Auth Container (Google Sign-In) -->
+                <div id="auth-header-container" class="flex items-center gap-2"></div>
+
+                <!-- Language indicator -->
                 <button onclick="toggleLang()" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-sm font-semibold transition-colors border border-slate-300 shadow-sm">
                     <i data-lucide="languages" class="w-4 h-4 text-blue-600"></i>
                     <span id="lang-indicator">EN</span>
@@ -36,6 +44,53 @@
                 <span data-i18n="main_title">CAN FD Protocol Explorer</span>
             </h1>
             <p class="text-slate-600 text-sm" data-i18n="main_desc">Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)</p>
+        </div>
+
+        <!-- Google Sign-In & Firebase Auth Modal -->
+        <!-- Google Sign-In & Firebase Auth Modal -->
+        <div id="google-auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fadeIn">
+            <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden transform transition-all">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-100 text-center relative bg-gradient-to-b from-slate-50 to-white">
+                    <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <!-- Google Logo SVG -->
+                    <div class="w-12 h-12 mx-auto mb-3 bg-white rounded-full shadow-md flex items-center justify-center border border-slate-100">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800" data-i18n="modal_auth_title">Đăng Nhập Với Google</h3>
+                    <p class="text-xs text-slate-500 mt-1" data-i18n="modal_auth_desc">Đăng nhập tài khoản Google để tham gia thảo luận, trả lời và ghim ghi chú kỹ thuật</p>
+                    
+                    <!-- Firebase Cloud Status Badge -->
+                    <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Cloud Database: tech-blogger-widgets</span>
+                    </div>
+
+                    <!-- Environment Notice (if file:/// blocks popup) -->
+                    <div id="auth-environment-notice" class="hidden text-xs bg-amber-50 border border-amber-200 text-amber-900 p-2.5 rounded-lg text-left mt-3"></div>
+                </div>
+
+                <!-- Google Sign-In Action -->
+                <div class="p-6">
+                    <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 p-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-800 font-semibold shadow-sm hover:shadow transition-all group">
+                        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span class="text-sm font-bold text-slate-800" data-i18n="btn_continue_google">Tiếp tục với Google</span>
+                    </button>
+                    <p class="text-[11px] text-slate-400 text-center mt-4">Xác thực an toàn qua Google Firebase Auth. Không lưu mật khẩu.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Navigation Tabs -->
@@ -287,11 +342,49 @@
                 clear_filter: "Xóa bộ lọc",
                 qa_empty: "Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.",
                 qa_wip_title: "Chuyên mục đang được biên soạn",
-                qa_wip_desc: "Nội dung phỏng vấn chuyên sâu cho CAN FD đang được cập nhật dần theo từng Phase. Các câu hỏi sẽ sớm xuất hiện tại đây.",
                 qa_theory: "📖 Lý Thuyết",
                 qa_modeling: "🖥️ SystemC/C++ Modeling",
                 qa_practice: "🔧 ECU/AUTOSAR",
-                qa_trap: "⚠️ Interview Trap"
+                qa_trap: "⚠️ Bẫy Phỏng Vấn (Trap)",
+                discussion_section_title: "Thảo Luận & Ghi Chú Kỹ Thuật",
+                discussion_section_subtitle: "Để lại ghi chú, thảo luận hoặc concern cho 4 phần: Lý Thuyết / C++ Modeling / ECU & AUTOSAR / Bẫy Phỏng Vấn",
+                target_section_label: "Phần liên quan:",
+                scope_theory: "📖 Lý Thuyết",
+                scope_modeling: "🖥️ C++ Modeling",
+                scope_practice: "🔧 ECU / AUTOSAR",
+                scope_trap: "⚠️ Bẫy Phỏng Vấn",
+                scope_all: "📌 Chung cho câu hỏi",
+                filter_by: "Lọc:",
+                filter_all: "Tất cả",
+                filter_theory: "📖 Lý Thuyết",
+                filter_modeling: "🖥️ C++ Modeling",
+                filter_practice: "🔧 ECU / AUTOSAR",
+                filter_trap: "⚠️ Bẫy Phỏng Vấn",
+                modal_auth_title: "Đăng Nhập Với Google",
+                modal_auth_desc: "Đăng nhập tài khoản Google để tham gia thảo luận, trả lời và ghim ghi chú kỹ thuật",
+                btn_continue_google: "Tiếp tục với Google",
+                sign_in_google: "Đăng nhập Google",
+                sign_out: "Đăng xuất",
+                logged_in_as: "Kỹ sư",
+                comment_placeholder: "Chia sẻ câu hỏi hoặc góc nhìn phản biện...",
+                btn_post_comment: "Gửi thảo luận",
+                login_to_discuss: "Đăng nhập Google để gửi bình luận cho câu hỏi này",
+                btn_login_now: "Đăng nhập ngay",
+                no_comments_yet: "Chưa có thảo luận nào cho câu hỏi này. Hãy là người đầu tiên đặt câu hỏi!",
+                delete_confirm: "Bạn có chắc muốn xóa bình luận này không?",
+                just_now: "Vừa xong",
+                time_ago_hours: "giờ trước",
+                like: "Thích",
+                reply: "Trả lời",
+                replying_to: "Đang trả lời",
+                cancel: "Hủy",
+                send_reply: "Gửi phản hồi",
+                author_badge: "Tác Giả",
+                pin_note: "Ghim Note",
+                unpin_note: "Bỏ ghim",
+                pinned_badge: "📌 Note của Tác Giả",
+                pin_note_checkbox: "Ghim làm Note quan trọng",
+                author_placeholder: "Chia sẻ note kinh nghiệm, giải đáp hoặc đính chính cho câu hỏi này..."
             },
             en: {
                 main_title: "CAN FD Protocol Explorer",
@@ -320,7 +413,46 @@
                 qa_theory: "📖 Theory",
                 qa_modeling: "🖥️ SystemC/C++ Modeling",
                 qa_practice: "🔧 ECU/AUTOSAR",
-                qa_trap: "⚠️ Interview Trap"
+                qa_trap: "⚠️ Interview Trap",
+                discussion_section_title: "Discussions & Technical Notes",
+                discussion_section_subtitle: "Leave notes, ask questions or add concerns for: Theory / C++ Modeling / ECU & AUTOSAR / Interview Traps",
+                target_section_label: "Target Section:",
+                scope_theory: "📖 Theory",
+                scope_modeling: "🖥️ C++ Modeling",
+                scope_practice: "🔧 ECU / AUTOSAR",
+                scope_trap: "⚠️ Interview Trap",
+                scope_all: "📌 General Question Note",
+                filter_by: "Filter:",
+                filter_all: "All",
+                filter_theory: "📖 Theory",
+                filter_modeling: "🖥️ C++ Modeling",
+                filter_practice: "🔧 ECU / AUTOSAR",
+                filter_trap: "⚠️ Interview Trap",
+                modal_auth_title: "Sign in with Google",
+                modal_auth_desc: "Sign in with your Google account to participate in discussions, replies and pin technical notes",
+                btn_continue_google: "Continue with Google",
+                sign_in_google: "Sign in with Google",
+                sign_out: "Sign out",
+                logged_in_as: "Engineer",
+                comment_placeholder: "Share your questions or counter-arguments...",
+                btn_post_comment: "Post Discussion",
+                login_to_discuss: "Sign in with Google to post comments on this question",
+                btn_login_now: "Sign In Now",
+                no_comments_yet: "No discussions yet for this question. Be the first to start the thread!",
+                delete_confirm: "Are you sure you want to delete this comment?",
+                just_now: "Just now",
+                time_ago_hours: "h ago",
+                like: "Like",
+                reply: "Reply",
+                replying_to: "Replying to",
+                cancel: "Cancel",
+                send_reply: "Send Reply",
+                author_badge: "Author",
+                pin_note: "Pin Note",
+                unpin_note: "Unpin",
+                pinned_badge: "📌 Author's Note",
+                pin_note_checkbox: "Pin as Author Note",
+                author_placeholder: "Share author insights, corrections or tips for this question..."
             }
         };
 
@@ -448,6 +580,925 @@
         let currentSegment = null;
         const qaState = {};
 
+        // ==========================================
+        // FIREBASE AUTH & CLOUD FIRESTORE CONTROLLER
+        // ==========================================
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVA-0_rwfddgpQPZAGXH9bhy9t6YK_Jno",
+            authDomain: "tech-blogger-widgets.firebaseapp.com",
+            projectId: "tech-blogger-widgets",
+            storageBucket: "tech-blogger-widgets.firebasestorage.app",
+            messagingSenderId: "807910437975",
+            appId: "1:807910437975:web:2ecedb68e8a9967817df12"
+        };
+
+        const AUTHOR_EMAIL = "thathcmus@gmail.com";
+
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        let firestoreDb = null;
+        let isFirebaseReady = false;
+        let firestoreCommentsCache = [];
+        let isFirestoreConnected = false;
+        let activeUser = null;
+
+        // An toàn khởi tạo Firebase Compat SDK
+        try {
+            if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                firebaseAuth = firebase.auth();
+                firestoreDb = firebase.firestore();
+                isFirebaseReady = true;
+                console.log("Firebase initialized:", firebaseConfig.projectId);
+            }
+        } catch (e) {
+            console.warn("Firebase Init Warning:", e);
+        }
+
+        // Tự động dọn dẹp triệt để bất kỳ dữ liệu test/mock/seed cũ từ các phiên thử nghiệm trước
+        // Tự động dọn dẹp triệt để bất kỳ session mock/test cũ nào từ các phiên thử nghiệm trước
+        try {
+            const oldUserRaw = localStorage.getItem('canfd_active_user');
+            if (oldUserRaw) {
+                const u = JSON.parse(oldUserRaw);
+                if (!u || !u.isFirebase) {
+                    localStorage.removeItem('canfd_active_user');
+                }
+            }
+            localStorage.removeItem('canfd_mock_comments');
+        } catch(e) {}
+
+        function getActiveUser() {
+            if (activeUser) {
+                if (!activeUser.isFirebase) {
+                    activeUser = null;
+                    try { localStorage.removeItem('canfd_active_user'); } catch(e){}
+                    return null;
+                }
+                return activeUser;
+            }
+            try {
+                const stored = localStorage.getItem('canfd_active_user');
+                if (stored && stored !== 'null') {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && parsed.isFirebase) {
+                        activeUser = parsed;
+                        return activeUser;
+                    } else {
+                        localStorage.removeItem('canfd_active_user');
+                    }
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function isUserAuthor(user) {
+            if (!user) return false;
+            return user.role === 'Author' || user.email === AUTHOR_EMAIL;
+        }
+
+        function setActiveUser(user) {
+            activeUser = user;
+            try {
+                if (user && user.isFirebase) {
+                    localStorage.setItem('canfd_active_user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('canfd_active_user');
+                }
+            } catch (e) {
+                console.warn("Storage error:", e);
+            }
+            renderAuthHeader();
+            refreshAllCommentsUI();
+        }
+
+        function initFirebaseAuthListener() {
+            if (!isFirebaseReady || !firebaseAuth) return;
+            try {
+                firebaseAuth.onAuthStateChanged((user) => {
+                    if (user) {
+                        const isAuthor = (user.email === AUTHOR_EMAIL);
+                        const userProfile = {
+                            id: user.uid,
+                            name: user.displayName || (user.email ? user.email.split('@')[0] : 'Engineer'),
+                            email: user.email || '',
+                            avatar: user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60',
+                            role: isAuthor ? 'Author' : 'Engineer',
+                            isFirebase: true
+                        };
+                        setActiveUser(userProfile);
+                    } else {
+                        setActiveUser(null);
+                    }
+                });
+            } catch (e) {
+                console.warn("Auth Listener Error:", e);
+            }
+        }
+
+        async function signInWithGoogle() {
+            if (!isFirebaseReady || !firebaseAuth) {
+                showModalNotice("Firebase SDK đang khởi tạo hoặc chưa sẵn sàng. Vui lòng thử lại sau giây lát.");
+                return;
+            }
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                await firebaseAuth.signInWithPopup(provider);
+                closeAuthModal();
+            } catch (err) {
+                console.warn("Google Sign-In Popup Warning:", err);
+                if (location.protocol === 'file:' || err.code === 'auth/operation-not-supported-in-this-environment' || err.code === 'auth/unauthorized-domain') {
+                    showModalNotice("⚠️ Trình duyệt chặn Google OAuth Popup trên giao thức <code>file:///</code>. Khi bạn nhúng widget lên Blogger / GitHub Pages, popup Google Sign-In sẽ hoạt động bình thường!");
+                } else if (err.code !== 'auth/popup-closed-by-user') {
+                    showModalNotice("Thông báo: " + (err.message || err.code));
+                }
+            }
+        }
+
+        async function logoutUser() {
+            if (isFirebaseReady && firebaseAuth && firebaseAuth.currentUser) {
+                try {
+                    await firebaseAuth.signOut();
+                } catch (e) {
+                    console.warn("Sign out error:", e);
+                }
+            }
+            setActiveUser(null);
+        }
+
+        function showModalNotice(msg) {
+            const el = document.getElementById('auth-environment-notice');
+            if (el) {
+                el.innerHTML = msg;
+                el.classList.remove('hidden');
+            }
+        }
+
+        function openAuthModal() {
+            const modal = document.getElementById('google-auth-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+            }
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('google-auth-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function initFirestoreSync() {
+            if (!isFirebaseReady || !firestoreDb) {
+                console.log("Firestore using local cache mode.");
+                return;
+            }
+            try {
+                firestoreDb.collection('canfd_comments')
+                    .onSnapshot((snapshot) => {
+                        if (snapshot.empty) {
+                            firestoreCommentsCache = [];
+                            isFirestoreConnected = true;
+                            try {
+                                localStorage.setItem('canfd_comments_cache', JSON.stringify([]));
+                            } catch(e){}
+                            refreshAllCommentsUI();
+                            updateAllBadgeCounts();
+                            return;
+                        }
+                        const items = [];
+                        snapshot.forEach(doc => {
+                            if (doc.id.startsWith('cmt_seed_')) return;
+                            const data = doc.data();
+                            items.push({
+                                id: doc.id,
+                                ...data,
+                                createdAt: typeof data.createdAt === 'number' ? data.createdAt : (data.createdAt && data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now())
+                            });
+                        });
+                        firestoreCommentsCache = items;
+                        isFirestoreConnected = true;
+                        try {
+                            localStorage.setItem('canfd_comments_cache', JSON.stringify(items));
+                        } catch(e){}
+
+                        refreshAllCommentsUI();
+                        updateAllBadgeCounts();
+                    }, (error) => {
+                        console.warn("Firestore snapshot listener error (fallback to local):", error);
+                    });
+            } catch (e) {
+                console.warn("Firestore listener setup error:", e);
+            }
+        }
+
+        function getAllComments() {
+            if (isFirestoreConnected) {
+                return firestoreCommentsCache;
+            }
+            try {
+                const stored = localStorage.getItem('canfd_comments_cache');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        return parsed.filter(c => c && c.id && !c.id.startsWith('cmt_seed_'));
+                    }
+                }
+            } catch (e) {}
+            return [];
+        }
+
+        function saveAllCommentsLocally(list) {
+            try {
+                localStorage.setItem('canfd_comments_cache', JSON.stringify(list));
+            } catch (e) {
+                console.warn("Storage error:", e);
+            }
+        }
+
+        function getCommentsForQuestion(questionId) {
+            const list = getAllComments();
+            return list.filter(c => c.questionId === questionId);
+        }
+
+        function refreshAllCommentsUI() {
+            document.querySelectorAll('[id^="content-"][id$="-comments"]').forEach(el => {
+                const qId = el.id.replace('content-', '').replace('-comments', '');
+                renderCommentsUI(qId);
+            });
+        }
+
+        function updateAllBadgeCounts() {
+            qaData.forEach(item => {
+                updateBadgeCount(item.id);
+            });
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatRelativeTime(timestamp) {
+            const now = Date.now();
+            const diffMin = Math.round((now - timestamp) / 60000);
+            const labels = i18n[currentLang];
+            if (diffMin < 2) return labels.just_now;
+            if (diffMin < 60) return `${diffMin}m`;
+            const diffHour = Math.round(diffMin / 60);
+            if (diffHour < 24) return `${diffHour} ${labels.time_ago_hours}`;
+            const diffDay = Math.round(diffHour / 24);
+            return `${diffDay}d`;
+        }
+
+        function renderAuthHeader() {
+            const container = document.getElementById('auth-header-container');
+            if (!container) return;
+            const user = getActiveUser();
+            const labels = i18n[currentLang];
+
+            if (user) {
+                const isAuthor = isUserAuthor(user);
+                const roleBadge = isAuthor 
+                    ? `<span class="px-1.5 py-0.2 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
+                    : '';
+                const borderClass = isAuthor ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-300';
+
+                container.innerHTML = `
+                    <div class="flex items-center gap-2 bg-white/95 px-3 py-1.5 rounded-full border ${borderClass} shadow-sm text-xs">
+                        <img src="${user.avatar}" alt="${escapeHtml(user.name)}" class="w-5 h-5 rounded-full border border-slate-300 object-cover shrink-0">
+                        <span class="font-bold text-slate-800 max-w-[120px] truncate">${escapeHtml(user.name)}</span>
+                        ${roleBadge}
+                        <button onclick="openAuthModal()" title="Đổi tài khoản" class="text-slate-400 hover:text-amber-600 transition-colors ml-1">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="logoutUser()" title="${labels.sign_out}" class="text-slate-400 hover:text-rose-600 ml-1 transition-colors">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal()" class="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-full text-xs font-semibold transition-all border border-slate-300 shadow-sm hover:shadow hover:border-slate-400 group">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span class="group-hover:text-slate-900">${labels.sign_in_google}</span>
+                    </button>
+                `;
+            }
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        }
+
+        const qaCommentFilter = {};
+
+        function setCommentFilter(questionId, filter) {
+            qaCommentFilter[questionId] = filter;
+            renderCommentsUI(questionId);
+        }
+
+        function renderCommentsUI(questionId) {
+            const user = getActiveUser();
+            const allQComments = getCommentsForQuestion(questionId);
+            const labels = i18n[currentLang];
+            const container = document.getElementById(`content-${questionId}-comments`);
+            if (!container) return;
+
+            const isAuthor = isUserAuthor(user);
+            const activeFilter = qaCommentFilter[questionId] || 'all';
+
+            // Phân loại comments gốc và replies
+            const rootComments = allQComments.filter(c => !c.parentId);
+            
+            // Đếm số lượng theo từng section
+            const countAll = rootComments.length;
+            const countTheory = rootComments.filter(c => c.targetSection === 'theory').length;
+            const countModeling = rootComments.filter(c => c.targetSection === 'modeling').length;
+            const countPractice = rootComments.filter(c => c.targetSection === 'practice').length;
+            const countTrap = rootComments.filter(c => c.targetSection === 'trap').length;
+
+            // Lọc theo activeFilter
+            let displayedRoots = rootComments;
+            if (activeFilter !== 'all') {
+                displayedRoots = rootComments.filter(c => c.targetSection === activeFilter);
+            }
+
+            // Sắp xếp: Pinned lên đầu tiên, sau đó theo thời gian giảm dần
+            displayedRoots.sort((a, b) => {
+                if (a.isPinned && !b.isPinned) return -1;
+                if (!a.isPinned && b.isPinned) return 1;
+                return b.createdAt - a.createdAt;
+            });
+
+            // Map gom nhóm reply
+            const repliesMap = {};
+            allQComments.filter(c => c.parentId).forEach(r => {
+                if (!repliesMap[r.parentId]) repliesMap[r.parentId] = [];
+                repliesMap[r.parentId].push(r);
+            });
+            Object.keys(repliesMap).forEach(pId => {
+                repliesMap[pId].sort((a, b) => a.createdAt - b.createdAt);
+            });
+
+            // Scope badge configs
+            const sectionScopeConfig = {
+                'theory': { text: labels.scope_theory || '📖 Lý Thuyết', class: 'bg-blue-50 text-blue-700 border-blue-200' },
+                'modeling': { text: labels.scope_modeling || '🖥️ C++ Modeling', class: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+                'practice': { text: labels.scope_practice || '🔧 ECU / AUTOSAR', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                'trap': { text: labels.scope_trap || '⚠️ Bẫy Phỏng Vấn', class: 'bg-rose-50 text-rose-700 border-rose-200' },
+                'all': { text: labels.scope_all || '📌 Ghi chú chung', class: 'bg-slate-100 text-slate-600 border-slate-200' }
+            };
+
+            // Filter button helper
+            const filterBtn = (key, label, count) => {
+                const isActive = activeFilter === key;
+                const activeStyle = isActive 
+                    ? 'bg-amber-600 text-white shadow-xs font-bold border-amber-600' 
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200';
+                return `
+                    <button onclick="setCommentFilter('${questionId}', '${key}')" class="px-2.5 py-0.5 rounded-full text-[11px] border transition-colors flex items-center gap-1 ${activeStyle}">
+                        <span>${label}</span>
+                        <span class="text-[10px] opacity-80">(${count})</span>
+                    </button>
+                `;
+            };
+
+            const headerHtml = `
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2 pb-3 border-b border-slate-200/80">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-700 flex items-center justify-center font-bold shrink-0">
+                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-slate-800 text-xs sm:text-sm">
+                                    ${labels.discussion_section_title || 'Thảo Luận & Ghi Chú Kỹ Thuật'}
+                                </h4>
+                                <span id="badge-count-${questionId}" class="px-2 py-0.2 text-[10px] font-bold rounded-full ${allQComments.length > 0 ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-slate-200 text-slate-500'}">
+                                    ${allQComments.length}
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-0.5">
+                                ${labels.discussion_section_subtitle}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-slate-400 text-[10px] font-medium mr-0.5 hidden sm:inline">${labels.filter_by || 'Lọc:'}</span>
+                        ${filterBtn('all', labels.filter_all || 'Tất cả', countAll)}
+                        ${filterBtn('theory', labels.filter_theory || '📖 Lý Thuyết', countTheory)}
+                        ${filterBtn('modeling', labels.filter_modeling || '🖥️ C++ Modeling', countModeling)}
+                        ${filterBtn('practice', labels.filter_practice || '🔧 ECU / AUTOSAR', countPractice)}
+                        ${filterBtn('trap', labels.filter_trap || '⚠️ Bẫy Phỏng Vấn', countTrap)}
+                    </div>
+                </div>
+            `;
+
+            // Active QA Tab for initial select option
+            const currentQATab = (qaState[questionId] && qaState[questionId].tab) || 'theory';
+
+            // Form nhập bình luận
+            let inputHtml = '';
+            if (user) {
+                const placeholder = isAuthor ? labels.author_placeholder : labels.comment_placeholder;
+                const authorBadgeBar = isAuthor ? `
+                    <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-amber-100 text-xs flex-wrap gap-2">
+                        <span class="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
+                            <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-600"></i>
+                            ⭐ Soạn thảo với tư cách Tác Giả Blog
+                        </span>
+                        <label class="flex items-center gap-1.5 text-amber-900 text-[11px] cursor-pointer select-none font-medium">
+                            <input type="checkbox" id="pin-checkbox-${questionId}" class="rounded text-amber-600 focus:ring-amber-500">
+                            <span>${labels.pin_note_checkbox || '📌 Ghim làm Note quan trọng'}</span>
+                        </label>
+                    </div>
+                ` : '';
+
+                inputHtml = `
+                    <div class="bg-white p-4 rounded-xl border ${isAuthor ? 'border-amber-300 ring-2 ring-amber-100 bg-amber-50/15' : 'border-slate-200'} shadow-sm mb-4">
+                        ${authorBadgeBar}
+                        <!-- Scope Selector Bar -->
+                        <div class="flex items-center justify-between mb-2 pb-1.5 text-xs flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-500 text-[11px] font-medium flex items-center gap-1">
+                                    <i data-lucide="tag" class="w-3 h-3 text-slate-400"></i>
+                                    ${labels.target_section_label || 'Ghi chú cho phần:'}
+                                </span>
+                                <select id="input-scope-${questionId}" class="text-xs bg-slate-50 border border-slate-200 rounded-md px-2 py-1 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer">
+                                    <option value="theory" ${currentQATab === 'theory' ? 'selected' : ''}>${labels.scope_theory}</option>
+                                    <option value="modeling" ${currentQATab === 'modeling' ? 'selected' : ''}>${labels.scope_modeling}</option>
+                                    <option value="practice" ${currentQATab === 'practice' ? 'selected' : ''}>${labels.scope_practice}</option>
+                                    <option value="trap" ${currentQATab === 'trap' ? 'selected' : ''}>${labels.scope_trap}</option>
+                                    <option value="all">${labels.scope_all}</option>
+                                </select>
+                            </div>
+                            <span class="text-[11px] text-slate-400 hidden sm:inline">
+                                Tự động đồng bộ với tab bạn đang xem ở trên
+                            </span>
+                        </div>
+
+                        <!-- Textarea & Action -->
+                        <div class="flex items-start gap-3">
+                            <img src="${user.avatar}" alt="Avatar" class="w-8 h-8 rounded-full border border-slate-200 object-cover mt-1 shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <textarea id="input-comment-${questionId}" rows="2" placeholder="${placeholder}" class="w-full p-2.5 text-xs sm:text-sm bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all resize-none"></textarea>
+                                <div class="flex justify-between items-center mt-2 flex-wrap gap-2">
+                                    <span class="text-[11px] text-slate-400">Ctrl + Enter để gửi</span>
+                                    <button onclick="postComment('${questionId}')" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 shrink-0">
+                                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                        <span>${labels.btn_post_comment}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                inputHtml = `
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-amber-200">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-amber-900 text-sm">${labels.login_to_discuss}</h4>
+                                <p class="text-xs text-amber-700">Đăng nhập tài khoản Google để gửi bình luận, giải đáp hoặc lưu note kỹ thuật cho 4 phần ở trên</p>
+                            </div>
+                        </div>
+                        <button onclick="openAuthModal()" class="px-4 py-2 bg-white hover:bg-amber-100 text-amber-900 font-bold rounded-lg border border-amber-300 shadow-sm text-xs transition-colors shrink-0">
+                            ${labels.btn_login_now}
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Danh sách comment
+            let listHtml = '';
+            if (displayedRoots.length === 0) {
+                const emptyMsg = rootComments.length === 0 
+                    ? labels.no_comments_yet 
+                    : `Không có thảo luận nào trong mục ${sectionScopeConfig[activeFilter]?.text || activeFilter}.`;
+                listHtml = `
+                    <div class="text-center py-6 text-slate-400 bg-white/60 rounded-xl border border-dashed border-slate-200">
+                        <i data-lucide="message-square-dashed" class="w-7 h-7 mx-auto mb-1.5 text-slate-300"></i>
+                        <p class="text-xs">${emptyMsg}</p>
+                    </div>
+                `;
+            } else {
+                listHtml = `
+                    <div class="space-y-3.5">
+                        ${displayedRoots.map(c => {
+                            const isLiked = user && c.likedBy && c.likedBy.includes(user.id);
+                            const canDelete = user && (user.id === c.userId || user.email === c.userEmail || isAuthor);
+                            const likeClass = isLiked ? 'text-rose-600 bg-rose-50 border-rose-200 font-bold' : 'text-slate-500 bg-white hover:bg-slate-50 border-slate-200';
+                            const cIsAuthor = c.userRole === 'Author' || c.userEmail === AUTHOR_EMAIL;
+
+                            const authorBadge = cIsAuthor 
+                                ? `<span class="px-1.5 py-0.2 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5 shadow-xs"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
+                                : `<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 text-blue-600 border border-blue-200 rounded">Google User</span>`;
+
+                            const cScope = sectionScopeConfig[c.targetSection] || sectionScopeConfig['all'];
+                            const scopeBadge = `<span class="px-1.5 py-0.2 text-[9px] font-semibold rounded border ${cScope.class}">${cScope.text}</span>`;
+
+                            const pinnedBanner = c.isPinned ? `
+                                <div class="bg-amber-100/90 text-amber-900 px-3 py-1.5 text-[11px] font-bold flex items-center justify-between border-b border-amber-200">
+                                    <span class="flex items-center gap-1.5">
+                                        <i data-lucide="pin" class="w-3.5 h-3.5 text-amber-600"></i>
+                                        <span>${labels.pinned_badge}</span>
+                                        <span class="text-amber-800 font-normal hidden sm:inline">&bull; Gắn với: <strong>${cScope.text}</strong></span>
+                                    </span>
+                                    ${isAuthor ? `
+                                        <button onclick="togglePinComment('${questionId}', '${c.id}')" class="text-amber-700 hover:text-amber-900 text-[10px] font-semibold hover:underline">
+                                            ${labels.unpin_note}
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : '';
+
+                            const cardBorder = c.isPinned 
+                                ? 'border-amber-300 ring-2 ring-amber-100 bg-amber-50/15' 
+                                : (cIsAuthor ? 'border-amber-200 bg-amber-50/10' : 'border-slate-200 bg-white');
+
+                            const replies = repliesMap[c.id] || [];
+                            const repliesHtml = replies.length > 0 ? `
+                                <div class="space-y-2 mt-3 pt-3 border-t border-slate-100">
+                                    ${replies.map(r => {
+                                        const rLiked = user && r.likedBy && r.likedBy.includes(user.id);
+                                        const rCanDelete = user && (user.id === r.userId || user.email === r.userEmail || isAuthor);
+                                        const rLikeClass = rLiked ? 'text-rose-600 bg-rose-50 border-rose-200 font-bold' : 'text-slate-500 bg-white hover:bg-slate-50 border-slate-200';
+                                        const rIsAuthor = r.userRole === 'Author' || r.userEmail === AUTHOR_EMAIL;
+
+                                        const rBadge = rIsAuthor 
+                                            ? `<span class="px-1.5 py-0.2 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
+                                            : `<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 text-blue-600 border border-blue-200 rounded">Google User</span>`;
+
+                                        return `
+                                            <div class="ml-3 sm:ml-8 pl-3 border-l-2 ${rIsAuthor ? 'border-amber-400 bg-amber-50/40' : 'border-slate-300 bg-slate-50/80'} p-3 rounded-r-xl transition-all">
+                                                <div class="flex items-center justify-between gap-2 mb-1">
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <img src="${r.userAvatar}" alt="${escapeHtml(r.userName)}" class="w-5 h-5 rounded-full border border-slate-200 object-cover shrink-0">
+                                                        <span class="font-bold text-slate-800 text-xs">${escapeHtml(r.userName)}</span>
+                                                        ${rBadge}
+                                                        <span class="text-[10px] text-blue-600 bg-blue-50 px-1 rounded font-medium">@${escapeHtml(r.replyToUser || c.userName)}</span>
+                                                        <span class="text-[10px] text-slate-400">&bull; ${formatRelativeTime(r.createdAt)}</span>
+                                                    </div>
+                                                    ${rCanDelete ? `
+                                                        <button onclick="deleteComment('${questionId}', '${r.id}')" title="Xóa" class="text-slate-300 hover:text-rose-600 p-1 rounded transition-colors">
+                                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                        </button>
+                                                    ` : ''}
+                                                </div>
+                                                <p class="text-xs text-slate-700 leading-relaxed break-words whitespace-pre-wrap ml-6">${escapeHtml(r.content)}</p>
+                                                <div class="mt-2 ml-6 flex items-center gap-2">
+                                                    <button onclick="toggleLike('${questionId}', '${r.id}')" class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] border transition-colors ${rLikeClass}">
+                                                        <i data-lucide="heart" class="w-3 h-3 ${rLiked ? 'fill-rose-500 text-rose-500' : ''}"></i>
+                                                        <span>${r.likes || 0}</span>
+                                                    </button>
+                                                    <button onclick="toggleReplyBox('${c.id}', '${escapeHtml(r.userName)}')" class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors">
+                                                        <i data-lucide="reply" class="w-3 h-3 text-slate-400"></i>
+                                                        <span>${labels.reply}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : '';
+
+                            return `
+                                <div class="rounded-xl border ${cardBorder} shadow-xs overflow-hidden transition-all hover:border-slate-300">
+                                    ${pinnedBanner}
+                                    <div class="p-3.5 sm:p-4">
+                                        <div class="flex items-start gap-3">
+                                            <img src="${c.userAvatar}" alt="${escapeHtml(c.userName)}" class="w-8 h-8 rounded-full border border-slate-200 object-cover shrink-0 mt-0.5">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center justify-between gap-2 mb-1.5">
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <span class="font-bold text-slate-800 text-xs">${escapeHtml(c.userName)}</span>
+                                                        ${authorBadge}
+                                                        ${scopeBadge}
+                                                        <span class="text-[10px] text-slate-400">&bull; ${formatRelativeTime(c.createdAt)}</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-1">
+                                                        ${isAuthor && !c.isPinned ? `
+                                                            <button onclick="togglePinComment('${questionId}', '${c.id}')" title="${labels.pin_note}" class="text-slate-300 hover:text-amber-600 p-1 rounded transition-colors">
+                                                                <i data-lucide="pin" class="w-3.5 h-3.5"></i>
+                                                            </button>
+                                                        ` : ''}
+                                                        ${canDelete ? `
+                                                            <button onclick="deleteComment('${questionId}', '${c.id}')" title="Xóa" class="text-slate-300 hover:text-rose-600 p-1 rounded transition-colors">
+                                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                            </button>
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                                <p class="text-xs text-slate-700 leading-relaxed break-words whitespace-pre-wrap">${escapeHtml(c.content)}</p>
+                                                
+                                                <!-- Action Buttons -->
+                                                <div class="mt-2.5 flex items-center gap-2 flex-wrap">
+                                                    <button onclick="toggleLike('${questionId}', '${c.id}')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] border transition-colors ${likeClass}">
+                                                        <i data-lucide="heart" class="w-3.5 h-3.5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}"></i>
+                                                        <span>${c.likes || 0}</span>
+                                                    </button>
+                                                    
+                                                    <button onclick="toggleReplyBox('${c.id}', '${escapeHtml(c.userName)}')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-medium transition-colors">
+                                                        <i data-lucide="reply" class="w-3.5 h-3.5 text-slate-400"></i>
+                                                        <span>${labels.reply}</span>
+                                                        ${replies.length > 0 ? `<span class="ml-1 text-[10px] text-slate-400 font-bold">(${replies.length})</span>` : ''}
+                                                    </button>
+                                                </div>
+
+                                                <!-- Form Reply Box -->
+                                                <div id="reply-box-${c.id}" class="hidden mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                                    <div class="text-[11px] font-semibold text-slate-600 mb-1.5 flex items-center justify-between">
+                                                        <span>${labels.replying_to} <strong class="text-blue-600">@${escapeHtml(c.userName)}</strong>:</span>
+                                                        <button onclick="toggleReplyBox('${c.id}')" class="text-slate-400 hover:text-slate-600 text-[10px] hover:underline">${labels.cancel}</button>
+                                                    </div>
+                                                    <textarea id="reply-input-${c.id}" rows="2" placeholder="Nhập câu trả lời cho @${escapeHtml(c.userName)}..." class="w-full p-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
+                                                    <div class="flex justify-end gap-2 mt-2">
+                                                        <button onclick="toggleReplyBox('${c.id}')" class="px-3 py-1 text-xs text-slate-500 hover:text-slate-700 font-medium">${labels.cancel}</button>
+                                                        <button onclick="postReply('${questionId}', '${c.id}')" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1">
+                                                            <i data-lucide="send" class="w-3 h-3"></i>
+                                                            <span>${labels.send_reply}</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Replies con -->
+                                                ${repliesHtml}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="animate-fadeIn">
+                    ${headerHtml}
+                    ${inputHtml}
+                    ${listHtml}
+                </div>
+            `;
+
+            // Bắt sự kiện phím Ctrl+Enter
+            const textarea = document.getElementById(`input-comment-${questionId}`);
+            if (textarea) {
+                textarea.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        postComment(questionId);
+                    }
+                });
+            }
+
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        }
+
+        function toggleReplyBox(commentId, targetUserName) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const box = document.getElementById(`reply-box-${commentId}`);
+            if (!box) return;
+            const isHidden = box.classList.contains('hidden');
+            if (isHidden) {
+                box.classList.remove('hidden');
+                const textarea = document.getElementById(`reply-input-${commentId}`);
+                if (textarea) {
+                    if (targetUserName) textarea.setAttribute('data-target-user', targetUserName);
+                    textarea.focus();
+                }
+            } else {
+                box.classList.add('hidden');
+            }
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        }
+
+        function postComment(questionId) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const textarea = document.getElementById(`input-comment-${questionId}`);
+            if (!textarea) return;
+            const text = textarea.value.trim();
+            if (!text) {
+                textarea.focus();
+                textarea.classList.add('ring-2', 'ring-rose-500');
+                setTimeout(() => textarea.classList.remove('ring-2', 'ring-rose-500'), 1500);
+                return;
+            }
+
+            const scopeSelect = document.getElementById(`input-scope-${questionId}`);
+            const selectedScope = scopeSelect ? scopeSelect.value : (qaState[questionId]?.tab || 'theory');
+
+            const isAuthor = isUserAuthor(user);
+            const pinCheckbox = document.getElementById(`pin-checkbox-${questionId}`);
+            const shouldPin = isAuthor && pinCheckbox && pinCheckbox.checked;
+
+            const newCmt = {
+                id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                questionId: questionId,
+                userId: user.id,
+                userName: user.name,
+                userEmail: user.email,
+                userAvatar: user.avatar,
+                userRole: isAuthor ? "Author" : (user.role || "Engineer"),
+                targetSection: selectedScope,
+                content: text,
+                createdAt: Date.now(),
+                likes: 0,
+                likedBy: [],
+                parentId: null,
+                isPinned: Boolean(shouldPin)
+            };
+
+            const all = getAllComments();
+            all.unshift(newCmt);
+            saveAllCommentsLocally(all);
+            if (isFirestoreConnected) {
+                firestoreCommentsCache.unshift(newCmt);
+            }
+
+            // Sync lên Cloud Firestore
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(newCmt.id).set(newCmt).catch(err => {
+                    console.warn("Firestore save error:", err);
+                });
+            }
+
+            textarea.value = '';
+            renderCommentsUI(questionId);
+            updateBadgeCount(questionId);
+        }
+
+        function postReply(questionId, parentId) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const textarea = document.getElementById(`reply-input-${parentId}`);
+            if (!textarea) return;
+            const text = textarea.value.trim();
+            if (!text) {
+                textarea.focus();
+                textarea.classList.add('ring-2', 'ring-rose-500');
+                setTimeout(() => textarea.classList.remove('ring-2', 'ring-rose-500'), 1500);
+                return;
+            }
+
+            const targetUser = textarea.getAttribute('data-target-user') || '';
+            const isAuthor = isUserAuthor(user);
+
+            const all = getAllComments();
+            const parentComment = all.find(c => c.id === parentId);
+            const parentScope = parentComment ? (parentComment.targetSection || 'all') : 'all';
+
+            const newReply = {
+                id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                questionId: questionId,
+                userId: user.id,
+                userName: user.name,
+                userEmail: user.email,
+                userAvatar: user.avatar,
+                userRole: isAuthor ? "Author" : (user.role || "Engineer"),
+                targetSection: parentScope,
+                content: text,
+                createdAt: Date.now(),
+                likes: 0,
+                likedBy: [],
+                parentId: parentId,
+                replyToUser: targetUser,
+                isPinned: false
+            };
+
+            all.push(newReply);
+            saveAllCommentsLocally(all);
+            if (isFirestoreConnected) {
+                firestoreCommentsCache.push(newReply);
+            }
+
+            // Sync lên Cloud Firestore
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(newReply.id).set(newReply).catch(err => {
+                    console.warn("Firestore reply error:", err);
+                });
+            }
+
+            textarea.value = '';
+            renderCommentsUI(questionId);
+            updateBadgeCount(questionId);
+        }
+
+        function togglePinComment(questionId, commentId) {
+            const user = getActiveUser();
+            if (!isUserAuthor(user)) return;
+            const all = getAllComments();
+            const target = all.find(c => c.id === commentId);
+            if (!target) return;
+            target.isPinned = !target.isPinned;
+            saveAllCommentsLocally(all);
+
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(commentId).update({
+                    isPinned: target.isPinned
+                }).catch(err => console.warn(err));
+            }
+
+            renderCommentsUI(questionId);
+        }
+
+        function toggleLike(questionId, commentId) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const all = getAllComments();
+            const target = all.find(c => c.id === commentId);
+            if (!target) return;
+
+            if (!target.likedBy) target.likedBy = [];
+            const idx = target.likedBy.indexOf(user.id);
+            if (idx >= 0) {
+                target.likedBy.splice(idx, 1);
+                target.likes = Math.max(0, (target.likes || 1) - 1);
+            } else {
+                target.likedBy.push(user.id);
+                target.likes = (target.likes || 0) + 1;
+            }
+
+            saveAllCommentsLocally(all);
+
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(commentId).update({
+                    likes: target.likes,
+                    likedBy: target.likedBy
+                }).catch(err => console.warn(err));
+            }
+
+            renderCommentsUI(questionId);
+        }
+
+        function deleteComment(questionId, commentId) {
+            const labels = i18n[currentLang];
+            if (!confirm(labels.delete_confirm)) return;
+            let all = getAllComments();
+            const repliesToDelete = all.filter(c => c.parentId === commentId);
+            all = all.filter(c => c.id !== commentId && c.parentId !== commentId);
+            saveAllCommentsLocally(all);
+            if (isFirestoreConnected) {
+                firestoreCommentsCache = all;
+            }
+
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(commentId).delete().catch(err => console.warn(err));
+                repliesToDelete.forEach(r => {
+                    firestoreDb.collection('canfd_comments').doc(r.id).delete().catch(err => console.warn(err));
+                });
+            }
+
+            renderCommentsUI(questionId);
+            updateBadgeCount(questionId);
+        }
+
+        function updateBadgeCount(questionId) {
+            const count = getCommentsForQuestion(questionId).length;
+            const badge = document.getElementById(`badge-count-${questionId}`);
+            if (badge) {
+                badge.textContent = count;
+                badge.className = `px-2 py-0.2 text-[10px] font-bold rounded-full ${count > 0 ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-slate-200 text-slate-500'}`;
+            }
+            const cardBadge = document.getElementById(`card-comment-badge-${questionId}`);
+            if (cardBadge) {
+                const span = cardBadge.querySelector('span');
+                if (span) span.textContent = count;
+                cardBadge.className = `px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${count > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`;
+            }
+        }
+
         function applyI18n() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -458,6 +1509,7 @@
             document.getElementById('lang-indicator').textContent = currentLang === 'vi' ? 'EN' : 'VN';
             
             // Re-render components with dynamic text
+            renderAuthHeader();
             applyFilters();
             if (currentSegment) {
                 selectSegment(currentSegment);
@@ -510,6 +1562,7 @@
                 
                 // Lấy trạng thái đã lưu, nếu chưa có thì mặc định đóng & tab theory
                 const state = qaState[item.id] || { expanded: false, tab: 'theory' };
+                if (state.tab === 'comments') state.tab = 'theory'; // Chuyển đổi an toàn từ bản cũ
                 const answerHidden = state.expanded ? '' : 'hidden';
                 const iconClasses = state.expanded ? 'text-amber-600 bg-amber-100' : 'text-slate-400 bg-slate-50';
                 const iconStyle = state.expanded ? 'style="transform: rotate(180deg);"' : '';
@@ -527,13 +1580,22 @@
                 const practiceContent = state.tab === 'practice' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
                 const trapContent = state.tab === 'trap' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
 
+                const commentCount = getCommentsForQuestion(item.id).length;
+                const cardCommentBadgeClass = commentCount > 0 
+                    ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                    : 'bg-slate-100 text-slate-500 border-slate-200';
+
                 const cardHtml = `
                     <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm transition-all hover:border-amber-300">
                         <div class="p-4 cursor-pointer flex justify-between items-start gap-4 select-none" onclick="toggleAnswer('${item.id}')">
                             <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-2">
+                                <div class="flex items-center gap-2 mb-2 flex-wrap">
                                     <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase border ${diffClass}">${item.difficulty}</span>
                                     <div class="flex gap-1 flex-wrap">${tagsHtml}</div>
+                                    <span id="card-comment-badge-${item.id}" class="px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${cardCommentBadgeClass}" title="Số lượt ghi chú & thảo luận">
+                                        <i data-lucide="message-square" class="w-3 h-3 text-amber-600"></i>
+                                        <span>${commentCount}</span>
+                                    </span>
                                 </div>
                                 <h3 class="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors flex items-start gap-2">
                                     <span class="text-amber-600 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
@@ -546,7 +1608,7 @@
                         </div>
                         
                         <div id="answer-${item.id}" class="${answerHidden} border-t border-slate-100 bg-slate-50">
-                            <!-- Answer Tabs Nav -->
+                            <!-- Answer Tabs Nav: Đúng 4 Tab nội dung cốt lõi -->
                             <div class="flex border-b border-slate-200 bg-slate-100 px-4 pt-3 gap-2 overflow-x-auto no-scrollbar">
                                 <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
                                     ${labels.qa_theory}
@@ -562,8 +1624,8 @@
                                 </button>
                             </div>
                             
-                            <!-- Answer Content -->
-                            <div class="p-5 text-sm text-slate-700 leading-relaxed">
+                            <!-- Answer Content (Hiển thị tab tương ứng) -->
+                            <div class="p-5 text-sm text-slate-700 leading-relaxed bg-white">
                                 <div id="content-${item.id}-theory" class="${theoryContent}">
                                     ${content.answer.theory}
                                 </div>
@@ -577,10 +1639,18 @@
                                     ${content.answer.trap}
                                 </div>
                             </div>
+
+                            <!-- MỤC THẢO LUẬN & GHI CHÚ NẰM TRỰC TIẾP DƯỚI CÂU TRẢ LỜI CỦA CẢ 4 TAB -->
+                            <div id="discussion-wrapper-${item.id}" class="border-t-2 border-slate-200/90 bg-slate-50/90 p-4 sm:p-5 rounded-b-xl">
+                                <div id="content-${item.id}-comments"></div>
+                            </div>
                         </div>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
+
+                // Render bình luận trực tiếp cho thẻ này
+                renderCommentsUI(item.id);
             });
 
             try {
@@ -618,6 +1688,7 @@
             tabs.forEach(t => {
                 const btn = document.getElementById(`btn-${id}-${t}`);
                 const content = document.getElementById(`content-${id}-${t}`);
+                if (!btn || !content) return;
                 
                 if (t === tab) {
                     btn.className = "px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-700 bg-white rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
@@ -627,6 +1698,18 @@
                     content.classList.add('hidden');
                 }
             });
+
+            // Tự động đồng bộ phần selector trong ô nhập bình luận bên dưới theo tab đang xem
+            const scopeSelect = document.getElementById(`input-scope-${id}`);
+            if (scopeSelect && ['theory', 'modeling', 'practice', 'trap'].includes(tab)) {
+                scopeSelect.value = tab;
+            }
+
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide render failed:", e);
+            }
         }
 
         function applyFilters() {
@@ -868,6 +1951,10 @@
 
             // Init Language
             applyI18n();
+
+            // Init Firebase Auth Listener & Cloud Firestore Sync
+            initFirebaseAuthListener();
+            initFirestoreSync();
 
             // Init Q&A Cards
             renderQACards(qaData);
