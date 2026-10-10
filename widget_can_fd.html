@@ -24,7 +24,7 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 antialiased p-4 md:p-8">
 
-    <!-- ROOT CONTAINER DUY NHẤT ĐẢM BẢO CÔ LẬP VỚI THEME BLOGGER -->
+    <!-- UNIQUE ROOT CONTAINER ENSURING ISOLATION FROM BLOGGER THEMES -->
     <div id="canfd-explorer-root" class="max-w-5xl mx-auto">
         
         <!-- Header -->
@@ -51,7 +51,6 @@
             <p class="text-slate-600 text-sm" data-i18n="main_desc">Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)</p>
         </div>
 
-        <!-- Google Sign-In & Firebase Auth Modal -->
         <!-- Google Sign-In & Firebase Auth Modal -->
         <div id="google-auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fadeIn">
             <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden transform transition-all">
@@ -98,9 +97,9 @@
             </div>
         </div>
 
-        <!-- Smart Top Navigation & Filter Container (Sticky Top với Smart Hide/Show khi cuộn) -->
+        <!-- Smart Top Navigation & Filter Container (Sticky Top with Smart Scroll Auto-Hide/Show) -->
         <div id="smart-nav-container" class="sticky top-2 z-40 w-full mb-6 transition-transform duration-300 ease-out">
-            <!-- 3 Tab Điều Hướng Chính -->
+            <!-- 3 Main Navigation Tabs -->
             <div id="main-nav-tabs" class="flex flex-wrap justify-center gap-2 mb-3 bg-white/95 backdrop-blur-md p-2 rounded-xl shadow-md border border-slate-200 w-fit mx-auto transition-colors">
                 <button id="btn-tab-frame" class="px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2">
                     <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
@@ -113,7 +112,7 @@
                 </button>
             </div>
 
-            <!-- Cụm Tiêu Đề & Bộ Lọc Tab 3 (Chỉ hiện khi ở Tab 3 Interview Q&A) -->
+            <!-- Tab 3 Header & Filter Group (Visible only in Tab 3 Interview Q&A) -->
             <div id="qa-filter-header-group" class="hidden bg-white/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-200/90 shadow-md">
                 <div class="flex items-center justify-between border-b pb-2 mb-2.5 border-slate-100">
                     <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -329,7 +328,7 @@
 
     </div>
 
-    <!-- SCRIPT ĐIỀU KHIỂN (VANILLA JS FAULT-TOLERANT) -->
+    <!-- CONTROLLER SCRIPT (FAULT-TOLERANT VANILLA JS) -->
     <script>
         
         let currentLang = 'vi';
@@ -472,7 +471,7 @@
             }
         };
 
-        // DATA LAYER CHO Q&A (BILINGUAL)
+        // DATA LAYER FOR Q&A (BILINGUAL)
         const qaData = [
             {
                 id: "q_can_foundation_1",
@@ -619,7 +618,7 @@
         let isFirestoreConnected = false;
         let activeUser = null;
 
-        // An toàn khởi tạo Firebase Compat SDK
+        // Safely initialize Firebase Compat SDK
         try {
             if (typeof firebase !== 'undefined' && firebase.initializeApp) {
                 firebaseApp = firebase.initializeApp(firebaseConfig);
@@ -632,8 +631,7 @@
             console.warn("Firebase Init Warning:", e);
         }
 
-        // Tự động dọn dẹp triệt để bất kỳ dữ liệu test/mock/seed cũ từ các phiên thử nghiệm trước
-        // Tự động dọn dẹp triệt để bất kỳ session mock/test cũ nào từ các phiên thử nghiệm trước
+        // Clean up any legacy mock/test sessions and comments from previous versions
         try {
             const oldUserRaw = localStorage.getItem('canfd_active_user');
             if (oldUserRaw) {
@@ -975,30 +973,30 @@
             const isAuthor = isUserAuthor(user);
             const activeFilter = qaCommentFilter[questionId] || 'all';
 
-            // Phân loại comments gốc và replies
+            // Separate root comments and threaded replies
             const rootComments = allQComments.filter(c => !c.parentId);
             
-            // Đếm số lượng theo từng section
+            // Count comments per section
             const countAll = rootComments.length;
             const countTheory = rootComments.filter(c => c.targetSection === 'theory').length;
             const countModeling = rootComments.filter(c => c.targetSection === 'modeling').length;
             const countPractice = rootComments.filter(c => c.targetSection === 'practice').length;
             const countTrap = rootComments.filter(c => c.targetSection === 'trap').length;
 
-            // Lọc theo activeFilter
+            // Filter by activeFilter
             let displayedRoots = rootComments;
             if (activeFilter !== 'all') {
                 displayedRoots = rootComments.filter(c => c.targetSection === activeFilter);
             }
 
-            // Sắp xếp: Pinned lên đầu tiên, sau đó theo thời gian giảm dần
+            // Sort: Pinned first, then by timestamp descending
             displayedRoots.sort((a, b) => {
                 if (a.isPinned && !b.isPinned) return -1;
                 if (!a.isPinned && b.isPinned) return 1;
                 return b.createdAt - a.createdAt;
             });
 
-            // Map gom nhóm reply
+            // Map to group replies by parentId
             const repliesMap = {};
             allQComments.filter(c => c.parentId).forEach(r => {
                 if (!repliesMap[r.parentId]) repliesMap[r.parentId] = [];
@@ -1065,7 +1063,7 @@
             // Active QA Tab for initial select option
             const currentQATab = (qaState[questionId] && qaState[questionId].tab) || 'theory';
 
-            // Form nhập bình luận
+            // Comment submission form
             let inputHtml = '';
             if (user) {
                 const placeholder = isAuthor ? labels.author_placeholder : labels.comment_placeholder;
@@ -1145,7 +1143,7 @@
                 `;
             }
 
-            // Danh sách comment
+            // Comments list
             let listHtml = '';
             if (displayedRoots.length === 0) {
                 const emptyMsg = rootComments.length === 0 
@@ -1297,7 +1295,7 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Replies con -->
+                                                <!-- Child replies -->
                                                 ${repliesHtml}
                                             </div>
                                         </div>
@@ -1317,7 +1315,7 @@
                 </div>
             `;
 
-            // Bắt sự kiện phím Ctrl+Enter
+            // Keyboard shortcut: Ctrl+Enter / Cmd+Enter to submit
             const textarea = document.getElementById(`input-comment-${questionId}`);
             if (textarea) {
                 textarea.addEventListener('keydown', (e) => {
@@ -1400,7 +1398,7 @@
                 firestoreCommentsCache.unshift(newCmt);
             }
 
-            // Sync lên Cloud Firestore
+            // Sync to Cloud Firestore
             if (isFirebaseReady && firestoreDb) {
                 firestoreDb.collection('canfd_comments').doc(newCmt.id).set(newCmt).catch(err => {
                     console.warn("Firestore save error:", err);
@@ -1459,7 +1457,7 @@
                 firestoreCommentsCache.push(newReply);
             }
 
-            // Sync lên Cloud Firestore
+            // Sync to Cloud Firestore
             if (isFirebaseReady && firestoreDb) {
                 firestoreDb.collection('canfd_comments').doc(newReply.id).set(newReply).catch(err => {
                     console.warn("Firestore reply error:", err);
@@ -1619,9 +1617,9 @@
                 const content = item[currentLang];
                 const labels = i18n[currentLang];
                 
-                // Lấy trạng thái đã lưu, nếu chưa có thì mặc định đóng & tab theory
+                // Retrieve saved card state; default to collapsed with theory tab
                 const state = qaState[item.id] || { expanded: false, tab: 'theory' };
-                if (state.tab === 'comments') state.tab = 'theory'; // Chuyển đổi an toàn từ bản cũ
+                if (state.tab === 'comments') state.tab = 'theory';
                 const answerHidden = state.expanded ? '' : 'hidden';
                 const iconClasses = state.expanded ? 'text-amber-600 bg-amber-100' : 'text-slate-400 bg-slate-50';
                 const iconStyle = state.expanded ? 'style="transform: rotate(180deg);"' : '';
@@ -1648,10 +1646,10 @@
 
                 const cardHtml = `
                     <div id="qa-card-${item.id}" class="border border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-amber-300">
-                        <!-- KHỐI STICKY TOÀN DIỆN: GIỮ LẠI [CÂU HỎI + 4 TABS + CÂU TRẢ LỜI] LIỀN KỀ NHAU KHI CUỘN -->
+                        <!-- COMPREHENSIVE STICKY BLOCK: RETAIN [QUESTION + 4 TABS + ANSWER CONTENT] TOGETHER ON SCROLL -->
                         <div id="qa-sticky-block-${item.id}" class="qa-card-sticky-block sticky z-20 bg-white rounded-xl transition-all duration-300 ${state.expanded ? 'rounded-t-xl border-b border-slate-200 shadow-xs' : ''}" style="top: ${initialStickyTop};">
                             
-                            <!-- Tiêu đề câu hỏi -->
+                            <!-- Question Header -->
                             <div class="qa-card-header p-4 cursor-pointer flex justify-between items-start gap-4 select-none ${state.expanded ? 'border-b border-slate-100' : ''}" onclick="toggleAnswer('${item.id}')">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-2 flex-wrap">
@@ -1672,9 +1670,9 @@
                                 </div>
                             </div>
 
-                            <!-- 4 Tab Bar & Answer Content: GIỮ LẠI LIỀN KỀ NGAY SAU CÂU HỎI KHI TUA XUỐNG -->
+                            <!-- 4-Tab Bar & Answer Content: Retained adjacent to question header when scrolling down -->
                             <div id="qa-expanded-body-${item.id}" class="${answerHidden}">
-                                <!-- Answer Tabs Nav: Đúng 4 Tab nội dung cốt lõi -->
+                                <!-- Answer Tabs Navigation: 4 core knowledge tabs -->
                                 <div class="flex border-b border-slate-200 bg-slate-100/90 px-4 pt-2.5 gap-2 overflow-x-auto no-scrollbar">
                                     <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
                                         ${labels.qa_theory}
@@ -1690,7 +1688,7 @@
                                     </button>
                                 </div>
                                 
-                                <!-- Answer Content Box: Có max-height + overflow-y-auto để không chiếm quá nhiều màn hình, cuộn mượt mà -->
+                                <!-- Answer Content Box: Smooth scrolling with max-height to conserve screen space -->
                                 <div class="p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed bg-white max-h-[220px] overflow-y-auto">
                                     <div id="content-${item.id}-theory" class="${theoryContent}">
                                         ${content.answer.theory}
@@ -1708,7 +1706,7 @@
                             </div>
                         </div>
 
-                        <!-- KHỐI THẢO LUẬN & GHI CHÚ: NẰM LIỀN KỀ BÊN DƯỚI KHỐI STICKY, CUỘN TỰ DO -->
+                        <!-- DISCUSSION & TECHNICAL NOTES BLOCK: Freely scrollable below sticky block -->
                         <div id="answer-discussion-${item.id}" class="${answerHidden}">
                             <div id="discussion-wrapper-${item.id}" class="bg-slate-50/90 p-4 sm:p-5 rounded-b-xl border-t border-slate-200">
                                 <div id="content-${item.id}-comments"></div>
@@ -1718,7 +1716,7 @@
                 `;
                 container.insertAdjacentHTML('beforeend', cardHtml);
 
-                // Render bình luận trực tiếp cho thẻ này
+                // Render comments directly for this card
                 renderCommentsUI(item.id);
             });
 
@@ -1729,7 +1727,7 @@
             }
         }
 
-        // --- BỘ ĐIỀU KHIỂN SMART STICKY NAV & CÂU HỎI LIỀN KỀ (100% KHÔNG ĐÈ NHAU) ---
+        // --- SMART STICKY NAV & ADJACENT QUESTION CONTROLLER (Zero overlap) ---
         let lastScrollY = window.pageYOffset || document.documentElement.scrollTop;
         let isSmartNavHidden = false;
         let isScrollTicking = false;
@@ -1770,28 +1768,28 @@
         function handleSmartScroll() {
             const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
             
-            // 1. Nếu ở sát đỉnh trang (< 80px) -> Luôn hiện đầy đủ 6 mục điều hướng
+            // 1. Near page top (< 80px) -> Always reveal full navigation bar
             if (currentScrollY <= 80) {
                 if (isSmartNavHidden) setSmartNavVisibility(true);
                 lastScrollY = currentScrollY;
                 return;
             }
 
-            // 2. Tính độ dịch chuyển cuộn
+            // 2. Compute scroll delta
             const deltaY = currentScrollY - lastScrollY;
             
-            // Ngưỡng tối thiểu (8px) để triệt tiêu rung khi dừng cuộn
+            // Minimum threshold (8px) to prevent jitter
             if (Math.abs(deltaY) < 8) {
                 return;
             }
 
             if (deltaY > 0) {
-                // Cuộn XUỐNG: Ẩn 6 mục điều hướng, chỉ giữ lại câu hỏi + 4 tabs + câu trả lời và comment (kể cả khi xuống cuối trang)
+                // Scroll DOWN: Hide navigation, keep question + 4 tabs + answer and comments visible
                 if (!isSmartNavHidden) {
                     setSmartNavVisibility(false);
                 }
             } else {
-                // Cuộn LÊN 1 xíu: Hiện lại ngay 6 mục điều hướng
+                // Scroll UP slightly: Reveal navigation bar
                 if (isSmartNavHidden) {
                     setSmartNavVisibility(true);
                 }
@@ -1810,7 +1808,7 @@
             const willExpand = expandedBody ? expandedBody.classList.contains('hidden') : false;
             
             if (willExpand) {
-                // Ý 3: Tự động un-expand tất cả các câu hỏi khác
+                // Single-open accordion: Auto-collapse all other questions
                 qaData.forEach(item => {
                     if (item.id !== id) {
                         const otherExp = document.getElementById(`qa-expanded-body-${item.id}`);
@@ -1842,7 +1840,7 @@
                     }
                 });
 
-                // Mở câu hỏi hiện tại
+                // Expand target question
                 if (expandedBody) expandedBody.classList.remove('hidden');
                 if (discussionSection) discussionSection.classList.remove('hidden');
                 if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-amber-600 bg-amber-100';
@@ -1857,7 +1855,7 @@
                 }
                 qaState[id].expanded = true;
 
-                // Neo mượt mà vị trí câu hỏi đang mở ngay tầm mắt người đọc
+                // Smooth scroll focus: Align question comfortably in viewport
                 if (cardEl) {
                     requestAnimationFrame(() => {
                         const navOffset = isSmartNavHidden ? 12 : (getSmartNavHeight() + 16);
@@ -1871,7 +1869,7 @@
                     });
                 }
             } else {
-                // Thu gọn câu hỏi hiện tại
+                // Collapse target question
                 if (expandedBody) expandedBody.classList.add('hidden');
                 if (discussionSection) discussionSection.classList.add('hidden');
                 if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-slate-400 bg-slate-50';
@@ -1886,8 +1884,7 @@
                 }
                 qaState[id].expanded = false;
 
-                // Nếu người dùng đang cuộn sâu bên dưới câu trả lời/comment khi bấm đóng,
-                // neo nhẹ góc nhìn về lại thẻ câu hỏi vừa đóng để không bị hẫng
+                // If scrolled deep into comments upon collapsing, smoothly realign view back to card header
                 if (cardEl) {
                     const rect = cardEl.getBoundingClientRect();
                     if (rect.top < 65) {
@@ -1922,7 +1919,7 @@
                 }
             });
 
-            // Tự động đồng bộ phần selector trong ô nhập bình luận bên dưới theo tab đang xem
+            // Automatically sync section selector in comment form with active tab
             const scopeSelect = document.getElementById(`input-scope-${id}`);
             if (scopeSelect && ['theory', 'modeling', 'practice', 'trap'].includes(tab)) {
                 scopeSelect.value = tab;
@@ -2127,7 +2124,7 @@
             document.getElementById(`tab-${targetId}`).classList.remove('hidden');
             document.getElementById(`btn-tab-${targetId}`).className = "px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2";
 
-            // Hiển thị hoặc ẩn bộ lọc Tab 3 bên trong smart-nav-container
+            // Toggle Tab 3 filter group inside smart-nav-container
             const filterGroup = document.getElementById('qa-filter-header-group');
             if (filterGroup) {
                 if (targetId === 'interview') {
@@ -2137,7 +2134,7 @@
                 }
             }
 
-            // Luôn hiện navigation khi chuyển đổi tab và đồng bộ offset sticky
+            // Ensure navigation is visible on tab switch and sync sticky offset
             setSmartNavVisibility(true);
 
             // Safe icon reload
@@ -2181,12 +2178,12 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            // Gắn sự kiện tab
+            // Attach tab event listeners
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-compare').addEventListener('click', () => switchTab('compare'));
             document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
 
-            // Gắn sự kiện Smart Scroll (Ẩn khi cuộn xuống, hiện khi cuộn lên hoặc ở đáy trang)
+            // Attach Smart Scroll event listener
             window.addEventListener('scroll', () => {
                 if (!isScrollTicking) {
                     requestAnimationFrame(() => {
@@ -2197,7 +2194,7 @@
                 }
             }, { passive: true });
 
-            // Cập nhật vị trí sticky khi resize cửa sổ
+            // Update sticky position on window resize
             window.addEventListener('resize', () => {
                 updateStickyBlockOffsets();
             });

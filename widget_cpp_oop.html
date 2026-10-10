@@ -69,11 +69,11 @@
                         <div class="space-y-3">
                             <button onclick="handlePrivateAccess()" class="w-full text-left font-mono bg-slate-800 hover:bg-red-900/40 border border-red-500/30 p-3 rounded text-slate-300 transition-colors">
                                 <span class="text-red-400">sensor.raw_ADC_register = 9999;</span> <br/>
-                                <span class="text-xs text-slate-500">// Cố tình ghi đè thanh ghi</span>
+                                <span class="text-xs text-slate-500">// Direct register overwrite attempt</span>
                             </button>
                             <button onclick="handlePublicAccess()" class="w-full text-left font-mono bg-slate-800 hover:bg-emerald-900/40 border border-emerald-500/30 p-3 rounded text-slate-300 transition-colors">
                                 <span class="text-emerald-400">float temp = sensor.readTemperature();</span> <br/>
-                                <span class="text-xs text-slate-500">// Gọi API an toàn</span>
+                                <span class="text-xs text-slate-500">// Safe public API call</span>
                             </button>
                             <button onclick="handleModifyPublic()" class="w-full text-left font-mono bg-slate-800 hover:bg-blue-900/40 border border-blue-500/30 p-3 rounded text-slate-300 transition-colors">
                                 <span class="text-blue-400">Hệ thống: Cập nhật môi trường</span>
@@ -306,9 +306,9 @@
         </div>
     </div>
 
-    <!-- SCRIPT ĐIỀU KHIỂN (VANILLA JS) -->
+    <!-- CONTROLLER SCRIPT (VANILLA JS) -->
     <script>
-        // --- CHUYỂN TAB ---
+        // --- TAB SWITCHING LOGIC ---
         const tabs = ['encap', 'inherit', 'poly', 'abstract'];
         const activeTabClass = 'bg-blue-600 text-white shadow-lg shadow-blue-500/30';
         const inactiveTabClass = 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200';

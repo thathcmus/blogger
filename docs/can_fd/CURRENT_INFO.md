@@ -104,11 +104,28 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
   - **Tua xuống (Scroll Down)**: Ẩn mượt mà `#smart-nav-container`, khối sticky câu hỏi tự động dời lên sát đỉnh (`top: 8px`), bình luận cuộn mượt mà phía dưới.
   - **Tua lên 1 xíu (Scroll Up)**: Trượt hiện lại 6 mục điều hướng trên đầu trang. Khi cuộn xuống (kể cả khi chạm đáy trang), thanh điều hướng giữ nguyên trạng thái ẩn để độc giả tập trung 100% vào nội dung câu hỏi và bình luận mà không bị tự động bật lên.
 * **Dòng 1901 – 2112**: Data & Handlers cho Segment Frame và So sánh thế hệ.
-* **Dòng 2113 – 2225**: `switchTab()`, sự kiện `DOMContentLoaded`, lắng nghe cuộn `window.scroll`, resize cửa sổ, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons.
+* **Dòng 2113 – 2222**: `switchTab()`, sự kiện `DOMContentLoaded`, lắng nghe cuộn `window.scroll`, resize cửa sổ, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons. (Toàn bộ code comments và HTML comments trong file đã được chuẩn hóa 100% Tiếng Anh).
 
 ---
 
-## 5. Tài Liệu Liên Quan & Kế Hoạch Bảo Trì
+## 5. Kiến Trúc Bảo Mật Cloud (Firebase Security Rules & Zero-Trust)
 
+* **Tệp cấu hình**: [`firestore.rules`](../../firestore.rules) & [`firebase.json`](../../firebase.json)
+* **Triết lý bảo vệ**: **Zero-Trust & Public Identifier Pattern**
+  * Firebase Web `apiKey` đóng vai trò là Application Identifier (công khai hợp lệ trên web).
+  * Toàn bộ tính toàn vẹn dữ liệu được bảo vệ nghiêm ngặt ở tầng Server thông qua Firebase Security Rules:
+    * **Quyền Đọc (`allow read`)**: Công khai (`if true`) cho tất cả độc giả để có thể xem thảo luận kỹ thuật.
+    * **Quyền Tạo (`canCreateComment`)**: Bắt buộc đăng nhập Firebase Auth (`request.auth != null`), xác thực danh tính chống mạo danh (`userId == auth.uid`, `userEmail == auth.token.email`), kiểm soát độ dài nội dung (1–2000 ký tự), khởi tạo like bằng 0 và chỉ cho phép Tác giả (`thathcmus@gmail.com`) tạo kèm cờ ghim (`isPinned: true`).
+    * **Quyền Sửa (`canUpdateComment`)**: Chỉ cho phép 2 thao tác nguyên tử:
+      * Tác giả ghim/bỏ ghim bài (`diff().affectedKeys().hasOnly(['isPinned'])`).
+      * Độc giả thả tim / bỏ tim (`diff().affectedKeys().hasOnly(['likes', 'likedBy'])`), nghiêm cấm sửa trộm nội dung hoặc thông tin tác giả.
+    * **Quyền Xóa (`canDeleteComment`)**: Chỉ chính chủ bình luận (`resource.data.userId == auth.uid`) hoặc Tác giả blog (`thathcmus@gmail.com`) mới có quyền xóa.
+    * **Default Deny**: Chặn toàn bộ mọi collection/document khác (`match /{document=**} { allow read, write: if false; }`).
+
+---
+
+## 6. Tài Liệu Liên Quan & Kế Hoạch Bảo Trì
+
+- **Bộ quy tắc bảo mật Cloud**: [`firestore.rules`](../../firestore.rules) — Cấu hình rules chính thức triển khai trên Firebase Console / CLI.
 - **Kế hoạch bảo trì chi tiết & Ground Truth**: [`MAINTENANCE_PLAN.md`](MAINTENANCE_PLAN.md) — Tài liệu theo dõi tiến độ 60 ngày (20 Items) và lưu trữ toàn bộ nội dung Q&A gốc.
 - **Backlog tính năng tổng thể**: [`BACKLOG.md`](BACKLOG.md) — Danh sách tính năng mở rộng dài hạn (Calculator, Waveform Simulator...).

@@ -7,7 +7,24 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
+### Security & Backend
+- **Thiết lập Bộ Quy Tắc Bảo Mật Cloud Firestore Chuẩn Zero-Trust (`firestore.rules`, `firebase.json`)**:
+  - Triển khai kiến trúc **Zero-Trust & Public Identifier Pattern** cho Firebase Web SDK: Khẳng định Web `apiKey` là Public Identifier hợp lệ, toàn bộ an ninh bảo vệ dữ liệu được thực thi ở tầng Server qua Firebase Security Rules.
+  - **Quyền Đọc (`allow read: if true;`)**: Mở quyền đọc công khai cho mọi độc giả đọc bài viết trên blog để theo dõi các thảo luận kỹ thuật.
+  - **Quyền Tạo (`canCreateComment()`)**: Bắt buộc đăng nhập Google Auth, kiểm tra khớp danh tính UID & Email chống mạo danh, ràng buộc độ dài nội dung (1–2000 ký tự) chống payload spam, khởi tạo like bằng 0, chỉ cho phép Tác giả (`thathcmus@gmail.com`) tạo kèm cờ ghim (`isPinned`).
+  - **Quyền Cập Nhật (`canUpdateComment()`)**: Hạn chế nghiêm ngặt, chỉ cho phép 2 thao tác nguyên tử: Tác giả ghim/bỏ ghim (`isPinned`), hoặc Độc giả thả tim / bỏ tim (`likes`, `likedBy`), cấm tuyệt đối sửa trộm nội dung comment hoặc thông tin tác giả.
+  - **Quyền Xóa (`canDeleteComment()`)**: Chỉ chính chủ bình luận hoặc Tác giả blog mới có quyền xóa.
+  - **Default Deny (`match /{document=**} { allow read, write: if false; }`)**: Chặn mọi truy cập vào tất cả các collection/document ngoài danh mục được cho phép.
+  - Hỗ trợ đa widget: Khai báo sẵn các collection `/canfd_comments/`, `/flexray_comments/`, `/cpp_comments/`.
+- **Chuẩn Hóa Song Ngữ Cho Bộ Mặt Dự Án (`README.md` & `README.vi.md`)**:
+  - Tách bộ mặt dự án thành 2 tệp: `README.md` (Bản tiếng Anh chuẩn quốc tế) và `README.vi.md` (Bản tiếng Việt).
+  - Tích hợp Language Switcher `🌐 [English](README.md) | [Tiếng Việt](README.vi.md)` ở đầu mỗi tệp, đồng bộ toàn bộ bảng showcase và sơ đồ cây thư mục.
+- **Chuẩn Hóa 100% Tiếng Anh Cho Code Comments & HTML Comments**:
+  - Refactor toàn bộ các dòng ghi chú, chú thích thuật toán, controllers và comment cấu trúc DOM trong cả 3 widget (`widget_can_fd.html`, `widget_flexray.html`, `widget_cpp_oop.html`) sang 100% Tiếng Anh chuẩn công nghiệp.
+  - Loại bỏ hoàn toàn tình trạng comment tiếng Việt trong mã nguồn, giảm tải dung lượng file HTML và tối ưu hóa context window cho AI Agent.
+
 ### Fixed
+- **Khắc phục lỗi cú pháp Firestore Security Rules**: Sửa lỗi parse path variable do ghép chuỗi ký tự wildcard không hợp lệ bằng cách khai báo tường minh từng collection; bổ sung từ khóa `if` còn thiếu trong default deny rule (`allow read, write: if false;`).
 - **Khắc phục triệt để 2 lỗi điều hướng & hiển thị Q&A (`widget_can_fd.html`)**:
   - **Điểm 1 (Triệt tiêu 100% hiện tượng đè lên nhau)**: Gom 3 Tab điều hướng chính và cụm Tiêu đề Ngân Hàng Câu Hỏi + Bộ lọc độ khó & chủ đề vào container duy nhất `#smart-nav-container` (`sticky top-2 z-40`). Áp dụng cơ chế đo đạc chiều cao thực tế tự động `getSmartNavHeight()` và cập nhật khoảng cách `updateStickyBlockOffsets()`. Khi người dùng cuộn ngược lên hoặc cuộn xuống cuối trang, toàn bộ cụm điều hướng hiển thị liền kề phía trên câu hỏi mà tuyệt đối không bị đè lên câu hỏi.
   - **Điểm 2 (Giữ lại Tiêu đề + 4 Tab + Nội dung câu trả lời liền kề khi cuộn)**: Tái cấu trúc thẻ card thành khối sticky thống nhất `.qa-card-sticky-block` bao gồm: [Tiêu đề câu hỏi] + [Thanh 4 Tab: Lý Thuyết, C++ Modeling, ECU/AUTOSAR, Bẫy Phỏng Vấn] + [Nội dung câu trả lời của tab đang xem với `max-h-[220px] overflow-y-auto`]. Khi người đọc cuộn xuống để đọc danh sách bình luận, toàn bộ khối này được ghim giữ lại nguyên vẹn ngay trên đầu (`top: 8px` khi nav ẩn, hoặc ngay sau nav khi nav hiện), đảm bảo 4 tab và câu trả lời luôn liền kề sau câu hỏi như lúc chưa tua xuống.

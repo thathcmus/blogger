@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlexRay Protocol Explorer</title>
-    <!-- Nhúng Tailwind CSS qua CDN -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Nhúng Lucide Icons -->
+    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @keyframes fadeIn {
@@ -16,10 +16,10 @@
         .animate-fadeIn {
             animation: fadeIn 0.4s ease-out forwards;
         }
-        /* Đảm bảo giao diện mượt mà */
+        /* Ensure smooth rendering */
         body { margin: 0; padding: 0; }
         
-        /* Ẩn thanh cuộn cho các khối ngang */
+        /* Hide scrollbar for horizontal containers */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -305,7 +305,7 @@
                             </div>
                         </div>
 
-                        <!-- Chú thích 4 phân đoạn -->
+                        <!-- 4 Cycle Segments Legend -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-xs text-slate-600">
                             <div class="p-2.5 bg-white rounded-lg border border-slate-200">
                                 <span class="font-bold text-blue-700 block mb-0.5">Static Segment (Bắt buộc):</span>
@@ -566,7 +566,7 @@
                                 </div>
                             </div>
 
-                            <!-- Sub-Section 1: Giải Mã Toàn Diện Sync Node -->
+                            <!-- Sub-Section 1: Comprehensive Sync Node Analysis -->
                             <div class="mb-6 p-5 bg-indigo-50/70 rounded-xl border border-indigo-200">
                                 <div class="flex items-center gap-2 mb-3">
                                     <i data-lucide="cpu" class="w-5 h-5 text-indigo-700"></i>
@@ -602,7 +602,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Bảng so sánh Sync Node vs Regular Node -->
+                                <!-- Comparison Table: Sync Node vs Regular Node -->
                                 <div class="overflow-x-auto border border-indigo-200/80 rounded-xl bg-white shadow-sm">
                                     <table class="w-full text-xs text-left border-collapse">
                                         <thead class="bg-indigo-100/70 text-indigo-900 font-bold uppercase">
@@ -638,7 +638,7 @@
                                 </div>
                             </div>
 
-                            <!-- Sub-Section 2: Cơ Chế Đồng Bộ Khi Clock Lệch (Clock Drift & FTM) -->
+                            <!-- Sub-Section 2: Clock Drift Synchronization & FTM Mechanism -->
                             <div class="mb-6">
                                 <h4 class="text-base md:text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
                                     <i data-lucide="git-merge" class="w-5 h-5 text-amber-600"></i>
@@ -732,7 +732,7 @@
 
                                         <!-- Timeline Tracks for 4 Nodes -->
                                         <div class="space-y-3 relative">
-                                            <!-- Trục tham chiếu thẳng đứng (Nominal Target Line) -->
+                                            <!-- Nominal Target Vertical Reference Line -->
                                             <div class="absolute top-0 bottom-0 left-[35%] w-[2px] bg-indigo-500/40 z-0 pointer-events-none dashed-line"></div>
 
                                             <!-- Node 1: Master Sync Node -->
@@ -847,7 +847,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT ĐIỀU KHIỂN LOGIC (Đã cập nhật để chống lỗi) -->
+    <!-- CONTROLLER LOGIC SCRIPT (Fault-Tolerant) -->
     <script>
         const frameData = {
             header: {
@@ -976,7 +976,7 @@
             }
         }
 
-        // LOGIC MÔ PHỎNG ĐỒNG BỘ CLOCK & FTM (CHO QUESTION 2)
+        // CLOCK SYNC & FTM SIMULATION LOGIC (FOR QUESTION 2)
         let currentSimClockStep = 0;
 
         function runSimClock(step) {
@@ -1159,9 +1159,9 @@
             });
         }
 
-        // TÁCH BIỆT LOGIC UI KHỎI CÁC THƯ VIỆN BÊN NGOÀI
+        // ISOLATE CORE UI LOGIC FROM EXTERNAL LIBRARIES
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. Gắn sự kiện cốt lõi (luôn chạy được)
+            // 1. Attach core UI event listeners (always executable)
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-node').addEventListener('click', () => switchTab('node'));
             document.getElementById('btn-tab-network').addEventListener('click', () => switchTab('network'));
@@ -1171,10 +1171,10 @@
             document.getElementById('btn-seg-payload').addEventListener('click', () => selectSegment('payload'));
             document.getElementById('btn-seg-trailer').addEventListener('click', () => selectSegment('trailer'));
 
-            // Khởi tạo mặc định
+            // Default initialization
             selectSegment('header');
 
-            // 2. Load Icon riêng biệt, nếu lỗi do Host chèn banner cũng không làm đứng web
+            // 2. Load icons with safe fallback
             try {
                 if(typeof lucide !== 'undefined') lucide.createIcons();
             } catch (error) {

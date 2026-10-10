@@ -124,8 +124,8 @@ Minh họa cách một ECU xử lý và trao đổi dữ liệu:
 * **Dòng 56 – 98**: Cụm giao diện Tab 1 (Sơ đồ Segment tương tác và khung chi tiết thuộc tính).
 * **Dòng 99 – 197**: Cụm giao diện Tab 2 (3 Box quản lý dữ liệu và Sơ đồ Data Flow kiến trúc ECU).
 * **Dòng 198 – 330**: Cụm giao diện Tab 3 (4 card phân loại Frame, Card kiến trúc Dual Channel, và Biểu đồ Communication Cycle phân đoạn).
-* **Dòng 331 – 670**: Cụm giao diện Tab 4 (Ngân hàng câu hỏi phỏng vấn dạng Accordion: Item Q1 phân tích Time-Triggered & POC, Item Q2 chi tiết về Sync Node & Bộ mô phỏng tương tác Clock Drift 4-Node, và placeholder slot Q3).
-* **Dòng 671 – 890**: JavaScript logic:
+* **Dòng 331 – 848**: Cụm giao diện Tab 4 (Ngân hàng câu hỏi phỏng vấn dạng Accordion: Item Q1 phân tích Time-Triggered & POC, Item Q2 chi tiết về Sync Node & Bộ mô phỏng tương tác Clock Drift 4-Node, và placeholder slot Q3).
+* **Dòng 849 – 1187**: JavaScript logic (Toàn bộ code comments và HTML comments đã được chuẩn hóa 100% Tiếng Anh):
   - Khai báo hằng số dữ liệu cấu trúc `const frameData = { header, payload, trailer }`.
   - Hàm `switchTab(tabId)`: Chuyển đổi 4 tabs mượt mà.
   - Hàm `toggleQuestion(qId)`: Đóng/mở câu hỏi dạng accordion với hiệu ứng xoay icon mũi tên.

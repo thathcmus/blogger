@@ -36,9 +36,13 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │
 ├── AGENTS.md                               # [File này] Bản chỉ dẫn dành cho Agent
 ├── CHANGELOG.md                            # Nhật ký phiên bản chuẩn SemVer
-├── README.md                               # Bộ mặt dự án cho cộng đồng & độc giả
+├── README.md                               # Bộ mặt dự án cho cộng đồng & độc giả (English)
+├── README.vi.md                            # Bộ mặt dự án cho cộng đồng & độc giả (Tiếng Việt)
 ├── LICENSE                                 # Giấy phép nguồn mở MIT
 ├── .gitignore                              # Chặn file rác
+│
+├── firebase.json                           # Cấu hình triển khai Firebase (Firestore Rules)
+├── firestore.rules                         # Bộ quy tắc bảo mật Cloud Firestore (Zero-Trust)
 │
 ├── widget_can_fd.html                      # Widget: Trực quan hóa giao thức CAN FD
 ├── widget_flexray.html                     # Widget: Trực quan hóa giao thức FlexRay
@@ -49,19 +53,17 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 
 ## 3. Quy Trình Vận Hành Tiêu Chuẩn Cho Agent (Standard Operating Procedures)
 
-### SOP-1: Khi Sửa Đổi / Nâng Cấp Widget Hiện Có
-1. **Bước 1 (Đọc Ngữ Cảnh)**: Bắt buộc đọc file `docs/<tên_widget>/CURRENT_INFO.md` và `docs/<tên_widget>/MAINTENANCE_PLAN.md` (nếu có) để hiểu toàn bộ kiến trúc DOM, CSS, data model, Ground Truth và logic JS trước khi chỉnh sửa.
-2. **Bước 2 (Kiểm Tra Invariants)**: Đọc `.agents/rules/blogger-embed-rules.md`. Không được vi phạm các quy tắc:
-   - Giữ nguyên root container cô lập; không đụng chạm thẻ `html`, `body`.
-   - Giữ nguyên `try ... catch` bảo vệ khi gọi thư viện ngoài (Lucide icons).
-   - Đảm bảo các bảng/sơ đồ ngang luôn có `overflow-x-auto` và `no-scrollbar`.
-3. **Bước 3 (Chỉnh Sửa Mã Nguồn)**: Sử dụng các công cụ chỉnh sửa tệp để sửa đổi chính xác.
-4. **Bước 4 (Kiểm Tra Cú Pháp - Verification Protocol)**: Bắt buộc chạy kiểm tra cú pháp JS (xem Mục 4 bên dưới), phải trả về `Syntax OK`.
-5. **Bước 5 (Giao Thức Đồng Bộ Tài Liệu - Doc-Sync Protocol & DoD)**:
-   - Cập nhật `docs/<tên_widget>/CURRENT_INFO.md` (phiên bản, ngày cập nhật, số dòng code, kiến trúc component).
-   - Cập nhật `docs/<tên_widget>/MAINTENANCE_PLAN.md` (đồng bộ Ground Truth Q&A và đánh dấu tick tiến độ).
-   - Kiểm tra và đồng bộ lại `README.md` (bảng Showcase & sơ đồ cây thư mục) nếu có thay đổi về tính năng/kiến trúc.
-   - Ghi nhận nhật ký vào `CHANGELOG.md` dưới mục `[Unreleased]`.
+### SOP-1: Khi Sửa Đổi Bất Kỳ Điều Gì Trước Khi Push (Pre-Push Auto-Sync Protocol)
+> **NGUYÊN TẮC CỐT LÕI**: Bất kể sửa đổi lớn hay nhỏ (sửa 1 dòng code, fix bug, tinh chỉnh CSS, cập nhật logic, chỉnh sửa cấu hình `firestore.rules`, thêm tính năng mới, v.v.), **Agent BẮT BUỘC PHẢI TỰ ĐỘNG ĐỒNG BỘ LẠI TOÀN BỘ CÁC FILE INFO/TÀI LIỆU LIÊN QUAN TRƯỚC KHI KẾT THÚC LƯỢT LÀM VIỆC ĐỂ SẴN SÀNG PUSH**, tuyệt đối không được để sót hoặc đợi người dùng nhắc nhở.
+
+1. **Bước 1 (Đọc Ngữ Cảnh & Invariants)**: Đọc file `docs/<tên_widget>/CURRENT_INFO.md` và `.agents/rules/blogger-embed-rules.md`. Giữ nguyên container cô lập, cơ chế fault-tolerant (`try...catch`), `overflow-x-auto` và `no-scrollbar`.
+2. **Bước 2 (Chỉnh Sửa Mã Nguồn/Cấu Hình)**: Sử dụng các công cụ chỉnh sửa tệp để sửa đổi chính xác.
+3. **Bước 3 (Kiểm Tra Cú Pháp - Verification Protocol)**: Bắt buộc chạy kiểm tra cú pháp JS (xem Mục 4 bên dưới), phải trả về `Syntax OK`.
+4. **Bước 4 (Tự Động Đồng Bộ Toàn Bộ File Info - Mandatory Info-Sync)**:
+   - **`docs/<tên_widget>/CURRENT_INFO.md`**: Cập nhật số dòng code thực tế của file `.html`, ngày cập nhật, phiên bản, kiến trúc component, đặc tả tính năng/cấu hình mới.
+   - **`CHANGELOG.md`**: Ghi nhận chi tiết vào mục `[Unreleased]` (Fixed, Added, Security, Changed...).
+   - **`README.md` & `AGENTS.md`**: Đồng bộ lại cây thư mục (Repository Architecture) và bảng Showcase nếu có file mới hoặc thay đổi kiến trúc.
+   - **`docs/<tên_widget>/MAINTENANCE_PLAN.md`**: Đồng bộ Ground Truth Q&A và cập nhật trạng thái nếu có thay đổi trong sprint plan.
 
 ### SOP-2: Khi Tạo Widget Mới
 1. **Bước 1**: Đọc kỹ hướng dẫn và sử dụng boilerplate template tại [SKILL.md](.agents/skills/blogger-widget-creator/SKILL.md).
@@ -72,10 +74,10 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 
 ### 🎯 Tiêu Chuẩn Hoàn Thành Bắt Buộc (Definition of Done - DoD)
 Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** nếu chưa kiểm tra đủ 4 điểm chốt (4-Point Checkpoint):
-- [ ] **Point 1 (Code & Syntax):** File HTML chạy mượt, Verification Protocol trả về `Syntax OK`.
-- [ ] **Point 2 (Ground Truth):** Lưu nội dung hoàn chỉnh vào `docs/<widget>/MAINTENANCE_PLAN.md` (nếu có sprint plan).
-- [ ] **Point 3 (Spec & Metrics):** Cập nhật `docs/<widget>/CURRENT_INFO.md` (phiên bản, số dòng code, kiến trúc mới).
-- [ ] **Point 4 (Global Sync):** Ánh xạ đồng bộ `README.md` (cây thư mục/bảng Showcase) và ghi log `CHANGELOG.md`.
+- [ ] **Point 1 (Code & Syntax):** File HTML/JS chạy mượt, Verification Protocol trả về `Syntax OK`.
+- [ ] **Point 2 (Auto Info-Sync Spec & Metrics):** Tự động cập nhật `docs/<widget>/CURRENT_INFO.md` (phiên bản, ngày cập nhật, số dòng code thực tế, kiến trúc mới).
+- [ ] **Point 3 (Ground Truth Plan):** Lưu nội dung hoàn chỉnh vào `docs/<widget>/MAINTENANCE_PLAN.md` (nếu có sprint plan).
+- [ ] **Point 4 (Global Sync & Changelog):** Ánh xạ đồng bộ `README.md` & `AGENTS.md` (cây thư mục/bảng Showcase) và ghi log chi tiết vào `CHANGELOG.md` dưới mục `[Unreleased]`.
 
 ---
 

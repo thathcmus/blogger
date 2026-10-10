@@ -73,10 +73,10 @@ Tài liệu này định nghĩa các quy tắc kỹ thuật và tiêu chuẩn th
        - 💻 **Góc độ C++ / Modeling Follow-up:** Câu hỏi vặn lại khi ứng viên đề cập đến C++/SystemC (về race conditions, delta cycles, resolution functions, bitfield memory layout/endianness, cache locality, exception vs state transition...).
    - Toàn bộ nội dung hoàn chỉnh phải được đồng bộ lưu trong `MAINTENANCE_PLAN.md` làm **Single Source of Truth** trước và song hành với mã nguồn HTML.
 
-4. **Quy Tắc Đồng Bộ Tài Liệu Bắt Buộc (Mandatory Doc-Sync Rule - Chống Documentation Drift)**:
-   - Nghiêm cấm hoàn thành tác vụ nếu chỉ sửa mã nguồn mà bỏ quên hệ thống tài liệu vệ tinh.
-   - Bất kỳ thay đổi nào tác động đến UI, Data Model hoặc logic widget đều bắt buộc phải kích hoạt quy trình đồng bộ liên hoàn:
-     - Cập nhật số dòng, phiên bản và kiến trúc tại `docs/<widget>/CURRENT_INFO.md`.
-     - Đồng bộ Ground Truth Q&A tại `docs/<widget>/MAINTENANCE_PLAN.md` (nếu widget có kế hoạch chạy sprint).
-     - Cập nhật bảng Showcase và sơ đồ cây thư mục tại `README.md` và `AGENTS.md` khi có file mới hoặc nâng cấp tính năng lớn.
-     - Ghi nhận chi tiết vào `CHANGELOG.md` dưới mục `[Unreleased]`.
+4. **Quy Tắc Tự Động Đồng Bộ Toàn Bộ File Info Trước Khi Push (Pre-Push Auto-Sync Rule)**:
+   - **Bất kỳ sửa đổi nào** (dù lớn hay nhỏ: sửa 1 dòng code, fix bug, sửa CSS, sửa logic, cấu hình rules/json, thêm tính năng, v.v.) chuẩn bị push lên Git đều **BẮT BUỘC** phải tự động kích hoạt quy trình đồng bộ toàn bộ các file info/tài liệu liên quan mà không cần đợi người dùng nhắc nhở:
+     - **`docs/<widget>/CURRENT_INFO.md`**: Cập nhật số dòng code thực tế của file `.html`, ngày cập nhật, phiên bản và kiến trúc/tính năng mới.
+     - **`CHANGELOG.md`**: Ghi nhận chi tiết vào mục `[Unreleased]` theo chuẩn Keep a Changelog.
+     - **`README.md` & `AGENTS.md`**: Đồng bộ sơ đồ cây thư mục (Repository Architecture) và bảng Showcase khi có file/tính năng mới.
+     - **`docs/<widget>/MAINTENANCE_PLAN.md`**: Đồng bộ Ground Truth Q&A và cập nhật tiến độ (nếu có sprint plan).
+     - **Verification Protocol**: Bắt buộc chạy kiểm tra cú pháp JS qua Node.js (`Syntax OK`).

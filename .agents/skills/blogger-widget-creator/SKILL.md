@@ -101,12 +101,12 @@ document.getElementById('qa-section').innerHTML = `
   node -e "const fs = require('fs'); const html = fs.readFileSync('Tên_File.html', 'utf8'); const js = html.match(/<script>([\s\S]*?)<\/script>/)[1]; new Function(js); console.log('Syntax OK');"
   ```
 
-### Bước 5b: Giao Thức Đồng Bộ Tài Liệu (Mandatory Doc-Sync Checklist)
-Bắt buộc thực hiện đủ 4 điểm chốt (Definition of Done - DoD) trước khi kết thúc tác vụ:
-1. `docs/<tên_widget>/CURRENT_INFO.md`: Cập nhật đặc tả, phiên bản, bản đồ mã nguồn (số dòng code thực tế).
-2. `docs/<tên_widget>/MAINTENANCE_PLAN.md`: Lưu trữ nội dung Ground Truth Q&A (nếu có sprint plan).
-3. `README.md` & `AGENTS.md`: Đồng bộ sơ đồ cây thư mục và bảng widget showcase.
-4. `CHANGELOG.md`: Ghi log phiên bản chuẩn theo Keep a Changelog.
+### Bước 5b: Giao Thức Tự Động Đồng Bộ File Info Trước Khi Push (Pre-Push Auto-Sync Checklist)
+Bất kể sửa đổi lớn hay nhỏ (code, bugfix, CSS, logic, cấu hình rules/json, tính năng mới), **Agent BẮT BUỘC tự động kiểm tra và đồng bộ đủ 4 điểm chốt (Definition of Done - DoD)** trước khi kết thúc tác vụ để sẵn sàng push lên Git:
+1. `docs/<tên_widget>/CURRENT_INFO.md`: Cập nhật đặc tả, ngày cập nhật, phiên bản, bản đồ mã nguồn (số dòng code thực tế của file `.html`).
+2. `docs/<tên_widget>/MAINTENANCE_PLAN.md`: Lưu trữ nội dung Ground Truth Q&A và cập nhật tiến độ (nếu có sprint plan).
+3. `README.md` & `AGENTS.md`: Đồng bộ sơ đồ cây thư mục (Repository Architecture) và bảng widget showcase.
+4. `CHANGELOG.md`: Ghi log chi tiết dưới mục `[Unreleased]` theo chuẩn Keep a Changelog.
 
 ---
 
