@@ -38,6 +38,11 @@
                     <i data-lucide="languages" class="w-4 h-4 text-blue-600"></i>
                     <span id="lang-indicator">EN</span>
                 </button>
+
+                <!-- Fullscreen button -->
+                <button id="btn-fullscreen" onclick="toggleFullscreen()" title="Toàn màn hình / Thu nhỏ" class="flex items-center justify-center p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-sm font-semibold transition-colors border border-slate-300 shadow-sm">
+                    <i id="icon-fullscreen" data-lucide="maximize-2" class="w-4 h-4 text-slate-600"></i>
+                </button>
             </div>
             <h1 class="text-3xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-2">
                 <i data-lucide="zap" class="text-amber-600 w-8 h-8"></i>
@@ -763,6 +768,34 @@
             const modal = document.getElementById('google-auth-modal');
             if (modal) modal.classList.add('hidden');
         }
+
+        function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    const docEl = document.documentElement;
+                    if (docEl.requestFullscreen) docEl.requestFullscreen();
+                    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+                    else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    else if (document.msExitFullscreen) document.msExitFullscreen();
+                }
+            } catch(e) {
+                console.warn("Fullscreen toggle warning:", e);
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const icon = document.getElementById('icon-fullscreen');
+            if (!icon) return;
+            if (document.fullscreenElement) {
+                icon.setAttribute('data-lucide', 'minimize-2');
+            } else {
+                icon.setAttribute('data-lucide', 'maximize-2');
+            }
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        });
 
         function initFirestoreSync() {
             if (!isFirebaseReady || !firestoreDb) {

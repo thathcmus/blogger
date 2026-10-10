@@ -9,15 +9,17 @@
 
 ## 1. Cách Nhúng Vào Google Blogger
 
-**Nhúng Iframe qua GitHub Pages (Khuyên dùng):**
+**Nhúng Iframe Full-Width Breakout qua GitHub Pages (Tự động bung rộng 1200px, không bị bóp size):**
 ```html
-<!-- CAN FD Explorer Embed Widget -->
-<div style="width: 100%; margin: 24px auto; text-align: center;">
+<!-- Khối Widget Full-Width Breakout (Bung rộng 1200px tự động ra 2 bên lề Blogger) -->
+<div style="position: relative; left: 50%; transform: translateX(-50%); width: min(96vw, 1200px); margin: 32px 0; text-align: center;">
     <iframe src="https://thathcmus.github.io/blogger/widget_can_fd.html" 
             width="100%" 
-            height="850px" 
-            style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;" 
+            height="1100px" 
+            style="border: none; border-radius: 16px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); background-color: #f8fafc; overflow: hidden; display: block;" 
             title="CAN FD Protocol Explorer"
+            allow="fullscreen"
+            allowfullscreen="true"
             loading="lazy">
     </iframe>
 </div>
