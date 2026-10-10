@@ -83,19 +83,19 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
 
 * **Dòng 1 – 29**: HTML Head, CDN scripts (Tailwind, Lucide, Firebase App/Auth/Firestore Compat v10.14.1), CSS keyframes (`fadeIn`, `no-scrollbar`).
 * **Dòng 30 – 48**: Root container `#canfd-explorer-root`, Header, User Auth bar (`#auth-header-container`) và nút chuyển ngữ (`#lang-indicator`).
-* **Dòng 49 – 118**: Modal Google Sign-In & Firebase Auth (`#google-auth-modal`), cơ chế Dual-Action hỗ trợ tự động nhận diện `file:///` (mở Localhost / đăng nhập nhanh Tác Giả) và web standard (`signInWithGoogle()`).
-* **Dòng 119 – 131**: Thanh điều hướng 3 Tabs chính (`#btn-tab-frame`, `#btn-tab-compare`, `#btn-tab-interview`).
-* **Dòng 132 – 253**: Cụm giao diện Tab 1 (Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`).
-* **Dòng 254 – 321**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
-* **Dòng 322 – 358**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi Q&A) chứa hệ thống các nút lọc khó/dễ, lọc tags và `div#qa-container`.
-* **Dòng 359 – 483**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn và Google Sign-In.
-* **Dòng 484 – 623**: Data Layer `qaData`: Mảng Object song ngữ chứa 4 tầng kiến thức chuẩn ISO 11898-1 và bẫy kép.
-* **Dòng 624 – 648**: Cấu hình Firebase (`firebaseConfig`), khởi tạo SDK.
-* **Dòng 649 – 860**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `loginAsAuthorLocal()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
-* **Dòng 861 – 1350**: Controller render UI thảo luận (`renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes.
-* **Dòng 1351 – 1545**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
-* **Dòng 1546 – 1995**: Data & Handlers cho Segment Frame và So sánh thế hệ.
-* **Dòng 1996 – 2032**: Sự kiện `DOMContentLoaded`, khởi tạo đa ngôn ngữ, xử lý `?auth=1`, Firebase Auth listener, Firestore sync và Lucide icons.
+* **Dòng 49 – 95**: Modal Google Sign-In & Firebase Auth (`#google-auth-modal`), nút đăng nhập thật qua Firebase popup Google và hướng dẫn xử lý tên miền ủy quyền.
+* **Dòng 96 – 108**: Thanh điều hướng 3 Tabs chính (`#btn-tab-frame`, `#btn-tab-compare`, `#btn-tab-interview`).
+* **Dòng 109 – 230**: Cụm giao diện Tab 1 (Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`).
+* **Dòng 231 – 298**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
+* **Dòng 299 – 335**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi Q&A) chứa hệ thống các nút lọc khó/dễ, lọc tags và `div#qa-container`.
+* **Dòng 336 – 460**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn và Google Sign-In.
+* **Dòng 461 – 600**: Data Layer `qaData`: Mảng Object song ngữ chứa 4 tầng kiến thức chuẩn ISO 11898-1 và bẫy kép.
+* **Dòng 601 – 625**: Cấu hình Firebase (`firebaseConfig`), khởi tạo SDK.
+* **Dòng 626 – 830**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
+* **Dòng 831 – 1320**: Controller render UI thảo luận (`renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes.
+* **Dòng 1321 – 1515**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
+* **Dòng 1516 – 1960**: Data & Handlers cho Segment Frame và So sánh thế hệ.
+* **Dòng 1961 – 1987**: Sự kiện `DOMContentLoaded`, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons.
 
 ---
 

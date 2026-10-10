@@ -77,8 +77,8 @@
                     <div id="auth-environment-notice" class="hidden text-xs bg-amber-50 border border-amber-200 text-amber-900 p-2.5 rounded-lg text-left mt-3"></div>
                 </div>
 
-                <!-- Google Sign-In Action (When on http:// or https://) -->
-                <div id="auth-action-web" class="p-6">
+                <!-- Google Sign-In Action -->
+                <div class="p-6">
                     <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 p-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-800 font-semibold shadow-sm hover:shadow transition-all group">
                         <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -89,28 +89,6 @@
                         <span class="text-sm font-bold text-slate-800" data-i18n="btn_continue_google">Tiếp tục với Google</span>
                     </button>
                     <p class="text-[11px] text-slate-400 text-center mt-4">Xác thực an toàn qua Google Firebase Auth. Không lưu mật khẩu.</p>
-                </div>
-
-                <!-- Local file:/// Bridge Action (When opened via file:///) -->
-                <div id="auth-action-file" class="hidden p-6 flex flex-col gap-3">
-                    <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
-                        ⚡ <strong>Chế độ mở qua file:/// cục bộ:</strong> Google OAuth chặn mở popup từ đường dẫn file trên máy tính. Bạn hãy chọn 1 trong 2 cách tiện lợi bên dưới:
-                    </div>
-                    
-                    <a href="http://localhost:3000/widget_can_fd.html?auth=1" target="_blank" class="w-full flex items-center justify-center gap-2.5 p-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md transition-all group">
-                        <i data-lucide="globe" class="w-4 h-4"></i>
-                        <span>1. Mở qua Localhost (Popup Google hoạt động 100%)</span>
-                    </a>
-
-                    <button onclick="loginAsAuthorLocal()" class="w-full flex items-center justify-center gap-2.5 p-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs shadow-md transition-all">
-                        <i data-lucide="crown" class="w-4 h-4"></i>
-                        <span>2. Xác thực nhanh Tác Giả (Thật Huỳnh)</span>
-                    </button>
-
-                    <a href="https://thathcmus.github.io/blogger/widget_can_fd.html" target="_blank" class="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs transition-colors">
-                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
-                        <span>3. Xem trên GitHub Pages Live</span>
-                    </a>
                 </div>
             </div>
         </div>
@@ -720,13 +698,8 @@
         }
 
         async function signInWithGoogle() {
-            if (location.protocol === 'file:') {
-                window.open('http://localhost:3000/widget_can_fd.html?auth=1', '_blank');
-                closeAuthModal();
-                return;
-            }
             if (!isFirebaseReady || !firebaseAuth) {
-                showModalNotice("Firebase SDK đang khởi tạo hoặc chưa sẵn sàng. Vui lòng thử lại sau giây lát.");
+                showModalNotice("Firebase SDK đang khởi tạo hoặc chưa sẵn sàng. Vui lòng tải lại trang.");
                 return;
             }
             try {
@@ -736,23 +709,25 @@
                 closeAuthModal();
             } catch (err) {
                 console.warn("Google Sign-In Popup Warning:", err);
-                if (err.code !== 'auth/popup-closed-by-user') {
+                if (err.code === 'auth/unauthorized-domain') {
+                    const host = window.location.hostname || 'domain hiện tại';
+                    showModalNotice(`
+                        <div class="text-xs text-amber-900 leading-relaxed text-left">
+                            <div class="font-bold text-rose-600 mb-1 flex items-center gap-1">
+                                <span>⚠️ Domain chưa được ủy quyền:</span> <code>${host}</code>
+                            </div>
+                            <p class="text-slate-600 mb-2">Để đăng nhập Google trên GitHub Pages hoặc Blogger, bạn chỉ cần thêm tên miền này vào Firebase Console (khoảng 30 giây):</p>
+                            <ol class="list-decimal ml-4 space-y-1 text-slate-700 font-medium">
+                                <li>Mở <a href="https://console.firebase.google.com/project/tech-blogger-widgets/authentication/settings" target="_blank" class="underline text-blue-600 font-bold hover:text-blue-800">Firebase Console &rarr; Auth Settings &rarr; Authorized domains</a></li>
+                                <li>Bấm <strong>Add domain</strong> và nhập: <code class="bg-amber-100 px-1 py-0.5 rounded text-amber-900 select-all font-mono font-bold">${host}</code></li>
+                                <li>Bấm <strong>Add</strong> rồi thử đăng nhập lại.</li>
+                            </ol>
+                        </div>
+                    `);
+                } else if (err.code !== 'auth/popup-closed-by-user') {
                     showModalNotice("Thông báo: " + (err.message || err.code));
                 }
             }
-        }
-
-        function loginAsAuthorLocal() {
-            const authorProfile = {
-                id: 'author_thathcmus',
-                name: 'Thật Huỳnh',
-                email: AUTHOR_EMAIL,
-                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60',
-                role: 'Author',
-                isFirebase: true
-            };
-            setActiveUser(authorProfile);
-            closeAuthModal();
         }
 
         async function logoutUser() {
@@ -777,18 +752,8 @@
         function openAuthModal() {
             const modal = document.getElementById('google-auth-modal');
             if (modal) {
-                const isFile = (location.protocol === 'file:');
-                const webAction = document.getElementById('auth-action-web');
-                const fileAction = document.getElementById('auth-action-file');
-                if (webAction && fileAction) {
-                    if (isFile) {
-                        webAction.classList.add('hidden');
-                        fileAction.classList.remove('hidden');
-                    } else {
-                        webAction.classList.remove('hidden');
-                        fileAction.classList.add('hidden');
-                    }
-                }
+                const noticeEl = document.getElementById('auth-environment-notice');
+                if (noticeEl) noticeEl.classList.add('hidden');
                 modal.classList.remove('hidden');
                 try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
             }
@@ -2008,16 +1973,6 @@
 
             // Init Q&A Cards
             renderQACards(qaData);
-
-            // Tự động mở modal auth nếu URL có tham số ?auth=1 (từ file:/// mở sang localhost)
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('auth') === '1') {
-                    setTimeout(() => {
-                        openAuthModal();
-                    }, 350);
-                }
-            } catch(e) {}
 
             // Safe icon init
             try {

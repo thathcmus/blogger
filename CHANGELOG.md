@@ -16,7 +16,7 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
   - Tích hợp **Cloud Firestore Realtime Sync** (`canfd_comments` collection): Lắng nghe thời gian thực qua `onSnapshot`, lưu trữ độc lập trên cloud, kết hợp cache offline `localStorage`.
   - **Chế độ Cơ sở dữ liệu Sạch (Clean State)**: Xóa sạch toàn bộ dữ liệu mẫu giả định (`SEED_COMMENTS = []`), chỉ hiển thị và đồng bộ các thảo luận thật do chính bạn và độc giả đăng nhập Google gửi lên.
   - Xóa sạch toàn bộ các tài khoản mock/demo và dữ liệu seed thử nghiệm cũ, vận hành 100% trên nền tảng Firebase Auth và Cloud Firestore.
-  - Khắc phục triệt để giới hạn chặn popup của Google OAuth trên giao thức `file:///`: Xây dựng máy chủ nội bộ `server.js` (port 3000) chạy nền để kích hoạt Google Sign-In Popup thật 100%, đồng thời bổ sung cơ chế Dual-Action trên modal cho phép xác thực nhanh danh tính Tác Giả (`Thật Huỳnh` - `thathcmus@gmail.com`) trực tiếp ngay trên `file:///`.
+  - Tối ưu hóa xác thực cho môi trường Web (GitHub Pages và Google Blogger): Bổ sung hướng dẫn chi tiết và thông báo trực quan khi domain chưa được cấp phép (auth/unauthorized-domain), tinh gọn mã nguồn chuẩn Web nhúng Blogger.
 - **Tái cấu trúc Khung Thảo Luận & Ghi Chú Kỹ Thuật (`widget_can_fd.html`)**:
   - Loại bỏ sub-tab thứ 5 "Thảo luận" riêng biệt; thay vào đó, đặt **Khung Thảo Luận & Ghi Chú nằm cố định trực tiếp bên dưới câu trả lời của CẢ 4 tab** (`📖 Lý Thuyết`, `🖥️ SystemC/C++ Modeling`, `🔧 ECU/AUTOSAR`, `⚠️ Interview Trap`).
   - Đảm bảo người đọc và tác giả khi xem bất kỳ phần nào đều có thể xem ngay thảo luận hoặc để lại concern/note kỹ thuật tương ứng mà không bị che khuất câu trả lời.
