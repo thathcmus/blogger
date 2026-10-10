@@ -102,9 +102,9 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
 * **Dòng 1731 – 1910**: **Smart Scroll Navigation Controller** (`getSmartNavHeight()`, `updateStickyBlockOffsets()`, `setSmartNavVisibility()`, `handleSmartScroll()`):
   - **Tính toán chiều cao thực tế động (`getSmartNavHeight()`)**: Tự động đo đạc kích thước thực tế của `#smart-nav-container`, gán tọa độ `top: (navHeight + 12)px` khi nav hiện, triệt tiêu 100% tình trạng đè lên câu hỏi khi cuộn lên hoặc kéo xuống cuối.
   - **Tua xuống (Scroll Down)**: Ẩn mượt mà `#smart-nav-container`, khối sticky câu hỏi tự động dời lên sát đỉnh (`top: 8px`), bình luận cuộn mượt mà phía dưới.
-  - **Tua lên 1 xíu (Scroll Up) & Cuối trang (At Bottom)**: Trượt hiện lại 6 mục điều hướng, câu hỏi tự động dời xuống vị trí liền kề ngay sau mà không bị che khuất.
-* **Dòng 1911 – 2122**: Data & Handlers cho Segment Frame và So sánh thế hệ.
-* **Dòng 2123 – 2235**: `switchTab()`, sự kiện `DOMContentLoaded`, lắng nghe cuộn `window.scroll`, resize cửa sổ, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons.
+  - **Tua lên 1 xíu (Scroll Up)**: Trượt hiện lại 6 mục điều hướng trên đầu trang. Khi cuộn xuống (kể cả khi chạm đáy trang), thanh điều hướng giữ nguyên trạng thái ẩn để độc giả tập trung 100% vào nội dung câu hỏi và bình luận mà không bị tự động bật lên.
+* **Dòng 1901 – 2112**: Data & Handlers cho Segment Frame và So sánh thế hệ.
+* **Dòng 2113 – 2225**: `switchTab()`, sự kiện `DOMContentLoaded`, lắng nghe cuộn `window.scroll`, resize cửa sổ, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons.
 
 ---
 

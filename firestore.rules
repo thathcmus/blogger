@@ -1,0 +1,100 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+
+    // Kiểm tra người dùng đã đăng nhập qua Firebase Auth chưa
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Kiểm tra người dùng có phải là Tác giả blog (Super Admin) không
+    function isAuthor() {
+      return isAuthenticated() && request.auth.token.email == "thathcmus@gmail.com";
+    }
+
+    // Kiểm tra tính hợp lệ khi tạo bình luận mới
+    function canCreateComment() {
+      return isAuthenticated()
+        // Chống giả mạo danh tính: UID & Email bắt buộc khớp với Auth Token
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userEmail == request.auth.token.email
+        // Giới hạn độ dài nội dung (1 đến 2000 ký tự)
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 2000
+        // Khởi tạo lượt like ban đầu phải bằng 0
+        && request.resource.data.likes == 0
+        && request.resource.data.likedBy is list
+        && request.resource.data.likedBy.size() == 0
+        // Chỉ Author mới được quyền tạo kèm cờ ghim (isPinned: true)
+        && (request.resource.data.isPinned == false || isAuthor());
+    }
+
+    // Kiểm tra tính hợp lệ khi cập nhật (Like hoặc Ghim)
+    function canUpdateComment() {
+      return isAuthenticated() && (
+        // Trường hợp A: Tác giả ghim hoặc bỏ ghim bình luận (chỉ thay đổi isPinned)
+        (
+          isAuthor()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isPinned'])
+        )
+        ||
+        // Trường hợp B: Độc giả thả tim / bỏ tim (chỉ thay đổi likes và likedBy)
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy'])
+          // Không cho phép sửa đổi nội dung hoặc người sở hữu
+          && request.resource.data.content == resource.data.content
+          && request.resource.data.userId == resource.data.userId
+        )
+      );
+    }
+
+    // Kiểm tra quyền xóa: Chỉ chính chủ hoặc Tác giả blog
+    function canDeleteComment() {
+      return isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAuthor()
+      );
+    }
+
+    // ==========================================
+    // WIDGET COMMENTS COLLECTIONS
+    // ==========================================
+
+    // 1. Widget CAN FD
+    match /canfd_comments/{commentId} {
+      allow read: if true;
+      allow create: if canCreateComment();
+      allow update: if canUpdateComment();
+      allow delete: if canDeleteComment();
+    }
+
+    // 2. Widget FlexRay (Sẵn sàng khi tích hợp)
+    match /flexray_comments/{commentId} {
+      allow read: if true;
+      allow create: if canCreateComment();
+      allow update: if canUpdateComment();
+      allow delete: if canDeleteComment();
+    }
+
+    // 3. Widget C++ OOP (Sẵn sàng khi tích hợp)
+    match /cpp_comments/{commentId} {
+      allow read: if true;
+      allow create: if canCreateComment();
+      allow update: if canUpdateComment();
+      allow delete: if canDeleteComment();
+    }
+
+    // ==========================================
+    // ZERO-TRUST DEFAULT RULE
+    // Chặn tất cả các collections/documents khác
+    // ==========================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

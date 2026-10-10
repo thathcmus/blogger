@@ -1769,8 +1769,6 @@
 
         function handleSmartScroll() {
             const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
-            const windowHeight = window.innerHeight;
-            const documentHeight = document.documentElement.scrollHeight;
             
             // 1. Nếu ở sát đỉnh trang (< 80px) -> Luôn hiện đầy đủ 6 mục điều hướng
             if (currentScrollY <= 80) {
@@ -1779,15 +1777,7 @@
                 return;
             }
 
-            // 2. Nếu ở phần cuối trang -> Luôn hiện đầy đủ 6 mục điều hướng (liền kề trên, không đè câu hỏi)
-            const isAtBottom = (windowHeight + currentScrollY) >= (documentHeight - 45);
-            if (isAtBottom) {
-                if (isSmartNavHidden) setSmartNavVisibility(true);
-                lastScrollY = currentScrollY;
-                return;
-            }
-
-            // 3. Tính độ dịch chuyển cuộn
+            // 2. Tính độ dịch chuyển cuộn
             const deltaY = currentScrollY - lastScrollY;
             
             // Ngưỡng tối thiểu (8px) để triệt tiêu rung khi dừng cuộn
@@ -1796,7 +1786,7 @@
             }
 
             if (deltaY > 0) {
-                // Cuộn XUỐNG: Ẩn 6 mục điều hướng, chỉ giữ lại câu hỏi + 4 tabs + câu trả lời và comment
+                // Cuộn XUỐNG: Ẩn 6 mục điều hướng, chỉ giữ lại câu hỏi + 4 tabs + câu trả lời và comment (kể cả khi xuống cuối trang)
                 if (!isSmartNavHidden) {
                     setSmartNavVisibility(false);
                 }
