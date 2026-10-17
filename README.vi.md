@@ -78,6 +78,7 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 - [`AGENTS.md`](AGENTS.md): Bản chỉ dẫn cốt lõi và giao thức nghiệm thu (Verification Protocol) cho AI Agent.
 - [`.agents/rules/blogger-embed-rules.md`](.agents/rules/blogger-embed-rules.md): Bộ quy tắc kỹ thuật nghiêm ngặt khi code widget nhúng Blogger.
 - [`.agents/skills/blogger-widget-creator/SKILL.md`](.agents/skills/blogger-widget-creator/SKILL.md): Kỹ năng và template mẫu 5 bước để tạo thêm widget mới.
+- [`.agents/skills/git-commit-push/SKILL.md`](.agents/skills/git-commit-push/SKILL.md): Kỹ năng xử lý tự động lệnh tắt `/commit`, `/push`, `/commit-push`.
 
 ---
 
@@ -86,7 +87,9 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 ```text
 ├── .agents/                                # Quy chuẩn và kỹ năng cho AI Agent
 │   ├── rules/blogger-embed-rules.md        # Luật nhúng Blogger & Tiêu chuẩn 4 tầng Q&A
-│   └── skills/blogger-widget-creator/      # Kỹ năng và template tạo widget mới
+│   └── skills/
+│       ├── blogger-widget-creator/         # Kỹ năng và template tạo widget mới
+│       └── git-commit-push/                # Kỹ năng xử lý tự động lệnh tắt /commit và /push
 ├── docs/                                   # Tài liệu hiện trạng, backlog & maintenance plan
 │   ├── can_fd/                             # Tài liệu CAN FD Protocol
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật
@@ -102,6 +105,8 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 ├── LICENSE                                 # Giấy phép mã nguồn mở MIT
 ├── firebase.json                           # Cấu hình triển khai Firebase
 ├── firestore.rules                         # Quy tắc bảo mật Cloud Firestore (Zero-Trust Rules)
+├── scripts/                                # Công cụ tự động hóa & Kiểm soát chất lượng
+│   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
 ├── widget_can_fd.html                      # Widget CAN FD Protocol Explorer
 ├── widget_flexray.html                     # Widget FlexRay Protocol Explorer
 └── widget_cpp_oop.html                     # Widget C++ OOP Simulator

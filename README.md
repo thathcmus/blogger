@@ -78,6 +78,7 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 - [`AGENTS.md`](AGENTS.md): Core operating guidelines, Definition of Done, and Verification Protocol.
 - [`.agents/rules/blogger-embed-rules.md`](.agents/rules/blogger-embed-rules.md): Technical invariants for Blogger embedding.
 - [`.agents/skills/blogger-widget-creator/SKILL.md`](.agents/skills/blogger-widget-creator/SKILL.md): 5-step workflow and starter boilerplate for new widgets.
+- [`.agents/skills/git-commit-push/SKILL.md`](.agents/skills/git-commit-push/SKILL.md): Automated `/commit`, `/push`, `/commit-push` workflow skill.
 
 ---
 
@@ -86,7 +87,9 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 ```text
 ├── .agents/                                # AI Agent rules and skills
 │   ├── rules/blogger-embed-rules.md        # Blogger embedding invariants & 4-tier Q&A rules
-│   └── skills/blogger-widget-creator/      # 5-step workflow & boilerplate generator
+│   └── skills/
+│       ├── blogger-widget-creator/         # 5-step workflow & boilerplate generator
+│       └── git-commit-push/                # Automated /commit and /push shortcut workflow
 ├── docs/                                   # Specifications, backlogs & maintenance plans
 │   ├── can_fd/                             # CAN FD Protocol documentation
 │   │   ├── CURRENT_INFO.md                 # Current technical specification
@@ -102,6 +105,8 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 ├── LICENSE                                 # MIT Open Source License
 ├── firebase.json                           # Firebase deployment configuration
 ├── firestore.rules                         # Cloud Firestore Zero-Trust Security Rules
+├── scripts/                                # Automation & Quality Control
+│   └── sync-docs.js                        # Auto-verification & documentation sync script
 ├── widget_can_fd.html                      # CAN FD Protocol Explorer widget
 ├── widget_flexray.html                     # FlexRay Protocol Explorer widget
 └── widget_cpp_oop.html                     # C++ OOP Simulator widget

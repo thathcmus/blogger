@@ -63,20 +63,22 @@ Tài liệu này định nghĩa các quy tắc kỹ thuật và tiêu chuẩn th
 2. **Tính Trong Suốt Khi Nhúng**:
    - Mọi widget phải có file tài liệu hiện trạng tương ứng đặt tại `docs/<widget_name>/CURRENT_INFO.md` để người quản trị blog hoặc AI có thể đọc hiểu trong 30 giây.
 
-3. **Tiêu Chuẩn 4 Tầng Nội Dung & Bẫy Kép (Double-Angle Interview Trap)**:
+3. **Tiêu Chuẩn 4 Tầng Nội Dung & Khung Diễn Đạt 5W-1H / Micro-STAR**:
    - Mọi Q&A item trong các visualizer phỏng vấn kỹ thuật (CAN FD, FlexRay, C++...) bắt buộc phải có đủ 4 tầng nội dung:
      - 📖 **Theory**: Chuẩn quốc tế (ISO, AUTOSAR, Protocol Spec).
      - 🖥️ **SystemC/C++ Modeling**: Thiết kế kiến trúc mô phỏng, registers, FSM, TLM-2.0 / bit-accurate logic trong C++/SystemC.
      - 🔧 **ECU/AUTOSAR Practice**: Cấu hình stack BSW thực tế (CanIf, PduR, CanSM, MCAL) hoặc thanh ghi MCU.
-     - ⚠️ **Interview Trap**: Bắt buộc triển khai **2 góc nhìn phản biện song song**:
-       - 🚗 **Góc độ Automotive / Protocol Trap:** Câu hỏi bẫy về timing, starvation, bus load, hardware limits, AUTOSAR DET/Dem.
-       - 💻 **Góc độ C++ / Modeling Follow-up:** Câu hỏi vặn lại khi ứng viên đề cập đến C++/SystemC (về race conditions, delta cycles, resolution functions, bitfield memory layout/endianness, cache locality, exception vs state transition...).
+     - ⚠️ **Interview Trap**: Bắt buộc triển khai **2 góc nhìn phản biện song song** (🚗 Automotive vs 💻 C++ Modeling).
+   - **Phân loại diễn đạt bắt buộc**:
+     - **Câu hỏi Khái niệm / Kiến trúc Giao thức (Type A)**: Tầng `📖 Theory` bắt buộc viết theo khuôn mẫu **5W-1H** (📌 What, 💡 Why, ⏱️ When, 📍 Where, ⚙️ Who & How).
+     - **Câu hỏi Tình huống / Xử lý sự cố / Bẫy (Type B)**: Tầng `⚠️ Interview Trap` bắt buộc viết theo khuôn mẫu **Micro-STAR** (🚨 Situation, 🎯 Task, 🛠️ Action, 📊 Result).
    - Toàn bộ nội dung hoàn chỉnh phải được đồng bộ lưu trong `MAINTENANCE_PLAN.md` làm **Single Source of Truth** trước và song hành với mã nguồn HTML.
 
 4. **Quy Tắc Tự Động Đồng Bộ Toàn Bộ File Info Trước Khi Push (Pre-Push Auto-Sync Rule)**:
    - **Bất kỳ sửa đổi nào** (dù lớn hay nhỏ: sửa 1 dòng code, fix bug, sửa CSS, sửa logic, cấu hình rules/json, thêm tính năng, v.v.) chuẩn bị push lên Git đều **BẮT BUỘC** phải tự động kích hoạt quy trình đồng bộ toàn bộ các file info/tài liệu liên quan mà không cần đợi người dùng nhắc nhở:
+     - **Chạy script tự động hóa**: `node scripts/sync-docs.js` (hoặc thông qua Git Pre-Commit Hook tự động).
      - **`docs/<widget>/CURRENT_INFO.md`**: Cập nhật số dòng code thực tế của file `.html`, ngày cập nhật, phiên bản và kiến trúc/tính năng mới.
      - **`CHANGELOG.md`**: Ghi nhận chi tiết vào mục `[Unreleased]` theo chuẩn Keep a Changelog.
      - **`README.md` & `AGENTS.md`**: Đồng bộ sơ đồ cây thư mục (Repository Architecture) và bảng Showcase khi có file/tính năng mới.
      - **`docs/<widget>/MAINTENANCE_PLAN.md`**: Đồng bộ Ground Truth Q&A và cập nhật tiến độ (nếu có sprint plan).
-     - **Verification Protocol**: Bắt buộc chạy kiểm tra cú pháp JS qua Node.js (`Syntax OK`).
+     - **Verification Protocol**: Bắt buộc kiểm tra cú pháp JS qua Node.js (`Syntax OK`).

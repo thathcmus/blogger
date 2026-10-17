@@ -22,8 +22,10 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │   ├── rules/
 │   │   └── blogger-embed-rules.md          # Bộ luật bắt buộc khi code widget nhúng Blogger
 │   └── skills/
-│       └── blogger-widget-creator/
-│           └── SKILL.md                    # Hướng dẫn 5 bước và template tạo widget mới
+│       ├── blogger-widget-creator/
+│       │   └── SKILL.md                    # Hướng dẫn 5 bước và template tạo widget mới
+│       └── git-commit-push/
+│           └── SKILL.md                    # Xử lý lệnh tắt /commit, /push, /commit-push tự động
 │
 ├── docs/                                   # Tài liệu chi tiết từng widget
 │   ├── can_fd/                             # Widget CAN FD
@@ -43,6 +45,9 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │
 ├── firebase.json                           # Cấu hình triển khai Firebase (Firestore Rules)
 ├── firestore.rules                         # Bộ quy tắc bảo mật Cloud Firestore (Zero-Trust)
+│
+├── scripts/                                # Công cụ tự động hóa & Kiểm soát chất lượng
+│   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
 │
 ├── widget_can_fd.html                      # Widget: Trực quan hóa giao thức CAN FD
 ├── widget_flexray.html                     # Widget: Trực quan hóa giao thức FlexRay
@@ -72,6 +77,19 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 4. **Bước 4**: Thêm widget mới vào bảng danh mục Showcase và sơ đồ cây thư mục trong cả `README.md` và `AGENTS.md`.
 5. **Bước 5**: Ghi nhận vào `CHANGELOG.md` và chạy Verification Protocol đảm bảo file không có lỗi cú pháp.
 
+### SOP-3: Giao Thức Lệnh Tắt `/commit`, `/push`, `/commit-push` (Automated Git Workflow)
+Khi người dùng gõ lệnh tắt hoặc yêu cầu liên quan đến Git:
+1. **Lệnh `/commit`**:
+   - Tự động chạy `node scripts/sync-docs.js --git-add` để kiểm tra cú pháp và đồng bộ `CURRENT_INFO.md`.
+   - Kiểm tra `git status` và `git diff --staged`.
+   - Soạn thảo Commit Message chuẩn Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `chore`) kèm phân tích chi tiết.
+   - Chạy `git add -A` và `git commit -m "<message>"`.
+2. **Lệnh `/push`**:
+   - Kiểm tra xem còn file chưa commit không. Nếu có, thực hiện quy trình `/commit` trước.
+   - Chạy `git push origin main` (hoặc nhánh hiện tại) và báo cáo commit hash/status.
+3. **Lệnh `/commit-push` (hoặc `/cp`)**:
+   - Thực thi liền mạch: Sync & Syntax Check $\rightarrow$ Commit $\rightarrow$ Push lên GitHub.
+
 ### 🎯 Tiêu Chuẩn Hoàn Thành Bắt Buộc (Definition of Done - DoD)
 Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** nếu chưa kiểm tra đủ 4 điểm chốt (4-Point Checkpoint):
 - [ ] **Point 1 (Code & Syntax):** File HTML/JS chạy mượt, Verification Protocol trả về `Syntax OK`.
@@ -81,28 +99,45 @@ Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** 
 
 ---
 
-## 4. Giao Thức Nghiệm Thu Của Agent (Verification Protocol)
+## 4. Giao Thức Nghiệm Thu & Tự Động Hóa (Verification & Automation Protocol)
 
-Mỗi khi Agent chỉnh sửa hoặc tạo mới file HTML, **bắt buộc phải chạy lệnh kiểm tra cú pháp JavaScript** trong terminal để đảm bảo không phát sinh lỗi parse hoặc lỗi cú pháp gây hỏng trang:
+Mỗi khi Agent chỉnh sửa hoặc tạo mới file HTML, **bắt buộc phải chạy kiểm tra cú pháp JavaScript và kích hoạt bộ đồng bộ tài liệu tự động**:
 
 ```powershell
-node -e "const fs = require('fs'); const html = fs.readFileSync('<Tên_File.html>', 'utf8'); const js = html.match(/<script>([\s\S]*?)<\/script>/)[1]; new Function(js); console.log('Syntax OK');"
+# Chạy script tự động hóa: kiểm tra cú pháp toàn bộ widget + đồng bộ docs/can_fd/CURRENT_INFO.md
+node scripts/sync-docs.js
 ```
 
-Nếu lệnh trả về `Syntax OK` và không có ngoại lệ, công việc mới được coi là hoàn tất về mặt kỹ thuật.
+> 🛡️ **Lưới an toàn Git Pre-Commit Hook**: Kho mã nguồn đã được cấu hình `.git/hooks/pre-commit`. Mọi lệnh `git commit` sẽ tự động thực thi `node scripts/sync-docs.js --git-add`. Nếu có bất kỳ lỗi cú pháp nào, commit sẽ bị hủy ngay lập tức và tài liệu sẽ được tự động cập nhật khớp với số dòng code thực tế.
 
 ---
 
-## 5. Tiêu Chuẩn Tri Thức Miền (Domain Knowledge Integrity)
+## 5. Tiêu Chuẩn Tri Thức Miền & Khung Diễn Đạt Q&A (Domain Knowledge & Frameworks)
 
 - Khi làm việc với giao thức **FlexRay**: Bắt buộc đối chiếu với tiêu chuẩn **FlexRay Protocol Specification v3.0.1** và **ISO 17458:2013**.
 - Khi làm việc với giao thức **CAN / CAN FD**: Bắt buộc đối chiếu với **ISO 11898-1:2015**.
 - Khi làm việc với **C++**: Bắt buộc đảm bảo tính chính xác theo chuẩn C++11/C++17/C++20 (Memory Layout, VTABLE, Polymorphism, RAII).
 - Không tự ý phỏng đoán hoặc đơn giản hóa sai lệch các quy định an toàn hệ thống ô tô (ISO 26262 ASIL).
 
-- **Tiêu chuẩn cấu trúc Q&A (4 Tầng & Bẫy Kép Double-Angle)**:
-  - Bắt buộc mỗi Q&A item phải có đủ 4 tầng: `📖 Theory` → `🖥️ SystemC/C++ Modeling` → `🔧 ECU/AUTOSAR Practice` → `⚠️ Interview Trap`.
-  - Riêng tầng `⚠️ Interview Trap` bắt buộc có đủ 2 góc nhìn phản biện:
-    - 🚗 **Góc độ Automotive / Protocol:** Bẫy về timing, starvation, bus load, hardware constraints, AUTOSAR DET/Dem.
-    - 💻 **Góc độ C++ / Modeling Follow-up:** Bẫy vặn lại khi ứng viên đề cập đến SystemC / C++ (race condition, delta cycle, resolution function, bitfield memory layout/endianness, cache locality, TLM vs bit-accurate).
-  - Toàn bộ nội dung phải đồng bộ lưu trong `MAINTENANCE_PLAN.md` làm Ground Truth chuẩn trước khi đưa lên code HTML.
+### 🎯 Chuẩn Cấu Trúc Q&A Bắt Buộc (4 Tầng & Phân Loại 5W-1H / Micro-STAR)
+Mỗi câu hỏi Q&A bắt buộc có đủ **4 tầng kỹ thuật cốt lõi**:
+1. `📖 Theory`: Lý thuyết & chuẩn giao thức ISO.
+2. `🖥️ SystemC/C++ Modeling`: Thiết kế kiến trúc mô phỏng, registers, FSM, TLM-2.0.
+3. `🔧 ECU/AUTOSAR Practice`: Cấu hình BSW stack thực tế (CanIf, PduR, CanSM, MCAL).
+4. `⚠️ Interview Trap`: Bẫy kép phản biện song song (🚗 Automotive/Protocol vs 💻 C++/Modeling).
+
+#### 📐 Quy tắc diễn đạt theo Phân Loại Câu Hỏi (Question Classification):
+- **TYPE A: Câu Hỏi Khái Niệm / Kiến Trúc Giao Thức (Protocol / Architecture / Specs)**:
+  - Tầng `📖 Theory` **BẮT BUỘC** viết theo chuẩn **5W-1H** với các icon nhận diện trực quan:
+    - 📌 **What**: Định nghĩa kỹ thuật cốt lõi trong 1–2 câu súc tích.
+    - 💡 **Why**: Giải quyết khiếm khuyết gì của chuẩn cũ hoặc giải quyết bài toán vật lý/an toàn nào.
+    - ⏱️ **When**: Kích hoạt ở phase nào trong frame hoặc điều kiện nào trong chu kỳ truyền thông.
+    - 📍 **Where**: Nằm ở vị trí bit nào trong frame, thuộc tầng phần cứng (Silicon MAC/Transceiver) hay phần mềm (MCAL/CanIf).
+    - ⚙️ **Who & How**: Thành phần điều khiển và cơ chế hoạt động chi tiết (bitwise logic, timer multiplexing, công thức tính).
+- **TYPE B: Câu Hỏi Tình Huống / Xử Lý Sự Cố / Bẫy Phỏng Vấn (Troubleshooting / Trap / Scenario)**:
+  - Tầng `⚠️ Interview Trap` (và các câu hỏi tình huống thực chiến) **BẮT BUỘC** viết theo chuẩn **Micro-STAR**:
+    - 🚨 **S (Situation)**: Bối cảnh xe hơi thực tế (nhiệt độ khoang máy 90°C, bus load 80%, xe đang phanh gấp ASIL D).
+    - 🎯 **T (Task)**: Thách thức kỹ thuật & yêu cầu thời gian thực (không được drop frame, khôi phục bus trong 50ms).
+    - 🛠️ **A (Action)**: Giải pháp kỹ thuật đa chiều (🚗 Automotive: đo oscilloscope, tinh chỉnh CanSM timer, chỉnh priority; 💻 C++: Two-phase update, LUT, tránh exception overhead).
+    - 📊 **R (Result)**: Kết quả định lượng (giảm bus load xuống 45%, phục hồi bus trong 20ms, bài học rút ra).
+- Toàn bộ nội dung hoàn chỉnh phải lưu đồng bộ trong `MAINTENANCE_PLAN.md` làm Ground Truth trước và song hành với `widget_can_fd.html`.

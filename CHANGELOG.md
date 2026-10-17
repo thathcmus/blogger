@@ -7,6 +7,22 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
+### Q&A Standardization & Automation
+- **Chuẩn Hóa Ngân Hàng Câu Hỏi Phỏng Vấn Theo Khung 5W-1H & Micro-STAR (v1.6.0) (`widget_can_fd.html`, `docs/can_fd/MAINTENANCE_PLAN.md`)**:
+  - **Rà soát & Viết lại toàn diện 5 câu hỏi phỏng vấn chuyên sâu CAN FD** với tính chính xác cao theo ISO 11898-1:2015, AUTOSAR Classic BSW Stack và SystemC/C++ Modeling:
+    - *Q2.1: CSMA/CR & Collision Resolution* (Arbitration wired-AND, Starvation defense, Two-Phase Evaluate-Update).
+    - *Q2.2: Remote Frame in CAN 2.0 vs CAN FD* (Deprecation rationale, RRS dominant bit, Observer pattern).
+    - *Q2.3: Overload Frame vs Error Frame* (Data phase restriction, Intermission timing, Lock-free ring buffer).
+    - *Q3.1: Vị trí của BRS (Bit Rate Switch)* (Sample point timing, CRC delimiter deceleration, ACK slot round-trip wire delay).
+    - *Q3.2: Quy luật Non-linear DLC & Padding* (4-bit header constraint, `constexpr LUT`, SecOC crypto signature padding fix).
+  - **Khung 5W-1H cho Tầng `📖 Lý Thuyết (Theory)`**: Bắt buộc cấu trúc 5 thành tố (📌 What, 💡 Why, ⏱️ When, 📍 Where, ⚙️ Who & How) kèm icon và semantic highlighting trực quan (`text-amber-600 dark:text-amber-400`).
+  - **Khung Micro-STAR cho Tầng `⚠️ Bẫy Phỏng Vấn (Trap)`**: Thiết kế tình huống bối cảnh xe hơi thực tế với huy hiệu Micro-STAR, chi tiết hóa 4 bước (🚨 Situation, 🎯 Task, 🛠️ Action song song 🚗 Automotive vs 💻 C++, 📊 Result với số liệu định lượng).
+  - **Song ngữ hoàn chỉnh (100% Vietnamese & English)**: Cả 5 câu hỏi được biên dịch chuẩn xác song song cho 2 chế độ hiển thị.
+- **Quy Trình Kiểm Soát Chất Lượng Tự Động Pre-Commit & Đồng Bộ Tài Liệu (`scripts/sync-docs.js`, `.git/hooks/pre-commit`)**:
+  - Xây dựng script `scripts/sync-docs.js` tự động kiểm tra cú pháp JavaScript bên trong thẻ `<script>` của toàn bộ các widget độc lập, trích xuất số dòng thực tế, số lượng Q&A và ngày cập nhật.
+  - Tự động cập nhật `docs/can_fd/CURRENT_INFO.md` và `docs/flexray/CURRENT_INFO.md` khớp tuyệt đối với mã nguồn.
+  - Cấu hình Git Hook `.git/hooks/pre-commit` tự động chạy kiểm tra và `git add` tài liệu đã đồng bộ trước khi cho phép commit.
+
 ### Security & Backend
 - **Thiết lập Bộ Quy Tắc Bảo Mật Cloud Firestore Chuẩn Zero-Trust (`firestore.rules`, `firebase.json`)**:
   - Triển khai kiến trúc **Zero-Trust & Public Identifier Pattern** cho Firebase Web SDK: Khẳng định Web `apiKey` là Public Identifier hợp lệ, toàn bộ an ninh bảo vệ dữ liệu được thực thi ở tầng Server qua Firebase Security Rules.
@@ -22,6 +38,14 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 - **Chuẩn Hóa 100% Tiếng Anh Cho Code Comments & HTML Comments**:
   - Refactor toàn bộ các dòng ghi chú, chú thích thuật toán, controllers và comment cấu trúc DOM trong cả 3 widget (`widget_can_fd.html`, `widget_flexray.html`, `widget_cpp_oop.html`) sang 100% Tiếng Anh chuẩn công nghiệp.
   - Loại bỏ hoàn toàn tình trạng comment tiếng Việt trong mã nguồn, giảm tải dung lượng file HTML và tối ưu hóa context window cho AI Agent.
+- **Quy Hoạch Lộ Trình Công Cụ Tương Tác Chuyên Sâu (Interactive Micro-Labs Roadmap)**:
+  - Cập nhật [`docs/can_fd/MAINTENANCE_PLAN.md`](docs/can_fd/MAINTENANCE_PLAN.md) và [`docs/can_fd/BACKLOG.md`](docs/can_fd/BACKLOG.md) bổ sung 6 tính năng mô phỏng tương tác cao:
+    - *Fault Confinement & Bus Off Simulator* (máy trạng thái FSM 3 nút, đồng hồ TEC/REC nhảy số, kích hoạt lỗi bit/stuff/crc).
+    - *Interactive Sample Point & TDCO Playground* (thanh trượt TQ, điểm lấy mẫu laser và bù trễ TDC).
+    - *Live DBC Signal Decoder* (giải mã tín hiệu vật lý 64-Byte Payload, Intel Little-Endian vs Motorola Big-Endian).
+    - *Minigame Thợ Săn Lỗi Xung Sóng* (Oscilloscope Glitch Hunter).
+    - *Sơ đồ dòng chảy dữ liệu AUTOSAR Packet Journey* (SW-C $\rightarrow$ COM $\rightarrow$ PduR $\rightarrow$ CanIf $\rightarrow$ Driver).
+    - *Web Audio FX* (hiệu ứng âm thanh phần cứng mô phỏng thiết bị đo lab).
 
 ### Fixed
 - **Tối ưu hóa toàn diện giao diện cuộn siêu mượt 60fps & triệt tiêu 100% hiện tượng đè component/khất giật (`widget_can_fd.html`)**:

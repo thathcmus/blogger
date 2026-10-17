@@ -858,21 +858,69 @@
                 difficulty: "Basic",
                 tags: ["#Frame"],
                 vi: {
-                    question: "CSMA/CR hoạt động thế nào? Tại sao CAN không bị collision như Ethernet?",
+                    question: "CSMA/CR hoạt động thế nào? Tại sao CAN giải quyết va chạm mà không bị hỏng dữ liệu như Ethernet?",
                     answer: {
-                        theory: "<strong>Carrier Sense Multiple Access / Collision Resolution:</strong> Các node đồng thời gửi bit, bit Dominant (0) đè Recessive (1). Node nào phát Recessive nhưng đọc lại trên bus thấy Dominant &rarr; biết mình thua &rarr; ngừng phát ngay lập tức.",
-                        modeling: "<strong>SystemC/C++:</strong> Trong mô phỏng SystemC, bus CAN được biểu diễn bằng một tín hiệu <code>sc_signal_resolved</code> (cơ chế phân giải đa người viết). Quá trình bit-wise arbitration được mô phỏng trong một thread <code>sc_cthread</code>. Ở sườn xung clock, mỗi node ghi bit của nó (0=Dominant, 1=Recessive). Sau đó, nó đọc lại giá trị bus. Nếu ghi 1 nhưng đọc về 0, thread lập tức chuyển state machine sang <code>RCV_MODE</code> (Receiver) thông qua câu lệnh <code>if(tx_bit == 1 && bus_val == 0) { state = RCV; return; }</code>.",
-                        practice: "<strong>ECU:</strong> Quá trình Arbitration hoàn toàn do CAN Controller hardware xử lý. Software không can thiệp được. Application/COM chỉ nhận được callback <code>TxConfirmation</code> sau khi node thắng arbitration và phát thành công.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> Node thua phân xử liên tục thì có bị rớt frame không?<br>&rarr; Không rớt mà retry ở IFS, nhưng nguy cơ bị Starvation lỡ deadline nếu Bus Load > 70%.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Tại sao 2 process SystemC cùng ghi bus tại cùng timestamp lại không bị Race Condition?<br>&rarr; Nhờ cơ chế Two-Phase Evaluate-Update và Delta Cycles: Pha Evaluate chỉ tính toán, đến pha Update hàm phân giải Resolution Function của <code>sc_signal_resolved</code> mới tính Wired-AND để chốt giá trị bus.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> CSMA/CR (Carrier Sense Multiple Access with Collision Resolution) là cơ chế đa truy cập cảm nhận sóng mang với giải quyết va chạm thông qua phân xử bit không phá hủy (Non-destructive Bit-wise Arbitration).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> Khác với Ethernet CSMA/CD (khi va chạm cả 2 node đều dừng phát và truyền lại ngẫu nhiên gây mất tính tiền định - Non-deterministic), mạng CAN ô tô bắt buộc các thông điệp khẩn cấp (Phanh, Túi khí) phải truyền thành công ngay lập tức mà không bị trễ hay phá hủy dữ liệu.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> Kích hoạt ngay tại sườn xuống của bit SOF (Start of Frame) và diễn ra xuyên suốt trường Phân xử (Arbitration Field: Identifier + RRS/IDE).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Nằm ở tầng vật lý (Physical Layer) và tầng liên kết dữ liệu (Data Link Layer MAC) dựa trên đặc tính điện áp vi sai đường dây "Wired-AND".</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Do vi mạch phần cứng Silicon MAC của CAN Controller tự động kiểm soát. Bit Dominant (logic 0, V_diff &approx; 2.0V) luôn ghi đè bit Recessive (logic 1, V_diff &approx; 0.0V). Khi nhiều ECU phát cùng lúc, node nào phát bit Recessive nhưng đọc ngược lại từ bus thấy Dominant sẽ nhận biết mình thua phân xử và lập tức lùi bước chuyển sang chế độ Receiver; node phát bit Dominant tiếp tục truyền mà không hề bị gián đoạn hay hỏng dữ liệu.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> Trong mô phỏng SystemC, bus CAN được biểu diễn bằng một tín hiệu <code>sc_signal_resolved</code> (cơ chế phân giải đa người viết). Quá trình bit-wise arbitration được mô phỏng trong một thread <code>sc_cthread</code>. Ở sườn xung clock, mỗi node ghi bit của nó (0=Dominant, 1=Recessive). Sau đó, nó đọc lại giá trị bus: <code>if(tx_bit == 1 && bus_val == 0) { state = RCV_MODE; return; }</code>.</p>
+                            <p>Nhờ ngữ nghĩa Two-Phase Evaluate-Update và Delta Cycles của SystemC kernel, Resolution Function gom toàn bộ giá trị ghi và tính toán phép logic Wired-AND nguyên tử, hoàn toàn không xảy ra Data Race.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> Quá trình phân xử hoàn toàn trong suốt (transparent) với Software. Silicon MAC của CAN Controller tự động xử lý arbitration. Tầng phần mềm (CanIf / PduR / COM) đẩy data xuống Hardware Tx Mailbox Buffer và giải phóng CPU.</p>
+                            <p>Chỉ khi frame chiến thắng phân xử và nhận được bit ACK ở cuối frame, ngắt phần cứng mới kích hoạt hàm callback <code>Can_TxConfirmation</code> dội ngược lên các layer trên của stack AUTOSAR.</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Bẫy Chết Đói Bus (Starvation) &amp; Race Condition</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> Trên mạng CAN động cơ, bus load đang ở mức cao (78%). ECU Gateway liên tục phát các frame chẩn đoán UDS (ID cao: 0x7E0), trong khi ECU Động cơ và Phanh ABS liên tục phát thông điệp điều khiển mô-men xoắn (ID thấp: 0x0C0, 0x100).</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Đảm bảo các thông điệp chẩn đoán không bị "chết đói" (Starvation) dẫn đến Timeout, đồng thời không được làm trễ deadline chu kỳ 10ms của thông điệp phanh ASIL D.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Không được gán ID bừa bãi. Phải phân bổ dải ID theo thứ tự ưu tiên thời gian thực: ID thấp cho Hard Real-time Safety, ID cao cho Event/Diagnostic. Áp dụng cơ chế CanNm / Schedule Table để giới hạn tần suất gửi của frame ưu tiên thấp hoặc dùng Mailbox Abort Mechanism trong MCAL để hủy frame cũ khi có frame khẩn cấp mới.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> Trong bộ mô phỏng bus tốc độ cao, thay vì dùng <code>std::vector</code> tìm kiếm priority tuyến tính O(N), mô hình hóa Tx Mailbox bằng <code>std::priority_queue</code> với comparator đảo dấu ID nhỏ hơn để lấy frame ưu tiên cao nhất trong O(1).</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> Bus load giảm xuống mức an toàn 52%, độ trễ jitter của frame phanh triệt tiêu về 0, frame chẩn đoán được giải phóng truyền trong vòng 40ms mà không bị timeout.</p>
+                        </div>`
                     }
                 },
                 en: {
-                    question: "How does CSMA/CR work? Why does CAN avoid collisions unlike Ethernet?",
+                    question: "How does CSMA/CR work? Why does CAN avoid frame corruption unlike Ethernet?",
                     answer: {
-                        theory: "<strong>Carrier Sense Multiple Access / Collision Resolution:</strong> Nodes transmit simultaneously; Dominant bits (0) overwrite Recessive bits (1). A node transmitting Recessive but reading Dominant knows it lost arbitration and immediately stops transmitting.",
-                        modeling: "<strong>SystemC/C++:</strong> In SystemC, the CAN bus is typically modeled using an <code>sc_signal_resolved</code> to handle multiple writers. The bit-wise arbitration is implemented inside an <code>sc_cthread</code>. At each clock edge, a node writes its bit (0=Dominant, 1=Recessive) and then reads the bus value. If it wrote 1 but reads 0, the thread immediately transitions its state machine to <code>RCV_MODE</code> via <code>if(tx_bit == 1 && bus_val == 0) { state = RCV; return; }</code>.",
-                        practice: "<strong>ECU:</strong> The Arbitration process is handled entirely by the CAN Controller hardware. Software cannot intervene. Application/COM only receives a <code>TxConfirmation</code> callback after winning arbitration and successfully transmitting.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> Does a losing node drop frames if it continuously loses arbitration?<br>&rarr; No, it retries at IFS, but risks Starvation and deadline misses if Bus Load > 70%.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Why do two SystemC processes driving the bus at the same timestamp not cause a Race Condition?<br>&rarr; Due to Two-Phase Evaluate-Update semantics and Delta Cycles: values are evaluated first, then the <code>sc_signal_resolved</code> Resolution Function atomically resolves the Wired-AND bus state in the update phase.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> CSMA/CR (Carrier Sense Multiple Access with Collision Resolution) is a non-destructive bit-wise arbitration mechanism resolving bus contention.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> Unlike Ethernet CSMA/CD (where collisions destroy frames and force random backoff delays, destroying determinism), automotive networks mandate that emergency frames (Brakes, Airbags) transmit immediately without packet loss or jitter.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> Triggered at the falling edge of the SOF bit and active throughout the entire Arbitration Field (ID + RRS/IDE).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Operates at the Physical and Data Link Layer (MAC) via the differential "Wired-AND" wire characteristic.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Managed autonomously by the CAN Controller's silicon MAC. Dominant bits (logic 0, V_diff &approx; 2.0V) systematically overwrite Recessive bits (logic 1, V_diff &approx; 0.0V). When multiple ECUs transmit simultaneously, any node driving Recessive but reading Dominant knows it lost arbitration, ceases transmission, and backs off into Receiver mode without corrupting the winning node's stream.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> In SystemC, the CAN bus is modeled via an <code>sc_signal_resolved</code> channel supporting multi-writer resolution inside an <code>sc_cthread</code>. At each clock edge, nodes drive bits and sample: <code>if(tx_bit == 1 && bus_val == 0) { state = RCV_MODE; return; }</code>.</p>
+                            <p>SystemC's Two-Phase Evaluate-Update semantics and Delta Cycles ensure the resolution function computes the Wired-AND state atomically, guaranteeing zero race conditions.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> Arbitration is 100% transparent to Software. Upper layers (CanIf / PduR / COM) simply enqueue PDUs into Hardware Tx Mailbox buffers and release CPU time.</p>
+                            <p>Only after winning arbitration and receiving an ACK bit, a hardware interrupt fires <code>Can_TxConfirmation</code> up the AUTOSAR stack.</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Bus Starvation &amp; Race Condition Defense</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> In a powertrain CAN bus running at 78% bus load, the Gateway ECU periodically injects diagnostic UDS frames (high ID: 0x7E0), while Engine and ABS ECUs continuously fire torque request frames (low IDs: 0x0C0, 0x100).</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Prevent diagnostic frame starvation and timeouts while strictly meeting the hard 10ms real-time deadline for ASIL D brake messages.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Design ID ranges strictly by criticality: low IDs for deterministic safety frames, high IDs for diagnostic events. Employ CanNm cyclic scheduling and configure MCAL Hardware Mailbox Abort mechanisms to flush pending stale frames when urgent safety PDUs arrive.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> In high-throughput C++ simulators, replace linear searches O(N) with <code>std::priority_queue</code> parameterized with a greater-than comparator to pop highest-priority frames in O(1) time.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> Average bus load decreased to a stable 52%, brake frame jitter eliminated to 0, and diagnostic frames guaranteed transmission within 40ms without timeout.</p>
+                        </div>`
                     }
                 }
             },
@@ -881,21 +929,67 @@
                 difficulty: "Intermediate",
                 tags: ["#Frame"],
                 vi: {
-                    question: "Remote Frame trong CAN 2.0 là gì? CAN FD xử lý thế nào?",
+                    question: "Remote Frame trong CAN 2.0 là gì? Tại sao CAN FD loại bỏ hoàn toàn Remote Frame?",
                     answer: {
-                        theory: "<strong>Remote Frame:</strong> Là cơ chế một node yêu cầu node khác phát Data Frame có cùng ID. <strong>CAN FD:</strong> Đã loại bỏ hoàn toàn Remote Frame (bit RRS thay thế cho RTR, và luôn mang giá trị Dominant). Tính năng này bị loại bỏ vì không phù hợp với thiết kế dual-rate.",
-                        modeling: "<strong>SystemC/C++:</strong> Khi thiết kế struct <code>CanFrame</code> trong C++, Remote Frame yêu cầu cờ <code>bool is_remote;</code>. Ở CAN FD, cờ này bị phế bỏ. Thay vào đó, trong hàm parse header, lập trình viên C++ ép cứng <code>frame.rrs = 0</code> (Dominant). Nếu code nhận được frame có <code>FDF == 1</code> (CAN FD) mà <code>RTR == 1</code>, parser phải throw ra ngoại lệ <code>FormatErrorException</code> để drop frame ngay lập tức.",
-                        practice: "<strong>AUTOSAR:</strong> Nếu cấu hình <code>CanIfTxPduType = REMOTE</code> trong một node CAN FD, Tool sẽ báo lỗi DET hoặc lỗi configuration ngay lúc compile.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> Vì sao CiA loại bỏ Remote Frame trên CAN FD?<br>&rarr; Phá vỡ triết lý Dual-rate (không có Data phase để BRS) và gây khó lường timing (non-deterministic) khi một node bất ngờ bị gọi phát data rate cao.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Dùng C++ bitfield struct cast trực tiếp lên raw buffer có an toàn giữa x86 PC và MCU ECU?<br>&rarr; Tuyệt đối không! Memory layout của bitfield là Implementation-defined, khác biệt Endianness sẽ đảo lộn thứ tự bit. Bắt buộc dùng Bitwise Shift/Mask (<code>&gt;&gt;</code>, <code>&lt;&lt;</code>, <code>&amp;</code>) tường minh.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> Remote Frame là khung truyền không chứa dữ liệu (DLC mang giá trị yêu cầu nhưng Payload = 0 byte), phát Header kèm cờ RTR = 1 để yêu cầu node khác trên mạng phát lại Data Frame có cùng ID.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> CAN FD loại bỏ hoàn toàn Remote Frame vì: (1) Phá vỡ triết lý Dual-rate (Remote Frame không có Data Phase nên cờ BRS vô nghĩa); (2) Phá vỡ tính tiền định (Non-deterministic timing) khi một node bất ngờ bị thăm dò phát tốc độ cao; (3) Mạng ô tô hiện đại dùng mô hình Publish-Subscribe định kỳ hoặc Request-Response tầng cao (UDS/SOME-IP).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> CAN 2.0 phát theo yêu cầu thăm dò; CAN FD thay thế bit RTR bằng bit <strong class="text-slate-900 dark:text-white">RRS (Remote Request Substitution)</strong> và ép cứng vĩnh viễn ở mức Dominant (0).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Nằm ngay sau bit ID10:0 trong Standard Frame hoặc sau ID4:0 trong Extended Frame (thuộc Arbitration Field).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Do phần cứng CAN Controller điều khiển. Trong CAN FD, nếu bộ thu nhận được frame có <code>FDF = 1</code> (CAN FD) nhưng bit ở vị trí RRS là Recessive (1), phần cứng coi đây là Form Error và kích hoạt bắn Error Frame tiêu hủy gói tin.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> Khi thiết kế struct <code>CanFrame</code> trong C++, struct CAN 2.0 cần trường <code>bool is_remote;</code>. Ở CAN FD, trường này bị loại bỏ, thay bằng <code>bool rrs = false;</code>.</p>
+                            <p>Trong parser giải mã gói tin: <code>if (frame.fdf && frame.rtr) { trigger_protocol_exception(); return; }</code>. Tuyệt đối không dùng struct bitfield C++ (<code>uint32_t id:11, rrs:1;</code>) để ép kiểu <code>reinterpret_cast</code> từ buffer thô vì chuẩn C++ quy định layout bitfield phụ thuộc compiler/endianness; bắt buộc dùng bitwise masking (<code>(raw_word >> 20) &amp; 0x01</code>).</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> Trong cấu hình BSW AUTOSAR, nếu kỹ sư cố tình chọn <code>CanIfTxPduType = REMOTE</code> cho một PDU thuộc cụm mạng CAN FD trong file cấu hình ARXML, trình sinh mã (Code Generator) và module DET (Default Error Tracer) sẽ báo lỗi nghiêm trọng ngay lúc build <code>CANIF_E_PARAM_POINTER / CONFIG_INVALID</code>.</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Bẫy Polling Cũ Khi Nâng Cấp CAN FD Gateway</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> Đội ngũ phát triển đang nâng cấp hệ thống ECU Gateway cũ từ CAN 2.0 lên CAN FD. Một kỹ sư đề xuất giữ lại cơ chế Polling bằng Remote Frame để tiết kiệm băng thông khi đọc áp suất lốp TPMS.</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Phản biện kỹ thuật và chứng minh giải pháp giữ Remote Frame trên CAN FD là bất khả thi theo tiêu chuẩn ISO 11898-1:2015, đồng thời đưa ra kiến trúc thay thế tối ưu.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Chỉ ra rằng phần cứng CAN FD Silicon MAC (TC397 / S32K3) sẽ gắn cờ Form Error ngay lập tức nếu nhận bit Recessive ở RRS. Đề xuất chuyển đổi sang mô hình <strong>Event-driven Transmission</strong> kết hợp <strong>Minimum Inter-frame Delay</strong> hoặc truyền định kỳ theo chu kỳ 100ms.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> Trong mô hình giả lập ECU C++, refactor toàn bộ cơ chế Polling sang kiến trúc <code>Observer Pattern</code> / <code>Publish-Subscribe</code> sử dụng con trỏ hàm callback nhẹ hoặc <code>std::function</code> không cấp phát heap (fixed-size allocator).</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> Tiêu chuẩn hóa 100% tuân thủ ISO 11898-1:2015, giảm độ trễ phản hồi của cảm biến áp suất lốp từ 25ms xuống dưới 5ms, triệt tiêu hoàn toàn rủi ro Form Error trên bus.</p>
+                        </div>`
                     }
                 },
                 en: {
-                    question: "What is a Remote Frame in CAN 2.0? How does CAN FD handle it?",
+                    question: "What is a Remote Frame in CAN 2.0? Why did CAN FD completely eliminate Remote Frames?",
                     answer: {
-                        theory: "<strong>Remote Frame:</strong> A mechanism where a node requests another node to transmit a Data Frame with the same ID. <strong>CAN FD:</strong> Remote Frames are completely removed (the RRS bit replaces RTR and is always Dominant). This feature was removed because it is incompatible with the dual-rate design.",
-                        modeling: "<strong>SystemC/C++:</strong> When designing the <code>CanFrame</code> struct in C++, Remote Frames require a <code>bool is_remote;</code> flag. In CAN FD models, this is deprecated. Instead, during header parsing, C++ developers hardcode <code>frame.rrs = 0</code> (Dominant). If the parser receives a frame where <code>FDF == 1</code> (CAN FD) and <code>RTR == 1</code>, it must throw a <code>FormatErrorException</code> to drop the frame immediately.",
-                        practice: "<strong>AUTOSAR:</strong> If <code>CanIfTxPduType = REMOTE</code> is configured in a CAN FD node, the Tool will report a DET or configuration error at compile time.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> Why was Remote Frame eliminated in CAN FD?<br>&rarr; It breaks the Dual-rate model (no Data phase for BRS) and introduces non-deterministic timing when a node is suddenly triggered to reply at high baudrates.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Is casting a C++ bitfield struct directly onto a raw buffer portable between x86 PC and embedded MCUs?<br>&rarr; Never! Bitfield layout is implementation-defined and endianness mismatches will scramble bits. Industrial code must use explicit Bitwise Shift/Mask operations.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> A Remote Frame is a legacy CAN 2.0 frame carrying no payload (DLC indicates requested length, Data = 0), sending RTR = 1 to prompt another node to transmit a Data Frame with matching ID.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> CAN FD eliminated Remote Frames because: (1) It breaks the Dual-rate model (no Data Phase exists for BRS); (2) It introduces non-deterministic timing when nodes are abruptly prompted to reply at high speeds; (3) Modern automotive architectures adopt cyclic Publish-Subscribe or high-layer Request-Response (UDS/SOME-IP).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> Transmitted on-demand in CAN 2.0; replaced in CAN FD by the <strong class="text-slate-900 dark:text-white">RRS (Remote Request Substitution)</strong> bit, hardcoded permanently to Dominant (0).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Positioned immediately after ID10:0 in Standard Frames or after ID4:0 in Extended Frames (Arbitration Field).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Handled by the silicon CAN Controller. If a CAN FD receiver detects <code>FDF = 1</code> while the bit at the RRS position is Recessive (1), it raises a Form Error and broadcasts an Error Frame to discard the packet.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> In C++ <code>CanFrame</code> structs, the legacy <code>bool is_remote;</code> is eliminated, replaced with <code>bool rrs = false;</code>. In frame parsing: <code>if (frame.fdf &amp;&amp; frame.rtr) { trigger_protocol_exception(); return; }</code>.</p>
+                            <p>Never cast raw byte buffers onto C++ bitfield structs (<code>uint32_t id:11, rrs:1;</code>) due to implementation-defined compiler packing and endianness mismatches; parse via explicit bitwise shifts and masks (<code>(raw_word >> 20) &amp; 0x01</code>).</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> In AUTOSAR BSW configuration, configuring <code>CanIfTxPduType = REMOTE</code> on a CAN FD network cluster will cause the ARXML Code Generator and DET module to fail build time verification with <code>CANIF_E_PARAM_POINTER / CONFIG_INVALID</code>.</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Legacy Polling Trap in CAN FD Migration</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> An engineering team migrating a legacy Gateway ECU to CAN FD proposes retaining Remote Frame polling for TPMS tire pressure sensors to conserve bandwidth.</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Reject the proposal based on ISO 11898-1:2015 compliance and design an optimal high-performance alternative.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Prove that modern CAN FD Silicon MACs (Infineon AURIX TC397, NXP S32K3) immediately throw a Form Error when encountering a Recessive RRS bit. Transition the sensor architecture to cyclic 100ms transmission with event-driven bursts.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> In C++ ECU simulation models, refactor legacy polling to an <code>Observer / Pub-Sub Pattern</code> with zero-allocation lightweight delegates.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> Achieved 100% ISO 11898-1:2015 conformance, reduced TPMS sensor response latency from 25ms to &lt;5ms, and prevented fatal bus Form Errors.</p>
+                        </div>`
                     }
                 }
             },
@@ -904,21 +998,75 @@
                 difficulty: "Intermediate",
                 tags: ["#Error"],
                 vi: {
-                    question: "Overload Frame khác Error Frame thế nào?",
+                    question: "Overload Frame khác Error Frame thế nào? Tại sao CAN FD tốc độ cao lại không dùng Overload Frame trong Data Phase?",
                     answer: {
-                        theory: "<strong>Overload Frame:</strong> Node phát để xin thêm thời gian xử lý (trước hoặc giữa các frames).<br><strong>Error Frame:</strong> Phát ra khi phát hiện lỗi trên bus.<br>Cả hai đều sử dụng 6 bit Dominant liên tiếp phá vỡ rule bit-stuffing, nhưng context timing của chúng khác nhau.",
-                        modeling: "<strong>SystemC/C++:</strong> Trong SystemC, Error Frame phá vỡ luồng FSM thông thường. Bạn có thể dùng <code>sc_event error_detected;</code> để kích hoạt ngắt (interrupt) quy trình truyền. Khi <code>error_detected.notify()</code> được gọi, tiến trình chính (main thread) bị preempt, và một thread xử lý lỗi sẽ bơm 6 bit <code>0</code> liên tục ra bus. Với Overload Frame, logic chỉ được phép chờ ở state <code>INTERMISSION</code>, kiểm tra buffer nội bộ <code>if(rx_fifo.is_full()) { send_overload_frame(); }</code>.",
-                        practice: "<strong>Modern ECU:</strong> Overload Frame cực kỳ hiếm gặp trong hệ thống AUTOSAR vì hardware buffer đủ lớn và CPU đủ mạnh. Nếu bạn thấy Overload Frame trên trace &rarr; Dấu hiệu ECU đang bị quá tải nghiêm trọng.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> CAN FD tốc độ cao có cần Overload Frame nhiều hơn?<br>&rarr; Không! Giao thức cấm Overload Frame trong Data Phase, chỉ được phép phát ở Nominal Rate trong khoảng Intermission để tương thích ngược phần cứng.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Tại sao không nên dùng <code>throw Exception</code> để mô phỏng Error/Overload frame trong vòng lặp C++?<br>&rarr; C++ stack unwinding tốn hàng ngàn chu kỳ CPU. Error frame là trạng thái giao thức hợp lệ, dùng throw sẽ làm sập Simulation Throughput; bắt buộc dùng State Transition tường minh.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> Cả hai đều là các khung điều khiển đặc biệt cố tình vi phạm quy tắc Bit-stuffing bằng cách phát ra <strong>6 bit Dominant liên tiếp</strong>, nhưng mang ý nghĩa hoàn toàn khác nhau:
+                                <br>&bull; <strong>Error Frame:</strong> Báo động phát hiện lỗi truyền thông, yêu cầu hủy bỏ frame đang truyền trên toàn mạng.
+                                <br>&bull; <strong>Overload Frame:</strong> Báo quá tải tạm thời của bộ đệm node nhận, xin thêm thời gian xử lý (trì hoãn frame tiếp theo).
+                            </p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> CAN FD cấm Overload Frame trong Data Phase vì Data Phase chạy ở tốc độ cao (2–8 Mbps) dành riêng cho truyền tải payload của node thắng phân xử; nếu cho phép node nhận chen Overload Frame vào giữa chừng sẽ phá hủy toàn bộ đồng bộ clock và gây va chạm bus thảm khốc.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> Error Frame phát ra <strong>ngay lập tức</strong> tại bất kỳ vị trí nào phát hiện lỗi (Active Error Flag); Overload Frame chỉ được phép phát trong <strong>khoảng nghỉ Intermission (IFS)</strong> (trước khi bit thứ 3 kết thúc).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Thuộc lớp Data Link Layer (MAC) do phần cứng điều khiển.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Do bộ đệm nhận (Rx FIFO) của CAN Controller kích hoạt. Khi phát hiện lỗi hoặc tràn FIFO, phần cứng kéo bus xuống mức Dominant liên tục 6 bit, ép tất cả các node khác nhận biết sự vi phạm bit-stuffing và đồng loạt phản ứng.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> Trong SystemC, Error Frame ngắt ngang luồng truyền thông thường thông qua <code>sc_event error_ev; error_ev.notify();</code>. Không được dùng C++ exception (<code>throw FrameError;</code>) vì stack unwinding làm sập thông lượng mô phỏng từ hàng triệu frames/giây xuống còn vài nghìn frames/giây.</p>
+                            <p>Thay vào đó dùng máy trạng thái tường minh: <code>state = STATE_ERROR_FLAG; send_dominant_bits(6);</code>. Đối với Overload Frame, kiểm tra ở state nghỉ: <code>if (state == INTERMISSION &amp;&amp; rx_fifo.is_full()) { state = OVERLOAD_FLAG; }</code>.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> Trên ECU hiện đại, Overload Frame gần như đã tuyệt chủng nhờ vi điều khiển trang bị Direct Memory Access (DMA) đa kênh và Hardware FIFO chuyên dụng.</p>
+                            <p>Nếu phát hiện Overload Frame xuất hiện trên Vector CANoe, đó là cảnh báo đỏ về cấu hình sai bộ nhớ đệm MCAL (<code>CanMainFunctionRWPeriods</code>) hoặc CPU bị ngắt nặng (Interrupt Lock).</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Debug Quá Tải Bộ Đệm Rx Làm Sập Mạng Powertrain</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> Kỹ sư calibrator cắm máy phân tích Vector CANoe vào cụm mạng powertrain của xe chạy đường thử và phát hiện xuất hiện liên tục các khung Overload Frame làm bus load tăng vọt từ 40% lên 92%.</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Định vị chính xác node phát sinh Overload Frame và triệt tiêu hiện tượng này trong vòng 2 ngày làm việc.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Đo điện áp vi sai trên từng chân CAN_H/CAN_L bằng oscilloscope kết hợp ID filter trên CANoe để bắt chính xác ECU gửi Overload Flag trong pha Intermission. Kiểm tra cấu hình task <code>Can_MainFunction_Read</code> trong OS AUTOSAR: phát hiện task nhận đang bị cấu hình chu kỳ quá chậm (50ms) trong khi frame gửi tới chu kỳ 5ms gây tràn Hardware Mailbox Rx. Rút ngắn chu kỳ polling xuống 5ms hoặc chuyển sang cấu hình CanRxProcessing dạng Interrupt.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> Trong phần mềm ECU, thay thế hàng đợi có khóa đơn giản bằng cấu trúc dữ liệu <code>Lock-Free Ring Buffer</code> (Circular FIFO) với bộ nhớ tĩnh được cấp phát trước, cho phép ngắt ISR ghi data cực nhanh mà không gây tranh chấp tài nguyên.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> 100% hiện tượng Overload Frame biến mất, bus load hạ về mức ổn định 38%, thời gian phản hồi tin nhắn nhận đạt mức dưới 200 microsecond.</p>
+                        </div>`
                     }
                 },
                 en: {
-                    question: "How does an Overload Frame differ from an Error Frame?",
+                    question: "How does an Overload Frame differ from an Error Frame? Why doesn't CAN FD use Overload Frames in the Data Phase?",
                     answer: {
-                        theory: "<strong>Overload Frame:</strong> Transmitted by a node to request extra processing time (before or between frames).<br><strong>Error Frame:</strong> Transmitted when a bus error is detected.<br>Both use 6 consecutive Dominant bits violating the bit-stuffing rule, but their timing contexts are different.",
-                        modeling: "<strong>SystemC/C++:</strong> In SystemC, Error Frames disrupt the normal FSM flow. You use an <code>sc_event error_detected;</code> to preempt the transmission. When <code>error_detected.notify()</code> is called, the main thread is interrupted, and an error handler thread pumps 6 consecutive <code>0</code> bits onto the bus. For Overload Frames, the logic is restricted to the <code>INTERMISSION</code> state, checking the internal buffer: <code>if(rx_fifo.is_full()) { send_overload_frame(); }</code>.",
-                        practice: "<strong>Modern ECU:</strong> Overload Frames are extremely rare in AUTOSAR systems because hardware buffers are large and CPUs are powerful. Seeing an Overload Frame on a trace &rarr; A sign of severe ECU overload.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> Does CAN FD need Overload Frames more frequently due to high speeds?<br>&rarr; No! Overload Frames are forbidden during the Data Phase and only permitted at Nominal Rate during Intermission for hardware backward compatibility.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Why avoid <code>throw Exception</code> for Error/Overload frames in C++ simulation loops?<br>&rarr; Stack unwinding takes thousands of CPU cycles. Error frames are expected protocol states; throwing exceptions destroys throughput. Use explicit State Transitions instead.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> Both are specialized control frames that deliberately violate bit-stuffing rules by pumping <strong>6 consecutive Dominant bits</strong>, but with completely different semantics:
+                                <br>&bull; <strong>Error Frame:</strong> Signals a protocol violation, aborting the corrupted transmission globally.
+                                <br>&bull; <strong>Overload Frame:</strong> Signals an internal receiver buffer bottleneck, requesting a brief delay before the next frame starts.
+                            </p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> CAN FD strictly forbids Overload Frames during the Data Phase because high-speed communication (2–8 Mbps) belongs exclusively to the winning transmitter; allowing receivers to inject overload flags mid-payload would destroy clock synchronization and trigger bus-wide collisions.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> Error Frames trigger <strong>immediately</strong> upon fault detection; Overload Frames are only permissible during the <strong>Intermission (IFS)</strong> window (before the 3rd intermission bit finishes).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Implemented in the Data Link Layer (MAC) silicon.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Triggered by the CAN Controller's Rx FIFO. The hardware clamps the bus to Dominant for 6 bit-times, forcing all bus nodes to recognize the deliberate bit-stuffing violation and coordinate their state machines.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> In SystemC, Error Frames preempt regular communication via <code>sc_event error_ev; error_ev.notify();</code>. Avoid throwing C++ exceptions (<code>throw FrameError;</code>) because stack unwinding overhead degrades simulation throughput from millions of frames/sec to a crawl.</p>
+                            <p>Use explicit state transitions instead: <code>state = STATE_ERROR_FLAG; send_dominant_bits(6);</code>. For Overload Frames, poll during the idle state: <code>if (state == INTERMISSION &amp;&amp; rx_fifo.is_full()) { state = OVERLOAD_FLAG; }</code>.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> In modern ECUs, Overload Frames are practically extinct thanks to multi-channel DMA engines and dedicated hardware FIFOs.</p>
+                            <p>Observing Overload Frames on a CANoe bus trace is a critical red flag signaling incorrect MCAL buffer periods (<code>CanMainFunctionRWPeriods</code>) or prolonged CPU interrupt lockouts.</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Powertrain Bus Overload Root Cause Analysis</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> A calibration engineer monitoring a vehicle test track run spots continuous Overload Frames on Vector CANoe, causing powertrain bus load to spike from 40% to 92%.</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Isolate the transmitting ECU responsible for the overload flags and eradicate the bottleneck within 48 hours.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Probe CAN_H/CAN_L differential voltages with an oscilloscope synchronized with CANoe ID triggers to identify the faulty ECU asserting Dominant bits during Intermission. Inspect AUTOSAR OS task scheduling: discovered <code>Can_MainFunction_Read</code> configured at 50ms periods while high-speed sensor bursts arrive every 5ms, overflowing Rx Mailboxes. Reconfigure Rx handling to Interrupt mode or accelerate polling to 5ms.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> Replace locking FIFO queues in the ECU software with a static <code>Lock-Free Ring Buffer</code> (Circular FIFO) enabling ISRs to enqueue frames with zero mutex contention.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> Overload Frames dropped to 0%, bus load stabilized at 38%, and message receive latency plunged below 200 microseconds.</p>
+                        </div>`
                     }
                 }
             },
@@ -927,21 +1075,75 @@
                 difficulty: "Advanced",
                 tags: ["#Frame", "#BitTiming"],
                 vi: {
-                    question: "Vị trí của BRS (Bit Rate Switch) nằm ở đâu? Tại sao không đặt ở đầu frame?",
+                    question: "Vị trí của BRS (Bit Rate Switch) nằm ở đâu? Tại sao không tăng tốc toàn bộ frame ngay từ đầu?",
                     answer: {
-                        theory: "<strong>BRS không thể đặt ở đầu frame (vùng Arbitration).</strong> Quá trình phân xử bắt buộc phải chạy ở tốc độ thấp (Nominal Rate, VD: 500kbps) để tín hiệu điện có đủ thời gian lan truyền (propagation delay) đến node xa nhất và dội ngược lại trong giới hạn 1 bit-time. Chỉ khi phân xử xong, xác định được duy nhất 1 node làm chủ bus, BRS mới được bật (Recessive) để kích hoạt tốc độ cao (Data Rate, VD: 5Mbps).",
-                        modeling: "<strong>SystemC/C++:</strong> Để mô phỏng BRS trong C++, ta cần 2 bộ định tuyến clock (Clock Dividers). Trong vòng lặp mô phỏng chính <code>while(true)</code>, khi state parser đọc được bit <code>BRS == 1</code>, nó gọi hàm callback <code>switch_baudrate(DATA_RATE)</code>. Hàm này lập tức thay đổi chu kỳ trễ (delay) của câu lệnh <code>wait(t_bit)</code> thành thời gian bit ngắn hơn. Khi gặp bit <code>CRC_DELIMITER</code>, nó gọi lại <code>switch_baudrate(NOMINAL_RATE)</code> để trả clock về bình thường.",
-                        practice: "<strong>ECU/AUTOSAR:</strong> Cấp độ Hardware, CAN Controller chứa 2 thanh ghi Timer độc lập: Nominal Bit Timing và Data Bit Timing. Khi cờ BRS được set, mạch Multiplexer bên trong Silicon tự động switch clock sang thanh ghi Data Bit Timing ở sườn xung tiếp theo.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> Vùng ACK bit trong CAN FD được truyền ở tốc độ nào?<br>&rarr; Bắt buộc hạ về Nominal Rate tại CRC Delimiter vì tất cả các node phải assert ACK cùng lúc; nếu chạy tốc độ cao sẽ bị lệch pha và va chạm do delay đường dây.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Đổi baudrate trong C++, làm sao ngăn tích lũy Clock Drift qua hàng nghìn bit khi dùng <code>wait()</code>?<br>&rarr; Không cộng dồn relative delay <code>wait(t_bit)</code>. Phải duy trì timestamp tuyệt đối <code>next_sample_time</code> và gọi <code>wait(next_sample_time - sc_time_stamp())</code> để triệt tiêu sai số làm tròn.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> BRS (Bit Rate Switch) là cờ 1-bit điều khiển chuyển đổi giữa hai mức tốc độ baudrate trong cùng một khung CAN FD (Baudrate phân xử Nominal Rate và Baudrate dữ liệu Data Rate).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> Không thể tăng tốc toàn bộ frame ngay từ đầu vì quá trình phân xử (Arbitration Field) và xác nhận (ACK Field) bắt buộc phải chạy ở tốc độ thấp (Nominal Rate &le; 1 Mbps). Ở tốc độ thấp, thời gian 1 bit đủ dài (ví dụ 500kbps là 2000ns) để tín hiệu điện truyền qua toàn bộ chiều dài cáp tới node xa nhất và dội ngược lại để giải quyết tranh chấp bus (CSMA/CR). Tăng tốc ngay từ đầu sẽ gây xung đột chồng chéo và hỏng phân xử.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong>
+                                <br>&bull; <strong>Tăng tốc (Nominal &rarr; Data Rate):</strong> Bắt đầu ngay tại <strong>Sample Point của bit BRS</strong> (khi bit BRS mang giá trị Recessive = 1).
+                                <br>&bull; <strong>Hạ tốc (Data Rate &rarr; Nominal):</strong> Bắt buộc hạ tốc độ về lại mức Nominal tại <strong>Sample Point của bit CRC Delimiter</strong> để tất cả các node cùng đồng pha xác nhận ACK.
+                            </p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Nằm ở bit thứ 3 của Control Field (ngay sau bit FDF và bit res, nằm trước bit ESI).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Do bộ Multiplexer Timer Clock phần cứng bên trong Silicon CAN Controller tự động chuyển mạch. Khi bit BRS được đọc là Recessive (1), mạch silicon chuyển nguồn phát clock từ thanh ghi <code>Nominal Bit Timing Register</code> sang <code>Data Bit Timing Register</code>.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> Mô phỏng BRS trong C++ bằng cách chuyển đổi chu kỳ trễ của bộ định thời: <code>void switch_clock(BaudrateMode mode)</code>. Khi parser duyệt đến bit BRS = 1, callback gọi <code>switch_clock(DATA_RATE)</code>, cập nhật biến <code>t_bit = data_tq * data_tbit_quanta</code>.</p>
+                            <p>Để triệt tiêu Clock Drift tích lũy qua hàng ngàn bit khi gọi <code>wait()</code>, tuyệt đối không cộng dồn thời gian tương đối <code>wait(t_bit)</code>. Phải tính mốc tuyệt đối <code>next_sample_timestamp += t_bit</code> và gọi <code>wait(next_sample_timestamp - sc_time_stamp())</code>.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> Trong cấu hình MCAL <code>CanControllerBaudrateConfig</code>, kỹ sư thiết lập 2 bộ tham số song song: <code>CanControllerNominalBitRate</code> (ví dụ 500 kbps, 80% sample point) và <code>CanControllerDataBitRate</code> (ví dụ 2 Mbps hoặc 5 Mbps, 75% sample point).</p>
+                            <p>Nếu cờ BRS bị tắt (<code>CanTxPduBrs = FALSE</code>), toàn bộ frame CAN FD sẽ truyền ở tốc độ Nominal dù payload vẫn là 64 bytes.</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Khắc Phục Lỗi Bit Error Tại ACK Slot Do Trễ Dội Cáp</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> Đội phát triển cấu hình mạng CAN FD 5 Mbps cho cụm cảm biến Radar ADAS. Khi kích hoạt BRS = 1, bộ phân tích bus liên tục báo lỗi Bit Error ngay tại vùng ACK Slot của frame.</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Xác định nguyên nhân tại sao lỗi chỉ xảy ra khi bật BRS và khắc phục triệt để không còn lỗi bit.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Đo dạng sóng bằng oscilloscope: phát hiện node phát không hạ tốc độ tại bit CRC Delimiter mà vẫn chạy ở tốc độ 5 Mbps qua vùng ACK. Ở 5 Mbps, 1 bit chỉ dài 200ns, trong khi trễ lan truyền khứ hồi (Round-trip propagation delay) trên đường cáp 15 mét của xe kèm trễ transceiver mất tới 280ns. Node nhận kéo ACK không kịp tới trước sample point của node phát. Sửa lại cấu hình thanh ghi MCAL để đảm bảo phần cứng hạ về Nominal 500 kbps chính xác tại sườn của CRC Delimiter.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> Trong mô hình simulator C++, bổ sung assertion kiểm tra trạng thái chuyển mạch: <code>assert(current_rate == NOMINAL_RATE && "ACK slot must run at nominal baudrate!");</code>.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> 100% lỗi Bit Error tại ACK Slot bị triệt tiêu, radar ADAS truyền thông suốt với băng thông thực tế tăng gấp 4.8 lần so với Classic CAN.</p>
+                        </div>`
                     }
                 },
                 en: {
-                    question: "Where is the BRS (Bit Rate Switch) located? Why can't it be placed at the start of the frame?",
+                    question: "Where is the BRS (Bit Rate Switch) located? Why not accelerate the entire frame from the start?",
                     answer: {
-                        theory: "<strong>BRS cannot be placed at the start of the frame.</strong> Arbitration must run at a low speed (Nominal Rate) so the electrical signal has enough time to propagate to the furthest node and back within 1 bit-time. Only after arbitration concludes and a single transmitting node is established can BRS be set (Recessive) to trigger the high speed (Data Rate).",
-                        modeling: "<strong>SystemC/C++:</strong> To model BRS in C++, we need two Clock Dividers. In the main simulation loop <code>while(true)</code>, when the state parser reads the bit <code>BRS == 1</code>, it calls a <code>switch_baudrate(DATA_RATE)</code> callback. This instantly changes the delay period of the <code>wait(t_bit)</code> statement to a shorter bit time. Upon reaching the <code>CRC_DELIMITER</code> bit, it calls <code>switch_baudrate(NOMINAL_RATE)</code> to restore the original clock.",
-                        practice: "<strong>ECU/AUTOSAR:</strong> At the hardware level, the CAN Controller contains two independent Timer registers: Nominal and Data Bit Timing. When the BRS flag is read, an internal multiplexer in the silicon seamlessly switches the clock source at the next pulse edge.",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> At what speed is the CAN FD ACK slot transmitted?<br>&rarr; Strictly at Nominal Rate starting at CRC Delimiter because all nodes must acknowledge simultaneously; high speed would cause phase collision over physical distance.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> How to prevent accumulated Clock Drift when switching baudrates in C++ <code>wait()</code>?<br>&rarr; Never accumulate relative <code>wait(t_bit)</code>. Maintain an absolute timestamp <code>next_sample_time</code> and call <code>wait(next_sample_time - sc_time_stamp())</code> to eliminate numerical precision errors.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> BRS (Bit Rate Switch) is a 1-bit flag that dynamically switches between two clock baudrates within a single CAN FD frame (Nominal Arbitration Rate vs Data Rate).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> The entire frame cannot run at high speed because Arbitration and ACK slots require propagation delay margins across the full physical bus harness (&le; 1 Mbps). At Nominal Rate (e.g., 500kbps = 2000ns bit time), differential signals can travel to the furthest node and back to resolve collisions cleanly. Speeding up early destroys CSMA/CR arbitration.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong>
+                                <br>&bull; <strong>Acceleration (Nominal &rarr; Data Rate):</strong> Triggers at the <strong>Sample Point of the BRS bit</strong> (when set to Recessive = 1).
+                                <br>&bull; <strong>Deceleration (Data Rate &rarr; Nominal):</strong> Strictly returns to Nominal Rate at the <strong>Sample Point of the CRC Delimiter bit</strong> so all nodes sample the ACK bit in identical phase.
+                            </p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> The 3rd bit of the Control Field (after FDF and res, before ESI).</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Controlled by the Silicon MAC clock multiplexer. Sensing BRS=1 shifts clock prescalers from the <code>Nominal Bit Timing Register</code> to the <code>Data Bit Timing Register</code>.</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> Model BRS by toggling simulation timers: <code>void switch_clock(BaudrateMode mode)</code>. When parsing BRS=1, trigger <code>switch_clock(DATA_RATE)</code> and update <code>t_bit = data_tq * data_tbit_quanta</code>.</p>
+                            <p>Prevent accumulated Clock Drift across thousands of bits by computing absolute milestones: <code>next_sample_timestamp += t_bit; wait(next_sample_timestamp - sc_time_stamp());</code>.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> In AUTOSAR MCAL <code>CanControllerBaudrateConfig</code>, engineers configure two dual timing sets: <code>CanControllerNominalBitRate</code> (e.g., 500kbps, 80% sample point) and <code>CanControllerDataBitRate</code> (e.g., 2Mbps or 5Mbps, 75% sample point).</p>
+                            <p>If <code>CanTxPduBrs = FALSE</code>, CAN FD frames transmit at Nominal Rate across all 64 bytes.</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">ACK Slot Phase-Shift &amp; Propagation Delay Fix</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> An ADAS Radar sensor cluster operating on a 5 Mbps CAN FD bus throws frequent Bit Errors specifically at the ACK slot whenever BRS is enabled.</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Identify the root cause behind ACK-phase failures and eliminate all transmission errors.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Probe waveforms with an oscilloscope: discovered the transmitter firmware failed to switch back to Nominal Rate at the CRC Delimiter, transmitting the ACK slot at 5 Mbps (200ns bit time). Round-trip wire delay across the 15m harness plus transceiver loops totaled 280ns, causing the receiver's dominant ACK pulse to miss the transmitter's sample point. Reconfigure MCAL bit-timing registers to enforce clock reduction at CRC Delimiter.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> In C++ simulators, embed rate validation assertions: <code>assert(current_rate == NOMINAL_RATE && "ACK slot must run at nominal baudrate!");</code>.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> Eliminated 100% of ACK Bit Errors; ADAS sensor streams achieved 4.8x real throughput gains over Classic CAN.</p>
+                        </div>`
                     }
                 }
             },
@@ -950,21 +1152,75 @@
                 difficulty: "Intermediate",
                 tags: ["#Frame"],
                 vi: {
-                    question: "Quy luật Non-linear DLC (Data Length Code) hoạt động như thế nào?",
+                    question: "Quy luật DLC phi tuyến tính trong CAN FD là gì? Nếu Application gửi 13 bytes thì điều gì xảy ra trên bus?",
                     answer: {
-                        theory: "<strong>Do CAN 2.0 giới hạn DLC ở 4 bit</strong> (từ 0000 đến 1111, tức max giá trị là 15), nó không thể đếm tuyến tính đến 64 byte. Để tương thích ngược cấu trúc Header, CAN FD giữ nguyên 4 bit này nhưng ánh xạ phi tuyến tính: DLC từ 0-8 giữ nguyên ý nghĩa (0-8 byte). Nhưng từ 9-15 lần lượt đại diện cho 12, 16, 20, 24, 32, 48, 64 bytes.",
-                        modeling: "<strong>SystemC/C++:</strong> Ánh xạ DLC phi tuyến tính thường được cài đặt bằng một bảng tra cứu (Look-up Table - LUT) dạng <code>constexpr uint8_t DLC_TO_BYTES[16] = {0,1,2,3,4,5,6,7,8, 12, 16, 20, 24, 32, 48, 64};</code>. Khi copy dữ liệu từ payload vào buffer <code>memcpy(dest, src, length)</code>, giá trị <code>length</code> được tra cứu qua <code>DLC_TO_BYTES[dlc_field]</code>. Nếu chiều dài thực tế (vd: 13) không nằm trong tập hợp này, hàm padding sẽ tự động chèn thêm padding bytes cho đến khi đạt mức kế tiếp (16).",
-                        practice: "<strong>ECU/AUTOSAR:</strong> Tại layer <code>CanIf</code> (CAN Interface), nếu tầng COM đẩy xuống một PDU có độ dài thực tế là 10 bytes, <code>CanIf</code> sẽ phải kích hoạt cơ chế Padding (chèn thêm byte rác, thường là 0x00 hoặc 0xCC) để nâng payload lên mức hợp lệ gần nhất là 12 bytes (tương ứng DLC=9).",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> Gửi gói tin 13 bytes xuống CAN FD sẽ ra sao?<br>&rarr; Bị ép lên DLC=10 (16 bytes), gồm 13 bytes data thực và 3 bytes padding do AUTOSAR BSW chèn vào.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Look-up Table <code>constexpr LUT[16]</code> vs <code>switch(dlc)</code> giải pháp nào tối ưu trên MCU không có Branch Predictor?<br>&rarr; LUT tối ưu vượt trội: Chỉ tốn 1 lệnh truy xuất $O(1)$, ăn trọn 1 cache line, triệt tiêu hoàn toàn Jump Table overhead và Branch Misprediction penalty.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> DLC (Data Length Code) phi tuyến tính là bảng quy ước ánh xạ 4-bit của trường DLC sang độ dài dữ liệu thực tế:
+                                <br>&bull; DLC từ <code>0</code> đến <code>8</code>: Đại diện tuyến tính cho <code>0</code> đến <code>8</code> bytes dữ liệu.
+                                <br>&bull; DLC từ <code>9</code> đến <code>15</code>: Ánh xạ phi tuyến tính lần lượt cho <code>12</code>, <code>16</code>, <code>20</code>, <code>24</code>, <code>32</code>, <code>48</code>, và <code>64</code> bytes.
+                            </p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> Để giữ nguyên tính tương thích với cấu trúc Header 4-bit của chuẩn cũ CAN 2.0 (chỉ có thể biểu diễn tối đa 2^4 = 16 giá trị). Nếu dùng đếm tuyến tính thì 4 bit không thể đếm tới 64 bytes.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> Kích hoạt ngay trong pha Control Field khi bộ điều khiển tạo và đóng gói frame.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> Nằm ở 4 bit cuối cùng của trường điều khiển (Control Field), ngay sau bit ESI.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Do tầng <code>CanIf</code> (phần mềm) và Silicon MAC (phần cứng) phối hợp. Nếu Application đẩy xuống một gói tin có kích thước lẻ không nằm trong các mốc hợp lệ (ví dụ: 13 bytes), tầng phần mềm bắt buộc phải thực hiện <strong>Padding</strong> (chèn thêm 3 bytes đệm dummy, thường là <code>0xCC</code> hoặc <code>0x00</code>) để làm tròn lên mốc DLC hợp lệ gần nhất là 16 bytes (DLC = 10).</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> Trong C++, bảng ánh xạ DLC phi tuyến tính được tối ưu hóa bằng mảng hằng số tra cứu Look-up Table: <code>constexpr uint8_t DLC_TO_BYTES[16] = {0,1,2,3,4,5,6,7,8, 12, 16, 20, 24, 32, 48, 64};</code>.</p>
+                            <p>Khi sao chép payload: <code>uint8_t dlc = get_dlc_from_size(size); size_t wire_bytes = DLC_TO_BYTES[dlc]; memcpy(tx_buf, app_data, size); memset(tx_buf + size, 0xCC, wire_bytes - size);</code>. Sử dụng <code>constexpr LUT</code> cho phép truy xuất bộ nhớ O(1) trực tiếp vào L1 Cache, nhanh hơn 60% so với câu lệnh <code>switch(dlc)</code> có 16 nhánh trên vi xử lý nhúng.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> Tại module <code>CanIf</code> của stack AUTOSAR, tham số <code>CanIfDataLengthCodeCheck</code> và <code>CanIfPduPaddingEnable</code> quyết định hành vi.</p>
+                            <p>Nếu bật Padding, <code>CanIf</code> tự chèn byte giá trị quy định (thường là <code>CanIfPduPaddingValue = 0xAA</code> hoặc <code>0x55</code> để tránh vô tình tạo ra chuỗi bit stuffing liên tục).</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">Bẫy Lệch Padding Gây Lỗi Xác Thực Chữ Ký SecOC</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> Một ECU truyền thông điệp mã hóa bảo mật SecOC có payload thực tế là 21 bytes. Kỹ sư thấy gói tin gửi lên bus có chiều dài 24 bytes (DLC=12), nhưng ở bên nhận, bộ giải mã thuật toán HMAC/CMAC liên tục báo lỗi sai chữ ký (Signature Verification Failed).</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Tìm ra nguyên nhân gốc rễ (Root Cause) gây lỗi xác thực chữ ký số SecOC và khắc phục triệt để.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Kiểm tra cơ chế tính toán chữ ký MAC tại tầng SecOC/PduR: Bên gửi tính toán MAC trên 21 bytes gốc, sau đó <code>CanIf</code> tự chèn 3 bytes padding <code>0x00</code> để thành 24 bytes truyền ra bus. Bên nhận khi nhận frame 24 bytes từ bus lại đưa toàn bộ 24 bytes (gồm cả 3 bytes padding) vào hàm kiểm tra chữ ký của HSM, dẫn đến sai lệch hash đầu vào. Sửa cấu hình PduR bên nhận để đọc đúng độ dài <code>PduLength = 21</code> từ metadata thay vì lấy kích thước buffer 24 bytes của CAN FD.</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> Trong unit test C++, viết hàm unpack an toàn: <code>void unpack_pdu(const uint8_t* wire_data, size_t valid_len, size_t wire_len);</code> để tách bạch rõ ràng giữa kích thước vật lý trên dây và kích thước logic của ứng dụng.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> 100% gói tin SecOC xác thực thành công ngay lập tức, độ trễ bảo mật được bảo toàn và không còn tình trạng drop gói tin trên mạng.</p>
+                        </div>`
                     }
                 },
                 en: {
-                    question: "How does the Non-linear DLC (Data Length Code) rule work?",
+                    question: "What is the Non-linear DLC rule in CAN FD? What happens on the bus if the Application sends 13 bytes?",
                     answer: {
-                        theory: "<strong>Since CAN 2.0 limits DLC to 4 bits</strong> (0 to 15), it cannot count linearly to 64 bytes. To maintain Header compatibility, CAN FD maps values non-linearly: DLC 0-8 means 0-8 bytes. However, DLC 9-15 map to 12, 16, 20, 24, 32, 48, and 64 bytes respectively.",
-                        modeling: "<strong>SystemC/C++:</strong> Non-linear DLC mapping is typically implemented using a Look-up Table (LUT) array: <code>constexpr uint8_t DLC_TO_BYTES[16] = {0,1,2,3,4,5,6,7,8, 12, 16, 20, 24, 32, 48, 64};</code>. When copying payload data via <code>memcpy(dest, src, length)</code>, the <code>length</code> is looked up via <code>DLC_TO_BYTES[dlc_field]</code>. If the actual data length (e.g., 13) is not in the set, a padding function automatically appends padding bytes until the next valid boundary (16) is reached.",
-                        practice: "<strong>ECU/AUTOSAR:</strong> In the <code>CanIf</code> layer, if the COM layer pushes a PDU of 10 bytes, <code>CanIf</code> must trigger Padding (inserting dummy bytes like 0x00 or 0xCC) to reach the nearest valid payload size of 12 bytes (DLC=9).",
-                        trap: `<strong>🚗 Automotive / Protocol:</strong> What happens if an SWC sends exactly 13 bytes over CAN FD?<br>&rarr; Padded to DLC=10 (16 bytes), containing 13 actual bytes and 3 padding bytes inserted by AUTOSAR BSW.<br><br><strong>💻 C++ / Modeling Follow-up:</strong> Look-up Table <code>constexpr LUT[16]</code> vs 16-case <code>switch(dlc)</code> on MCU without branch predictor?<br>&rarr; LUT is vastly superior: Single $O(1)$ indexed load, hits a single cache line, completely avoiding jump table overhead and branch misprediction penalties.`
+                        theory: `<div class="space-y-2">
+                            <p><strong class="text-amber-600 dark:text-amber-400">📌 What:</strong> Non-linear DLC (Data Length Code) is a 4-bit mapping convention encoding discrete payload boundaries:
+                                <br>&bull; DLC <code>0</code> to <code>8</code>: Linearly maps to <code>0</code> to <code>8</code> bytes.
+                                <br>&bull; DLC <code>9</code> to <code>15</code>: Non-linearly maps to <code>12</code>, <code>16</code>, <code>20</code>, <code>24</code>, <code>32</code>, <code>48</code>, and <code>64</code> bytes.
+                            </p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">💡 Why:</strong> Preserves 4-bit Header compatibility with CAN 2.0 (2^4 = 16 states). Linear incrementing cannot count up to 64 bytes using just 4 bits.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⏱️ When:</strong> Evaluated during the Control Field parsing and frame packaging phase.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">📍 Where:</strong> The final 4 bits of the Control Field, positioned immediately after ESI.</p>
+                            <p><strong class="text-amber-600 dark:text-amber-400">⚙️ Who &amp; How:</strong> Coordinated between the software <code>CanIf</code> module and hardware Silicon MAC. If an application submits an unmapped payload size (e.g., 13 bytes), the software stack pads 3 dummy bytes (<code>0xCC</code> or <code>0x00</code>) to elevate the frame to the next valid boundary (16 bytes, DLC = 10).</p>
+                        </div>`,
+                        modeling: `<div class="space-y-2">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">🖥️ SystemC/C++ Modeling:</strong> In C++, map DLC via a <code>constexpr uint8_t DLC_TO_BYTES[16] = {0,1,2,3,4,5,6,7,8, 12, 16, 20, 24, 32, 48, 64};</code> Look-up Table.</p>
+                            <p>Enforce padding: <code>uint8_t dlc = get_dlc_from_size(size); size_t wire_bytes = DLC_TO_BYTES[dlc]; memcpy(tx_buf, app_data, size); memset(tx_buf + size, 0xCC, wire_bytes - size);</code>. A <code>constexpr LUT</code> resolves to O(1) L1 Cache access, outperforming 16-branch <code>switch(dlc)</code> constructs by ~60% on embedded RISC processors.</p>
+                        </div>`,
+                        practice: `<div class="space-y-2">
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">🔧 ECU/AUTOSAR Practice:</strong> Handled by AUTOSAR <code>CanIf</code> parameters <code>CanIfDataLengthCodeCheck</code> and <code>CanIfPduPaddingEnable</code>.</p>
+                            <p>When enabled, <code>CanIf</code> inserts dummy bytes (<code>CanIfPduPaddingValue = 0xAA</code> or <code>0x55</code> to prevent unintended bit-stuffing streaks).</p>
+                        </div>`,
+                        trap: `<div class="space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300">Micro-STAR</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">SecOC Padding Hash Mismatch Troubleshooting</span>
+                            </div>
+                            <p><strong class="text-rose-500 dark:text-rose-400">🚨 S (Situation):</strong> An ECU transmitting a 21-byte SecOC authenticated message is padded to 24 bytes (DLC=12) by CanIf. On the receiver, the cryptographic HSM consistently rejects the message with Signature Verification Failures.</p>
+                            <p><strong class="text-sky-500 dark:text-sky-400">🎯 T (Task):</strong> Identify the discrepancy between transmitted data and SecOC cryptographic signature computation and restore verification.</p>
+                            <div class="pl-3 border-l-2 border-emerald-400 dark:border-emerald-500 space-y-1.5 my-1">
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (🚗 Automotive):</strong> Trace the SecOC/PduR crypto pipeline: The sender calculated the MAC over the original 21 bytes before CanIf appended 3 padding bytes (0x00). The receiver passed the full 24-byte wire buffer into the HSM verification routine, corrupting the hash input. Reconfigure receiver PduR routing to decouple physical wire length from logical payload length (<code>PduLength = 21</code>).</p>
+                                <p><strong class="text-emerald-700 dark:text-emerald-400">🛠️ A (💻 C++ / Modeling):</strong> Implement explicit C++ buffer unpacking interfaces: <code>void unpack_pdu(const uint8_t* wire_data, size_t valid_len, size_t wire_len);</code> to clearly isolate wire buffers from application payloads.</p>
+                            </div>
+                            <p><strong class="text-violet-600 dark:text-violet-400">📊 R (Result):</strong> Achieved 100% SecOC verification success, maintained cryptographic latency budgets, and eradicated message drops.</p>
+                        </div>`
                     }
                 }
             }
