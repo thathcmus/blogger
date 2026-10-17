@@ -7,6 +7,21 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
+### Agent Workflow & Documentation Architecture
+- **Chuẩn Hóa & Hoàn Thiện Hệ Thống Tài Liệu Kỹ Thuật Toàn Bộ Widget (`docs/cpp_oop/`, `docs/flexray/`)**:
+  - **Khởi tạo tài liệu C++ OOP Simulator (`docs/cpp_oop/CURRENT_INFO.md`, `docs/cpp_oop/BACKLOG.md`)**: Đặc tả hiện trạng kỹ thuật 4 trụ cột OOP (Encapsulation, Inheritance, Polymorphism, Abstraction), phân tích cấu trúc bộ nhớ & VTABLE resolution, bản đồ mã nguồn 513 dòng chính xác, và lộ trình backlog tính năng (`[CPP-001]` đến `[CPP-004]`).
+  - **Khởi tạo Ground Truth Q&A FlexRay (`docs/flexray/MAINTENANCE_PLAN.md`)**: Trích xuất nguyên văn toàn bộ nội dung Q1 (Time-Triggered Protocol) và Q2 (FTM Clock Drift Synchronization) từ mã nguồn làm Single Source of Truth cho quá trình bảo trì và mở rộng.
+- **Nâng Cấp Bộ Công Cụ Tự Động Hóa & Kiểm Soát Chất Lượng (`scripts/sync-docs.js`)**:
+  - Tích hợp cơ chế tự động đồng bộ số dòng code thực tế và ngày cập nhật cho cả `widget_flexray.html` và `widget_cpp_oop.html` vào các file `CURRENT_INFO.md` tương ứng.
+  - Tự động kiểm tra cú pháp JS của toàn bộ 3 widget trước khi cho phép commit.
+- **Bổ Sung SOP-4: Quy Trình Xử Lý Sự Cố & Hotfix Production (`AGENTS.md`)**:
+  - Bổ sung quy trình 4 bước chẩn đoán lỗi chuyên sâu (CDN Error fallback, Blogger Theme layout break, mobile viewport 375px break, JS Runtime error).
+- **Tạo Kỹ Năng Mới Cho AI Agent: Review & Soạn Thảo Q&A (`.agents/skills/review-qa-content/SKILL.md`)**:
+  - Hướng dẫn chi tiết checklist 4 tầng (Theory, SystemC/C++ Modeling, ECU/AUTOSAR Practice, Interview Trap) kết hợp khung 5W-1H cho câu hỏi khái niệm (Type A) và Micro-STAR cho câu hỏi tình huống (Type B).
+- **Đồng Bộ Bộ Mặt Dự Án & Sơ Đồ Cấu Trúc Kho Lưu Trữ (`AGENTS.md`, `README.md`, `README.vi.md`)**:
+  - Cập nhật liên kết tài liệu `docs/cpp_oop/` trong bảng Showcase của cả 2 bản `README.md` và `README.vi.md`.
+  - Cập nhật sơ đồ cây thư mục (Repository Architecture) đầy đủ các thư mục và kỹ năng mới.
+
 ### Q&A Standardization & Automation
 - **Chuẩn Hóa Ngân Hàng Câu Hỏi Phỏng Vấn Theo Khung 5W-1H & Micro-STAR (v1.6.0) (`widget_can_fd.html`, `docs/can_fd/MAINTENANCE_PLAN.md`)**:
   - **Rà soát & Viết lại toàn diện 5 câu hỏi phỏng vấn chuyên sâu CAN FD** với tính chính xác cao theo ISO 11898-1:2015, AUTOSAR Classic BSW Stack và SystemC/C++ Modeling:

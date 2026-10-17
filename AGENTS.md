@@ -24,17 +24,23 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │   └── skills/
 │       ├── blogger-widget-creator/
 │       │   └── SKILL.md                    # Hướng dẫn 5 bước và template tạo widget mới
-│       └── git-commit-push/
-│           └── SKILL.md                    # Xử lý lệnh tắt /commit, /push, /commit-push tự động
+│       ├── git-commit-push/
+│       │   └── SKILL.md                    # Xử lý lệnh tắt /commit, /push, /commit-push tự động
+│       └── review-qa-content/
+│           └── SKILL.md                    # Hướng dẫn review & thêm Q&A 4 tầng chuẩn hóa
 │
 ├── docs/                                   # Tài liệu chi tiết từng widget
 │   ├── can_fd/                             # Widget CAN FD
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật CAN FD
 │   │   ├── BACKLOG.md                      # Backlog tính năng tổng thể
 │   │   └── MAINTENANCE_PLAN.md             # Kế hoạch bảo trì 60 ngày & Ground Truth Q&A
+│   ├── cpp_oop/                            # Widget C++ OOP
+│   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật C++ OOP
+│   │   └── BACKLOG.md                      # Kế hoạch nâng cấp và mẫu yêu cầu thay đổi
 │   └── flexray/                            # Widget FlexRay
 │       ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật FlexRay
-│       └── BACKLOG.md                      # Kế hoạch nâng cấp và mẫu yêu cầu thay đổi
+│       ├── BACKLOG.md                      # Kế hoạch nâng cấp và mẫu yêu cầu thay đổi
+│       └── MAINTENANCE_PLAN.md             # Ground Truth Q&A FlexRay
 │
 ├── AGENTS.md                               # [File này] Bản chỉ dẫn dành cho Agent
 ├── CHANGELOG.md                            # Nhật ký phiên bản chuẩn SemVer
@@ -89,6 +95,17 @@ Khi người dùng gõ lệnh tắt hoặc yêu cầu liên quan đến Git:
    - Chạy `git push origin main` (hoặc nhánh hiện tại) và báo cáo commit hash/status.
 3. **Lệnh `/commit-push` (hoặc `/cp`)**:
    - Thực thi liền mạch: Sync & Syntax Check $\rightarrow$ Commit $\rightarrow$ Push lên GitHub.
+
+### SOP-4: Khi Debug Lỗi Production / Hotfix (Production Debugging Protocol)
+Khi widget bị báo lỗi trên Blogger hoặc GitHub Pages:
+1. **Bước 1 (Tái hiện lỗi)**: Mở widget bằng trình duyệt local (`file:///`) và kiểm tra Console (F12). Xác nhận lỗi có tái hiện không.
+2. **Bước 2 (Phân loại lỗi)**:
+   - **CDN Error**: Thư viện ngoài (Lucide, Tailwind, Firebase) bị chặn → kiểm tra `try...catch` fallback.
+   - **Layout Break**: CSS bị Blogger theme override → kiểm tra root container isolation, `!important` conflicts.
+   - **Mobile Break**: Thiếu `overflow-x-auto`, width cứng → kiểm tra responsive rules.
+   - **JS Runtime Error**: Logic crash → kiểm tra Console stack trace, đối chiếu Source Code Architecture trong `CURRENT_INFO.md`.
+3. **Bước 3 (Fix & Verify)**: Sửa lỗi → Chạy `node scripts/sync-docs.js` → Kiểm tra trên mobile viewport (375px).
+4. **Bước 4 (Sync)**: Thực hiện SOP-1 Bước 4 (Auto Info-Sync) đầy đủ.
 
 ### 🎯 Tiêu Chuẩn Hoàn Thành Bắt Buộc (Definition of Done - DoD)
 Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** nếu chưa kiểm tra đủ 4 điểm chốt (4-Point Checkpoint):

@@ -19,7 +19,7 @@ Engineered following a **Zero-Build & Self-Contained** philosophy, ready to embe
 | :--- | :--- | :---: | :---: |
 | **FlexRay Protocol Explorer**<br>`widget_flexray.html` | Explore Frame structures (Header/Payload/Trailer), node data handling via CHI & Message Buffers, and communication cycle timings (Static, Dynamic, Symbol Window, NIT) adhering to **FlexRay 3.0.1 / ISO 17458**. | [🔗 Live Demo](https://thathcmus.github.io/blogger/widget_flexray.html) | [`docs/flexray/`](docs/flexray/CURRENT_INFO.md) |
 | **CAN FD Protocol Explorer**<br>`widget_can_fd.html` | Bit-level CAN FD frame inspection, Bit Rate Switching (BRS), generation comparison matrix, 4-tier bilingual interview Q&A bank, and live community discussions powered by Firebase Cloud Firestore & Google Auth. | [🔗 Live Demo](https://thathcmus.github.io/blogger/widget_can_fd.html) | [`docs/can_fd/`](docs/can_fd/CURRENT_INFO.md) |
-| **C++ OOP Simulator**<br>`widget_cpp_oop.html` | Interactive simulation of Object-Oriented Programming pillars (Inheritance, Encapsulation, Polymorphism, Abstraction) with dynamic memory layout inspection and Virtual Table (VTABLE) resolution. | [🔗 Live Demo](https://thathcmus.github.io/blogger/widget_cpp_oop.html) | In Progress |
+| **C++ OOP Simulator**<br>`widget_cpp_oop.html` | Interactive simulation of Object-Oriented Programming pillars (Inheritance, Encapsulation, Polymorphism, Abstraction) with dynamic memory layout inspection and Virtual Table (VTABLE) resolution. | [🔗 Live Demo](https://thathcmus.github.io/blogger/widget_cpp_oop.html) | [`docs/cpp_oop/`](docs/cpp_oop/CURRENT_INFO.md) |
 
 ---
 
@@ -79,6 +79,7 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 - [`.agents/rules/blogger-embed-rules.md`](.agents/rules/blogger-embed-rules.md): Technical invariants for Blogger embedding.
 - [`.agents/skills/blogger-widget-creator/SKILL.md`](.agents/skills/blogger-widget-creator/SKILL.md): 5-step workflow and starter boilerplate for new widgets.
 - [`.agents/skills/git-commit-push/SKILL.md`](.agents/skills/git-commit-push/SKILL.md): Automated `/commit`, `/push`, `/commit-push` workflow skill.
+- [`.agents/skills/review-qa-content/SKILL.md`](.agents/skills/review-qa-content/SKILL.md): Standardized 4-tier Q&A review & creation skill (5W-1H & Micro-STAR).
 
 ---
 
@@ -89,15 +90,20 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 │   ├── rules/blogger-embed-rules.md        # Blogger embedding invariants & 4-tier Q&A rules
 │   └── skills/
 │       ├── blogger-widget-creator/         # 5-step workflow & boilerplate generator
-│       └── git-commit-push/                # Automated /commit and /push shortcut workflow
+│       ├── git-commit-push/                # Automated /commit and /push shortcut workflow
+│       └── review-qa-content/              # Standardized 4-tier Q&A review & creation skill
 ├── docs/                                   # Specifications, backlogs & maintenance plans
 │   ├── can_fd/                             # CAN FD Protocol documentation
 │   │   ├── CURRENT_INFO.md                 # Current technical specification
 │   │   ├── BACKLOG.md                      # Feature backlog
 │   │   └── MAINTENANCE_PLAN.md             # 60-day sprint plan & Ground Truth Q&A
+│   ├── cpp_oop/                            # C++ OOP Simulator documentation
+│   │   ├── CURRENT_INFO.md                 # Current technical specification
+│   │   └── BACKLOG.md                      # Feature backlog & enhancement roadmap
 │   └── flexray/                            # FlexRay Protocol documentation
 │       ├── CURRENT_INFO.md                 # Current technical specification
-│       └── BACKLOG.md                      # FlexRay enhancement backlog
+│       ├── BACKLOG.md                      # FlexRay enhancement backlog
+│       └── MAINTENANCE_PLAN.md             # Ground Truth Q&A FlexRay
 ├── AGENTS.md                               # AI Agent operating manual & SOPs
 ├── CHANGELOG.md                            # Version history (SemVer)
 ├── README.md                               # Project documentation (English)

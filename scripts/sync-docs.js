@@ -145,16 +145,35 @@ function syncFlexRayWidget() {
     if (fs.existsSync(docPath)) {
         let docContent = fs.readFileSync(docPath, 'utf8');
         const today = getTodayDate();
+        let modified = false;
+
+        // 1. Update line count in Version description: tổng cộng X dòng code
+        const versionLineRegex = /(\* \*\*Phiên bản hiện tại\*\*:.*?)tổng cộng\s+[\d,]+\s+dòng code/g;
+        if (versionLineRegex.test(docContent)) {
+            docContent = docContent.replace(versionLineRegex, `$1tổng cộng ${formattedLines} dòng code`);
+            modified = true;
+        }
+
+        // 2. Update date: * **Ngày cập nhật**: `YYYY-MM-DD`
         const dateRegex = /(\* \*\*Ngày cập nhật\*\*:\s*`)(\d{4}-\d{2}-\d{2})(`)/g;
         if (dateRegex.test(docContent)) {
             docContent = docContent.replace(dateRegex, `$1${today}$3`);
+            modified = true;
+        }
+
+        if (modified) {
             fs.writeFileSync(docPath, docContent, 'utf8');
-            console.log(`📄 [SYNC] docs/flexray/CURRENT_INFO.md date refreshed (${today}).`);
+            console.log(`📄 [SYNC] docs/flexray/CURRENT_INFO.md updated (lines: ${formattedLines}, date: ${today}).`);
             if (shouldGitAdd) {
                 try {
                     execSync(`git add "${docPath}"`, { cwd: ROOT_DIR });
-                } catch (e) {}
+                    console.log(`📌 [GIT] Staged docs/flexray/CURRENT_INFO.md`);
+                } catch (gitErr) {
+                    console.warn(`[WARN] Failed to git add ${docPath}:`, gitErr.message);
+                }
             }
+        } else {
+            console.log(`📄 [UP-TO-DATE] docs/flexray/CURRENT_INFO.md is already up to date.`);
         }
     }
 
@@ -164,6 +183,8 @@ function syncFlexRayWidget() {
 // Sync C++ OOP Widget Docs
 function syncCppOopWidget() {
     const htmlPath = path.join(ROOT_DIR, 'widget_cpp_oop.html');
+    const docPath = path.join(ROOT_DIR, 'docs', 'cpp_oop', 'CURRENT_INFO.md');
+
     if (!fs.existsSync(htmlPath)) return true;
 
     const html = fs.readFileSync(htmlPath, 'utf8');
@@ -171,7 +192,51 @@ function syncCppOopWidget() {
     if (!isValid) return false;
 
     const lineCount = html.split('\n').length;
-    console.log(`✅ [widget_cpp_oop.html] Syntax OK | Lines: ${formatNumber(lineCount)}`);
+    const formattedLines = formatNumber(lineCount);
+    console.log(`✅ [widget_cpp_oop.html] Syntax OK | Lines: ${formattedLines}`);
+
+    if (fs.existsSync(docPath)) {
+        let docContent = fs.readFileSync(docPath, 'utf8');
+        const today = getTodayDate();
+        let modified = false;
+
+        // 1. Update line count in Version description: tổng cộng X dòng code
+        const versionLineRegex = /(\* \*\*Phiên bản hiện tại\*\*:.*?)tổng cộng\s+[\d,]+\s+dòng code/g;
+        if (versionLineRegex.test(docContent)) {
+            docContent = docContent.replace(versionLineRegex, `$1tổng cộng ${formattedLines} dòng code`);
+            modified = true;
+        }
+
+        // 2. Update date: * **Ngày cập nhật**: `YYYY-MM-DD`
+        const dateRegex = /(\* \*\*Ngày cập nhật\*\*:\s*`)(\d{4}-\d{2}-\d{2})(`)/g;
+        if (dateRegex.test(docContent)) {
+            docContent = docContent.replace(dateRegex, `$1${today}$3`);
+            modified = true;
+        }
+
+        // 3. Update line count in Section 4 summary (if exists)
+        const section4Regex = /(File tổng cộng\s+)[\d,]+(\s+dòng)/g;
+        if (section4Regex.test(docContent)) {
+            docContent = docContent.replace(section4Regex, `$1${formattedLines}$2`);
+            modified = true;
+        }
+
+        if (modified) {
+            fs.writeFileSync(docPath, docContent, 'utf8');
+            console.log(`📄 [SYNC] docs/cpp_oop/CURRENT_INFO.md updated (lines: ${formattedLines}, date: ${today}).`);
+            if (shouldGitAdd) {
+                try {
+                    execSync(`git add "${docPath}"`, { cwd: ROOT_DIR });
+                    console.log(`📌 [GIT] Staged docs/cpp_oop/CURRENT_INFO.md`);
+                } catch (gitErr) {
+                    console.warn(`[WARN] Failed to git add ${docPath}:`, gitErr.message);
+                }
+            }
+        } else {
+            console.log(`📄 [UP-TO-DATE] docs/cpp_oop/CURRENT_INFO.md is already up to date.`);
+        }
+    }
+
     return true;
 }
 
