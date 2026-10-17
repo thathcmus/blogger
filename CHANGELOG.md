@@ -35,6 +35,19 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 - **Khắc phục lỗi cú pháp Firestore Security Rules**: Sửa lỗi parse path variable do ghép chuỗi ký tự wildcard không hợp lệ bằng cách khai báo tường minh từng collection; bổ sung từ khóa `if` còn thiếu trong default deny rule (`allow read, write: if false;`).
 
 ### Added
+- **Chế độ Tối Toàn Diện (Comprehensive Dark Mode Theme - v1.4.0) (`widget_can_fd.html`)**:
+  - **Nút chuyển đổi chế độ Sáng / Tối trực quan (`#btn-theme`)**: Đặt trên thanh Header (cạnh nút đổi ngôn ngữ và nút đăng nhập Google Auth), sử dụng icon Lucide Sun / Moon động kèm tooltip song ngữ.
+  - **Tự động nhận diện & Ghi nhớ tùy chọn người dùng**: Tự động nhận diện thiết lập giao diện hệ điều hành qua `window.matchMedia('(prefers-color-scheme: dark)')`, lưu vết trạng thái người dùng vào `localStorage` (`canfd_theme`), tự động cập nhật mượt mà khi người dùng đổi theme OS.
+  - **Bảng Màu Dark Palette Đẳng Cấp Chuyên Ngành Ô Tô**:
+    - Áp dụng cấu hình Tailwind `darkMode: 'class'` với cơ chế kích hoạt kép (`document.documentElement` và `#canfd-explorer-root`), đảm bảo tương thích 100% trong môi trường nhúng Blogspot/WordPress lẫn GitHub Pages độc lập.
+    - Phối màu Dark Palette: Nền chính `slate-950` (`#030712`), container/thẻ `slate-900` (`#0f172a`), chi tiết & hộp soạn thảo `slate-850` (`#151f32`), viền `slate-800`, chữ `slate-100`/`slate-400`.
+    - Giữ trọn độ tương phản cao và mã màu chuẩn hóa cho các phase truyền thông: `amber-400` cho Arbitration Phase, `emerald-400` cho Data Phase, `blue-400` cho CRC Field.
+  - **Đồng bộ hóa 100% trên toàn bộ hệ thống giao diện**:
+    - **Tab 1 (Frame Explorer)**: Thanh timeline bit frame, thẻ giải phẫu trường bit, hộp thông số kỹ thuật và callout so sánh.
+    - **Tab 2 (Comparison Table)**: Bảng đối chiếu Classic CAN vs CAN FD, thẻ tóm tắt tính năng, huy hiệu tiêu chuẩn ISO.
+    - **Tab 3 (Ngân hàng Q&A 4 Tầng)**: Thanh nav nổi glassmorphism (`bg-slate-900/90`), thanh lọc độ khó/chủ đề, Accordion câu hỏi, 4 sub-tab nội dung (`📖 Theory`, `🖥️ C++ Modeling`, `🔧 ECU/AUTOSAR`, `⚠️ Interview Trap`), khối code C++ syntax highlight tối ưu cho nền tối.
+    - **Hệ thống Bình luận Firebase Firestore**: Khung soạn thảo comment, dropdown chọn scope, các filter pills, banner Pinned Note tác giả, thẻ phản hồi lồng nhau (threaded replies), và modal đăng nhập Google Auth.
+  - **Hỗ trợ Song ngữ (i18n)**: Bổ sung key `theme_light` và `theme_dark` vào từ điển đa ngữ (Việt - Anh) cho tooltip nút theme.
 - **Nâng cấp Trải Nghiệm Điều Hướng & Đọc Q&A (`widget_can_fd.html`)**:
   - **Cơ chế Single-Open Accordion**: Khi bấm mở bất kỳ câu hỏi nào, tất cả các câu hỏi khác đang mở sẽ tự động thu gọn lại, giúp giao diện gọn gàng và độc giả tập trung 100% vào nội dung câu hỏi hiện tại.
   - **Thanh Điều Hướng Nổi Glassmorphism Siêu Nhẹ (`sticky top-2 z-30`)**: Neo tĩnh thanh điều hướng 3 tab chính nhỏ gọn (~48px) trên đầu trang với hiệu ứng kính mờ, không reflow, không che khuất nội dung bên dưới.

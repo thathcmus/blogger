@@ -46,5 +46,5 @@ Khi cần đề xuất tính năng mới hoặc cập nhật nội dung Q&A, vui
 
 ## 3. Các Đề Xuất Chờ Phê Duyệt (Backlog Pool)
 
-- [ ] **[CANFD-001] Chế độ tối (Dark Mode Theme):** Tự động nhận diện theme hệ thống hoặc thêm toggle Dark Mode cho widget.
+- [x] **[CANFD-001] Chế độ tối (Dark Mode Theme):** Tự động nhận diện theme hệ thống (`prefers-color-scheme`) kết hợp toggle nút bấm Sun/Moon, lưu `localStorage` (`canfd_theme`), hỗ trợ chuẩn màu Dark Palette cho toàn bộ 3 tab, modal và thảo luận Firestore *(Hoàn thành ở v1.4.0)*.
 - [ ] **[CANFD-002] Tích hợp bộ giả lập Oscilloscope (Signal Waveform):** Vẽ dạng sóng điện áp vi sai CAN_H / CAN_L khi chuyển đổi giữa Arbitration Phase và Data Phase để trực quan hóa hiệu ứng dội tín hiệu (Ringing).
