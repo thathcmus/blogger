@@ -1,0 +1,21 @@
+{
+  "name": "tech-blogger-widgets",
+  "version": "1.3.0",
+  "description": "Interactive Visualizers & Educational Simulators for Google Blogger, WordPress, Substack and GitHub Pages",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "sync": "node scripts/sync-docs.js",
+    "pack": "node scripts/pack-context.js",
+    "pack:full": "node scripts/pack-context.js --full"
+  },
+  "keywords": [
+    "automotive",
+    "can-fd",
+    "flexray",
+    "cpp-oop",
+    "blogger-widgets",
+    "interactive-visualizer"
+  ],
+  "author": "Huynh Thien That",
+  "license": "MIT"
+}

@@ -94,6 +94,10 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 │       ├── git-commit-push/                # Kỹ năng xử lý tự động lệnh tắt /commit và /push
 │       ├── pack-context/                   # Kỹ năng tự động đóng gói ngữ cảnh /pack và /pack-full
 │       └── review-qa-content/              # Kỹ năng review & soạn thảo Q&A 4 tầng chuẩn hóa
+├── dist/                                   # Thành phẩm biên dịch độc lập (Production Bundles)
+│   ├── widget_can_fd.html                  # Bundle CAN FD hoàn chỉnh (kèm Q&A biên dịch)
+│   ├── widget_flexray.html                 # Bundle FlexRay hoàn chỉnh
+│   └── widget_cpp_oop.html                 # Bundle C++ OOP hoàn chỉnh
 ├── docs/                                   # Tài liệu hiện trạng, backlog & maintenance plan
 │   ├── can_fd/                             # Tài liệu CAN FD Protocol
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật
@@ -112,19 +116,24 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 ├── README.md                               # Tài liệu giới thiệu dự án (English)
 ├── README.vi.md                            # Tài liệu giới thiệu dự án (Tiếng Việt)
 ├── LICENSE                                 # Giấy phép mã nguồn mở MIT
+├── package.json                            # Scripts build, sync, pack chuẩn Node.js
 ├── firebase.json                           # Cấu hình triển khai Firebase
 ├── firestore.rules                         # Quy tắc bảo mật Cloud Firestore (Zero-Trust Rules)
 ├── repomix.config.json                     # Cấu hình đóng gói ngữ cảnh cho AI (Repomix)
 ├── scripts/                                # Công cụ tự động hóa & Kiểm soát chất lượng
+│   ├── build.js                            # Trình biên dịch mã nguồn (src/ -> dist/ & root)
 │   ├── pack-context.js                     # Script đóng gói ngữ cảnh repo cho AI (LLM Context Packer)
 │   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
-├── src/                                    # Dữ liệu nguồn độc lập (Single Source of Truth)
-│   └── data/                               # Ngân hàng tri thức & nội dung câu hỏi
-│       └── can_fd/
-│           └── questions.json              # Ngân hàng Q&A 4 tầng CAN FD tự động biên dịch
-├── widget_can_fd.html                      # Widget CAN FD Protocol Explorer
-├── widget_flexray.html                     # Widget FlexRay Protocol Explorer
-└── widget_cpp_oop.html                     # Widget C++ OOP Simulator
+├── src/                                    # Mã nguồn phát triển sạch sẽ (Source of Truth)
+│   ├── data/                               # Ngân hàng tri thức & nội dung câu hỏi
+│   │   └── can_fd/
+│   │       └── questions.json              # Ngân hàng Q&A 4 tầng CAN FD tự động biên dịch
+│   ├── widget_can_fd.html                  # Mã nguồn UI/logic CAN FD (không chứa câu hỏi thô)
+│   ├── widget_flexray.html                 # Mã nguồn UI/logic FlexRay
+│   └── widget_cpp_oop.html                 # Mã nguồn UI/logic C++ OOP
+├── widget_can_fd.html                      # [Mirror live link] Phục vụ trực tiếp GitHub Pages
+├── widget_flexray.html                     # [Mirror live link] Phục vụ trực tiếp GitHub Pages
+└── widget_cpp_oop.html                     # [Mirror live link] Phục vụ trực tiếp GitHub Pages
 ```
 
 ---

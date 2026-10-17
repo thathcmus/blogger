@@ -1,0 +1,2635 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAN FD Protocol Explorer</title>
+    <!-- Tailwind CSS CDN & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#151f32',
+                            750: '#26354a'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase Compat SDKs (v10.14.1) for zero-build standalone Blogger embed -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fadeIn { animation: fadeIn 0.25s ease-out; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Elegant code styling for both light and dark themes */
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            padding: 0.15rem 0.35rem;
+            border-radius: 0.25rem;
+            font-size: 0.85em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        .dark code {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+        }
+
+        /* 3D Portal Tilt & Glare Effects */
+        .portal-tilt-card {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.15s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease;
+            will-change: transform;
+        }
+        .portal-tilt-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle 320px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.25), transparent 80%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 25;
+        }
+        .dark .portal-tilt-card::before {
+            background: radial-gradient(circle 320px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08), transparent 80%);
+        }
+        .portal-tilt-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Ambient Cyber Grid Background for Portal */
+        .portal-cyber-grid {
+            background-image: radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .dark .portal-cyber-grid {
+            background-image: radial-gradient(rgba(51, 65, 85, 0.35) 1px, transparent 1px);
+        }
+
+        /* Oscilloscope Wave Scan Animation */
+        @keyframes waveScan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(600%); }
+        }
+        .animate-wave-scan {
+            animation: waveScan 3.5s linear infinite;
+        }
+
+        /* Pulsing Glow Ring for Frame CTA Button */
+        @keyframes ctaPulseRing {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+            50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+        .animate-cta-pulse {
+            animation: ctaPulseRing 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Signal Dash Stream Animation */
+        @keyframes signalDash {
+            to { stroke-dashoffset: -32; }
+        }
+        .animate-signal-dash {
+            stroke-dasharray: 6 4;
+            animation: signalDash 1.2s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 antialiased p-4 md:p-8 transition-colors duration-300">
+
+    <!-- UNIQUE ROOT CONTAINER ENSURING ISOLATION FROM BLOGGER THEMES -->
+    <div id="canfd-explorer-root" class="max-w-5xl mx-auto transition-colors duration-300">
+        
+        <!-- Header: Split 2-Column Responsive Layout (Eliminating Absolute Overlap) -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-slate-200/80 dark:border-slate-800/80">
+            <!-- Left Column: Branding, Title & Subtitle -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2.5 mb-1.5">
+                    <span class="p-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs shrink-0">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </span>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
+                        <span data-i18n="main_title">CAN FD Protocol Explorer</span>
+                    </h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed ml-0.5" data-i18n="main_desc">
+                    Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)
+                </p>
+            </div>
+
+            <!-- Right Column: User Auth & Action Toolbar -->
+            <div class="flex items-center gap-2 shrink-0 self-start md:self-center flex-wrap sm:flex-nowrap">
+                <!-- User Auth Container (Google Sign-In / Profile Dropdown) -->
+                <div id="auth-header-container" class="relative"></div>
+
+                <!-- Theme Toggle Button (Dark / Light Mode) -->
+                <button id="btn-theme" onclick="toggleTheme()" title="Chế độ Sáng / Tối (Dark Mode)" class="flex items-center justify-center p-2 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
+                    <i id="icon-theme" data-lucide="moon" class="w-4 h-4 text-slate-600 dark:text-amber-400"></i>
+                </button>
+
+                <!-- Language indicator -->
+                <button onclick="toggleLang()" class="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-xs sm:text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
+                    <i data-lucide="languages" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                    <span id="lang-indicator">EN</span>
+                </button>
+
+                <!-- Fullscreen button -->
+                <button id="btn-fullscreen" onclick="toggleFullscreen()" title="Toàn màn hình / Thu nhỏ" class="flex items-center justify-center p-2 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
+                    <i id="icon-fullscreen" data-lucide="maximize-2" class="w-4 h-4 text-slate-600 dark:text-slate-300"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Google Sign-In & Firebase Auth Modal -->
+        <div id="google-auth-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm p-4 animate-fadeIn">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full overflow-hidden transform transition-all">
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-100 dark:border-slate-800 text-center relative bg-gradient-to-b from-slate-50 to-white dark:from-slate-850 dark:to-slate-900">
+                    <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <!-- Google Logo SVG -->
+                    <div class="w-12 h-12 mx-auto mb-3 bg-white dark:bg-slate-800 rounded-full shadow-md flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100" data-i18n="modal_auth_title">Đăng Nhập Với Google</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="modal_auth_desc">Đăng nhập tài khoản Google để tham gia thảo luận, trả lời và ghim ghi chú kỹ thuật</p>
+                    
+                    <!-- Firebase Cloud Status Badge -->
+                    <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Cloud Database: tech-blogger-widgets</span>
+                    </div>
+
+                    <!-- Environment Notice -->
+                    <div id="auth-environment-notice" class="hidden text-xs bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 p-2.5 rounded-lg text-left mt-3"></div>
+                </div>
+
+                <!-- Google Sign-In Action -->
+                <div class="p-6">
+                    <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-400 dark:hover:border-slate-600 text-slate-800 dark:text-slate-100 font-semibold shadow-sm hover:shadow transition-all group">
+                        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-100" data-i18n="btn_continue_google">Tiếp tục với Google</span>
+                    </button>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-500 text-center mt-4">Xác thực an toàn qua Google Firebase Auth. Không lưu mật khẩu.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- LANDING PORTAL HUB (3D Tilt Mouse-Tracking Showcase Cards) -->
+        <div id="portal-hub-view" class="space-y-6 mb-8 animate-fadeIn">
+            <!-- Portal Welcome Banner -->
+            <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-850 p-6 sm:p-8 text-center shadow-lg">
+                <div class="absolute inset-0 portal-cyber-grid opacity-30 pointer-events-none"></div>
+                <div class="relative z-10 max-w-2xl mx-auto">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100/80 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/80 shadow-xs mb-3">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span data-i18n="portal_welcome_badge">CỔNG TƯƠNG TÁC KỸ THUẬT Ô TÔ</span>
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-2.5 tracking-tight" data-i18n="portal_welcome_title">
+                        Khám Phá Giao Thức Mạng CAN FD
+                    </h2>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_welcome_desc">
+                        Lựa chọn chuyên đề bên dưới để bắt đầu mô phỏng trực quan hóa ở cấp độ bit, đối chiếu thế hệ và ôn luyện phỏng vấn kỹ sư ECU.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Vertical Interactive Showcase Cards Stack -->
+            <div class="space-y-6">
+                <!-- ================= CARD 1: CẤU TRÚC KHUNG ================= -->
+                <div onclick="enterExplorer('frame')" class="portal-tilt-card rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl hover:border-amber-500/60 dark:hover:border-amber-500/60 cursor-pointer group transition-all">
+                    <!-- Top Category & Badges -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-amber-600 dark:text-amber-400" data-i18n="portal_card1_tag">01 • PHÂN TÍCH BITSTREAM</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">⚡ DUAL BITRATE (1M &rarr; 8Mbps)</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">DATA 64 BYTES</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Signal Waveform Visual -->
+                    <div class="relative w-full h-28 sm:h-32 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center p-2 sm:p-3 mb-5 select-none shadow-inner">
+                        <div class="absolute inset-0 portal-cyber-grid opacity-35"></div>
+                        <div class="absolute top-0 bottom-0 w-24 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent animate-wave-scan pointer-events-none"></div>
+                        
+                        <svg class="w-full h-full relative z-10" viewBox="0 0 600 100" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="gradArbitration" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#f59e0b" />
+                                    <stop offset="100%" stop-color="#d97706" />
+                                </linearGradient>
+                                <linearGradient id="gradData" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#10b981" />
+                                    <stop offset="100%" stop-color="#059669" />
+                                </linearGradient>
+                                <linearGradient id="gradCrc" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#3b82f6" />
+                                    <stop offset="100%" stop-color="#2563eb" />
+                                </linearGradient>
+                            </defs>
+                            <line x1="0" y1="50" x2="600" y2="50" stroke="#334155" stroke-dasharray="4 4" stroke-width="1" />
+                            
+                            <!-- Arbitration (Nominal 1Mbps) -->
+                            <path d="M 0 50 L 20 50 L 20 20 L 60 20 L 60 50 L 100 50 L 100 20 L 150 20 L 150 50 L 180 50 L 180 20 L 210 20" 
+                                  fill="none" stroke="url(#gradArbitration)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="animate-signal-dash" />
+                            
+                            <!-- BRS Switch Marker -->
+                            <line x1="210" y1="10" x2="210" y2="90" stroke="#ef4444" stroke-width="2" stroke-dasharray="2 2" />
+                            <circle cx="210" cy="20" r="4" fill="#ef4444" class="animate-ping" />
+                            <circle cx="210" cy="20" r="4" fill="#ef4444" />
+                            
+                            <!-- Data Phase (High-Speed 8Mbps) -->
+                            <path d="M 210 20 L 225 20 L 225 50 L 240 50 L 240 20 L 255 20 L 255 50 L 270 50 L 270 20 L 285 20 L 285 50 L 300 50 L 300 20 L 315 20 L 315 50 L 330 50 L 330 20 L 345 20 L 345 50 L 360 50 L 360 20 L 375 20 L 375 50 L 390 50 L 390 20 L 405 20 L 405 50 L 420 50" 
+                                  fill="none" stroke="url(#gradData)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-signal-dash" />
+                            
+                            <!-- CRC & ACK -->
+                            <path d="M 420 50 L 450 50 L 450 20 L 490 20 L 490 50 L 530 50 L 530 20 L 560 20 L 560 50 L 600 50" 
+                                  fill="none" stroke="url(#gradCrc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                            
+                            <text x="60" y="85" fill="#f59e0b" font-size="10" font-weight="bold" font-family="monospace">ARBITRATION (1 Mbps)</text>
+                            <text x="215" y="15" fill="#ef4444" font-size="9" font-weight="bold" font-family="monospace">⚡ BRS SWITCH</text>
+                            <text x="270" y="85" fill="#10b981" font-size="10" font-weight="bold" font-family="monospace">DATA PHASE (8 Mbps)</text>
+                            <text x="490" y="85" fill="#3b82f6" font-size="10" font-weight="bold" font-family="monospace">CRC &amp; ACK</text>
+                        </svg>
+                    </div>
+
+                    <!-- Content & CTA Button -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                <i data-lucide="layout-template" class="w-5 h-5 text-amber-500"></i>
+                                <span data-i18n="portal_card1_title">Cấu Trúc Khung & Cơ Chế Bit Rate Switch (BRS)</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_card1_desc">
+                                Giải phẫu chi tiết 10 trường bit từ SOF đến EOF. Trực quan hóa bước nhảy tốc độ BRS từ 1 Mbps lên 8 Mbps, quy tắc nhồi bit Stuff-bit động và mã kiểm tra CRC 17/21 bit.
+                            </p>
+                        </div>
+                        <div class="shrink-0 pt-2 md:pt-0">
+                            <button onclick="enterExplorer('frame'); event.stopPropagation();" class="w-full md:w-auto relative overflow-hidden px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 animate-cta-pulse group/btn">
+                                <i data-lucide="play-circle" class="w-5 h-5 text-amber-200 animate-pulse"></i>
+                                <span data-i18n="portal_btn_frame">Khám Phá Cấu Trúc Frame</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <span class="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= CARD 2: SO SÁNH CÁC THẾ HỆ ================= -->
+                <div onclick="enterExplorer('compare')" class="portal-tilt-card rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl hover:border-blue-500/60 dark:hover:border-blue-500/60 cursor-pointer group transition-all">
+                    <!-- Top Category & Badges -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-blue-600 dark:text-blue-400" data-i18n="portal_card2_tag">02 • MA TRẬN ĐỐI CHIẾU</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">ISO 11898-1:2015</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">BUS LOAD 80%↓</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Benchmark Gauge Visual -->
+                    <div class="relative w-full h-28 sm:h-32 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden p-3.5 flex flex-col justify-between mb-5 select-none shadow-inner">
+                        <div class="absolute inset-0 portal-cyber-grid opacity-30"></div>
+                        <!-- Row 1: Classic CAN -->
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center text-[11px] font-mono mb-1">
+                                <span class="text-slate-400 font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span> Classic CAN 2.0</span>
+                                <span class="text-slate-400">1 Mbps • 8 Bytes max</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                                <div class="h-full bg-slate-500 rounded-full" style="width: 12%;"></div>
+                            </div>
+                        </div>
+                        <!-- Row 2: CAN FD -->
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center text-[11px] font-mono mb-1">
+                                <span class="text-amber-400 font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> CAN FD (ISO 11898-1)</span>
+                                <span class="text-emerald-400 font-bold">8 Mbps (8x) • 64 Bytes (8x)</span>
+                            </div>
+                            <div class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden p-0.5 border border-amber-500/30">
+                                <div class="h-full bg-gradient-to-r from-amber-500 to-emerald-400 rounded-full shadow-sm shadow-emerald-500/50" style="width: 50%;"></div>
+                            </div>
+                        </div>
+                        <!-- Row 3: CAN XL -->
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center text-[11px] font-mono mb-1">
+                                <span class="text-cyan-400 font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> CAN XL (Next-Gen)</span>
+                                <span class="text-cyan-300">20+ Mbps (20x) • 2048 Bytes</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full" style="width: 95%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content & CTA Button -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                <i data-lucide="scale" class="w-5 h-5 text-blue-500"></i>
+                                <span data-i18n="portal_card2_title">So Sánh Băng Thông & Các Thế Hệ CAN</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_card2_desc">
+                                Phân tích đối chiếu toàn diện giữa Classic CAN, CAN FD và CAN XL về hiệu suất truyền dẫn, tối ưu Bus Load, kích thước gói tin đến 64 Bytes và chuẩn an toàn ISO 11898-1.
+                            </p>
+                        </div>
+                        <div class="shrink-0 pt-2 md:pt-0">
+                            <button onclick="enterExplorer('compare'); event.stopPropagation();" class="w-full md:w-auto relative overflow-hidden px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 group/btn">
+                                <i data-lucide="scale" class="w-5 h-5 text-blue-200"></i>
+                                <span data-i18n="portal_btn_compare">Xem Bảng So Sánh Thế Hệ</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <span class="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= CARD 3: Q&A PHỎNG VẤN ================= -->
+                <div onclick="enterExplorer('interview')" class="portal-tilt-card rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl hover:border-purple-500/60 dark:hover:border-purple-500/60 cursor-pointer group transition-all">
+                    <!-- Top Category & Badges -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-purple-600 dark:text-purple-400" data-i18n="portal_card3_tag">03 • NGÂN HÀNG CÂU HỎI</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">4 TẦNG CHUYÊN SÂU</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">BẪY PHỎNG VẤN KÉP</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Microchip & Tiers Visual -->
+                    <div class="relative w-full h-28 sm:h-32 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden p-3 flex items-center justify-center mb-5 select-none shadow-inner">
+                        <div class="absolute inset-0 portal-cyber-grid opacity-30"></div>
+                        <div class="relative z-10 flex items-center justify-between w-full max-w-lg px-2">
+                            <div class="flex flex-col items-center gap-1">
+                                <div class="px-2.5 py-1 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300 text-[11px] font-bold shadow-sm shadow-blue-500/20">
+                                    📖 Lý Thuyết
+                                </div>
+                                <span class="text-[9px] text-slate-400 font-mono">ISO 11898-1</span>
+                            </div>
+                            <div class="flex-1 h-0.5 bg-gradient-to-r from-blue-500/50 to-purple-500/50 relative">
+                                <span class="absolute w-1.5 h-1.5 rounded-full bg-blue-400 -top-0.5 animate-ping"></span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 border-2 border-purple-500/60 shadow-lg shadow-purple-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i data-lucide="cpu" class="w-6 h-6 text-purple-400 animate-pulse"></i>
+                                </div>
+                                <span class="text-[10px] text-purple-300 font-mono font-bold mt-1">ECU AUTOSAR</span>
+                            </div>
+                            <div class="flex-1 h-0.5 bg-gradient-to-r from-purple-500/50 to-rose-500/50 relative">
+                                <span class="absolute w-1.5 h-1.5 rounded-full bg-purple-400 -top-0.5 right-1 animate-ping"></span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1">
+                                <div class="px-2.5 py-1 rounded-lg bg-rose-950/80 border border-rose-500/40 text-rose-300 text-[11px] font-bold shadow-sm shadow-rose-500/20">
+                                    ⚠️ Bẫy Phỏng Vấn
+                                </div>
+                                <span class="text-[9px] text-slate-400 font-mono">Double-Angle</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content & CTA Button -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                <i data-lucide="help-circle" class="w-5 h-5 text-purple-500"></i>
+                                <span data-i18n="portal_card3_title">Ngân Hàng Q&A Phỏng Vấn Kỹ Sư ECU & AUTOSAR</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_card3_desc">
+                                Bộ câu hỏi kỹ thuật ô tô chuyên sâu 4 tầng: Lý thuyết, Mô phỏng C++, Thực hành AUTOSAR BSW và Bẫy phỏng vấn phản biện kép kèm hệ sinh thái thảo luận Cloud.
+                            </p>
+                        </div>
+                        <div class="shrink-0 pt-2 md:pt-0">
+                            <button onclick="enterExplorer('interview'); event.stopPropagation();" class="w-full md:w-auto relative overflow-hidden px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 group/btn">
+                                <i data-lucide="help-circle" class="w-5 h-5 text-purple-200"></i>
+                                <span data-i18n="portal_btn_interview">Luyện Phỏng Vấn Ngay</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <span class="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content View (Initially Hidden when viewing Portal Hub) -->
+        <div id="main-content-view" class="hidden">
+            <!-- Main Navigation Tabs (Clean Floating Sticky Top Bar) -->
+            <div id="smart-nav-container" class="sticky top-2 z-30 w-full mb-6 pointer-events-none">
+                <div id="main-nav-tabs" class="flex flex-wrap justify-center gap-2 p-1.5 sm:p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200/90 dark:border-slate-800/90 w-fit mx-auto transition-colors pointer-events-auto">
+                    <button id="btn-tab-portal" onclick="backToPortal()" class="px-3.5 sm:px-4 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 text-xs sm:text-sm" title="Quay lại Cổng Khám Phá">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> <span data-i18n="nav_portal">Tổng Quan</span>
+                    </button>
+                    <button id="btn-tab-frame" onclick="switchTab('frame')" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2 text-xs sm:text-sm">
+                        <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
+                    </button>
+                    <button id="btn-tab-compare" onclick="switchTab('compare')" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm">
+                        <i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="tab2">2. So Sánh Các Thế Hệ</span>
+                    </button>
+                    <button id="btn-tab-interview" onclick="switchTab('interview')" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i> <span data-i18n="tab3">3. Q&A Phỏng Vấn</span>
+                    </button>
+                </div>
+            </div>
+
+        <!-- Tab 1 Container: Frame Format -->
+        <div id="tab-frame" class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6 animate-fadeIn">
+            <h2 class="text-xl font-bold mb-4 text-slate-800 dark:text-slate-100 border-b pb-2 border-slate-100 dark:border-slate-800"><span data-i18n="tab1_title">Cấu Trúc Bit Khung Truyền CAN FD (Base Frame Format)</span></h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6"><span data-i18n="tab1_desc">Mô phỏng luồng bit thực tế trên bus (Từ trái sang phải). Click vào từng trường (field) để xem giải thích chi tiết.</span></p>
+            
+            <!-- Visual Map -->
+            <div class="w-full overflow-x-auto no-scrollbar pb-4 mb-6">
+                <div class="flex min-w-[850px] rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 text-sm font-semibold text-center cursor-pointer select-none">
+                    
+                    <!-- Arbitration Field -->
+                    <div class="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-950/70 dark:hover:bg-indigo-900/80 transition-colors flex flex-col border-r border-white dark:border-slate-800 w-[25%]" onclick="selectSegment('arbitration')">
+                        <div class="bg-indigo-500 dark:bg-indigo-600 text-white py-1 px-2 text-xs flex flex-col justify-center">
+                            <span>Arbitration Phase</span>
+                            <span class="text-[10px] font-normal opacity-80">(Nominal Bit Rate)</span>
+                        </div>
+                        <div class="flex h-12 text-indigo-900 dark:text-indigo-200">
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-indigo-200 dark:border-indigo-800/60" title="Start of Frame">SOF<br>1</div>
+                            <div class="flex-[3] flex items-center justify-center px-2 border-r border-indigo-200 dark:border-indigo-800/60" title="Identifier">ID<br>11</div>
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-indigo-200 dark:border-indigo-800/60" title="Remote Transmission Request">RRS<br>1</div>
+                            <div class="flex-1 flex items-center justify-center px-1" title="Identifier Extension">IDE<br>1</div>
+                        </div>
+                    </div>
+
+                    <!-- Control Field -->
+                    <div class="bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/70 dark:hover:bg-amber-900/80 transition-colors flex flex-col border-r border-white dark:border-slate-800 w-[30%]" onclick="selectSegment('control')">
+                        <div class="bg-amber-500 dark:bg-amber-600 text-white py-1 px-2 text-xs flex justify-between items-center relative h-full">
+                            <div class="flex-1 text-center text-[10px] font-normal opacity-80">Nominal</div>
+                            <div class="absolute left-1/2 top-0 bottom-0 w-px bg-white/40"></div>
+                            <div class="flex-[2] text-center font-bold">Data Bit Rate</div>
+                        </div>
+                        <div class="flex h-12 text-amber-900 dark:text-amber-200">
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-amber-200 dark:border-amber-800/60 font-bold text-amber-700 dark:text-amber-400" title="Flexible Data Rate Format">FDF<br>1</div>
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-amber-200 dark:border-amber-800/60 text-[10px]">res<br>1</div>
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-amber-200 dark:border-amber-800/60 font-bold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/80" title="Bit Rate Switch">BRS<br>1</div>
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-amber-200 dark:border-amber-800/60 text-[10px]" title="Error State Indicator">ESI<br>1</div>
+                            <div class="flex-[2] flex items-center justify-center px-2" title="Data Length Code">DLC<br>4</div>
+                        </div>
+                    </div>
+
+                    <!-- Data Field -->
+                    <div class="bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/70 dark:hover:bg-emerald-900/80 transition-colors flex flex-col border-r border-white dark:border-slate-800 w-[20%]" onclick="selectSegment('data')">
+                        <div class="bg-emerald-500 dark:bg-emerald-600 text-white py-1 px-2 text-xs flex flex-col justify-center">
+                            <span>Data Phase</span>
+                            <span class="text-[10px] font-normal opacity-80">(Data Bit Rate)</span>
+                        </div>
+                        <div class="flex h-12 text-emerald-900 dark:text-emerald-200">
+                            <div class="flex-1 flex items-center justify-center px-2">Data Payload<br>(0 - 64 Bytes)</div>
+                        </div>
+                    </div>
+
+                    <!-- CRC Field -->
+                    <div class="bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/70 dark:hover:bg-purple-900/80 transition-colors flex flex-col border-r border-white dark:border-slate-800 w-[25%]" onclick="selectSegment('crc')">
+                        <div class="bg-purple-500 dark:bg-purple-600 text-white py-1 px-2 text-xs flex flex-col justify-center relative">
+                            <div class="flex justify-between items-center w-full">
+                                <span class="flex-1 text-center font-bold">Data Rate</span>
+                                <span class="text-[10px]">&rarr;</span>
+                                <span class="flex-1 text-center text-[10px] font-normal opacity-80">Nominal</span>
+                            </div>
+                        </div>
+                        <div class="flex h-12 text-purple-900 dark:text-purple-200 text-xs">
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-purple-200 dark:border-purple-800/60" title="Stuff Count">SBC<br>4</div>
+                            <div class="flex-[2] flex items-center justify-center px-1 border-r border-purple-200 dark:border-purple-800/60" title="Cyclic Redundancy Check">CRC<br>17/21</div>
+                            <div class="flex-1 flex items-center justify-center px-1 font-bold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/80" title="CRC Delimiter">DEL<br>1</div>
+                        </div>
+                    </div>
+
+                    <!-- ACK & EOF Field -->
+                    <div class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 transition-colors flex flex-col w-[15%]" onclick="selectSegment('ack')">
+                        <div class="bg-slate-600 dark:bg-slate-700 text-white py-1 px-2 text-xs flex flex-col justify-center">
+                            <span class="text-[10px] font-normal opacity-80">Nominal Bit Rate</span>
+                        </div>
+                        <div class="flex h-12 text-slate-800 dark:text-slate-200">
+                            <div class="flex-1 flex items-center justify-center px-1 border-r border-slate-300 dark:border-slate-700">ACK<br>2</div>
+                            <div class="flex-[2] flex items-center justify-center px-1">EOF<br>7</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Info Box -->
+            <div id="field-details" class="bg-slate-50 dark:bg-slate-850 p-5 rounded-xl border border-slate-200 dark:border-slate-800 min-h-[180px] transition-all">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="mouse-pointer-click" class="text-amber-500"></i>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100"><span data-i18n="select_segment">Chọn một phân đoạn phía trên để xem chi tiết</span></h3>
+                </div>
+                <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <span data-i18n="segment_default">Widget hỗ trợ trực quan hóa điểm khác biệt lớn nhất của CAN FD so với Classic CAN: Cờ <strong class="text-red-600 font-semibold">BRS (Bit Rate Switch)</strong> giúp chuyển đổi tốc độ baudrate trong vùng Data Phase, và kích thước Payload được mở rộng lên tới 64 Bytes.</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Tab 2 Container: Compare -->
+        <div id="tab-compare" class="hidden bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6 animate-fadeIn">
+            <h2 class="text-xl font-bold mb-4 text-slate-800 dark:text-slate-100 border-b pb-2 border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                <i data-lucide="arrow-left-right" class="text-blue-600 dark:text-blue-400"></i> <span data-i18n="tab2_title">Sự Tiến Hóa Của Giao Thức CAN</span>
+            </h2>
+            <div class="overflow-x-auto no-scrollbar">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                        <tr class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm">
+                            <th class="p-4 rounded-tl-lg font-semibold border-b border-slate-200 dark:border-slate-700 w-1/4" data-i18n="feature">Đặc tính</th>
+                            <th class="p-4 font-semibold border-b border-slate-200 dark:border-slate-700 w-1/4">Classic CAN (2.0)</th>
+                            <th class="p-4 font-semibold border-b border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 w-1/4 border-x border-amber-200 dark:border-amber-800">CAN FD</th>
+                            <th class="p-4 rounded-tr-lg font-semibold border-b border-slate-200 dark:border-slate-700 w-1/4">CAN XL (Mới)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-slate-600 dark:text-slate-300">
+                        <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="p-4 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i data-lucide="database" class="w-4 h-4 text-slate-400"></i> <span data-i18n="max_payload">Max Payload</span>
+                            </td>
+                            <td class="p-4">8 Bytes</td>
+                            <td class="p-4 font-bold text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/40 border-x border-amber-100 dark:border-amber-800/60">64 Bytes</td>
+                            <td class="p-4">2048 Bytes</td>
+                        </tr>
+                        <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="p-4 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i data-lucide="gauge" class="w-4 h-4 text-slate-400"></i> <span data-i18n="max_rate">Max Data Bit Rate</span>
+                            </td>
+                            <td class="p-4">1 Mbps</td>
+                            <td class="p-4 font-bold text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/40 border-x border-amber-100 dark:border-amber-800/60">8 Mbps (Thực tế ~2-5 Mbps)</td>
+                            <td class="p-4">20 Mbps+</td>
+                        </tr>
+                        <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="p-4 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i data-lucide="cpu" class="w-4 h-4 text-slate-400"></i> <span data-i18n="baudrate">Cơ Chế Baudrate</span>
+                            </td>
+                            <td class="p-4">Single Rate<br><span class="text-xs text-slate-400">(Tốc độ cố định)</span></td>
+                            <td class="p-4 font-bold text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/40 border-x border-amber-100 dark:border-amber-800/60">Dual Rate<br><span class="text-xs text-amber-500 font-normal">(Chuyển đổi tốc độ qua BRS)</span></td>
+                            <td class="p-4">Dual Rate</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td class="p-4 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i data-lucide="car" class="w-4 h-4 text-slate-400"></i> <span data-i18n="app">Ứng dụng ô tô</span>
+                            </td>
+                            <td class="p-4 text-xs">Cảm biến cơ bản, Body Control (Cửa, Gạt mưa, Đèn)</td>
+                            <td class="p-4 font-bold text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/40 border-x border-amber-100 dark:border-amber-800/60 text-xs">Powertrain, Hệ thống phanh, Radar/Camera cơ bản, OTA Firmware</td>
+                            <td class="p-4 text-xs">Mạng lưới Backbone, Giao tiếp IP/Ethernet bridge</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 rounded-lg text-sm border border-blue-100 dark:border-blue-900/60 flex gap-3 items-start">
+                <i data-lucide="info" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                <p><strong>Lưu ý:</strong> CAN FD (Flexible Data-Rate) tương thích ngược ở mức độ kiến trúc vật lý, nhưng một bộ điều khiển Classic CAN không thể đọc được frame của CAN FD (sẽ tạo ra Error Frame). Do đó, một mạng CAN hỗn hợp cần có sự thiết kế Gateway phù hợp.</p>
+            </div>
+        </div>
+
+        <!-- Tab 3 Container: Interview Q&A -->
+        <div id="tab-interview" class="hidden bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6 animate-fadeIn">
+            <!-- Tab 3 Header & Filter Group (Natural In-Flow) -->
+            <div id="qa-filter-header-group" class="mb-6">
+                <div class="flex items-center justify-between border-b pb-3 mb-4 border-slate-100 dark:border-slate-800">
+                    <h2 class="text-base sm:text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i data-lucide="message-square-text" class="text-amber-600 dark:text-amber-400 w-5 h-5 sm:w-6 sm:h-6"></i>
+                        <span data-i18n="tab3_title">Ngân Hàng Câu Hỏi Phỏng Vấn</span>
+                    </h2>
+                    <button onclick="resetFilters()" class="text-xs font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors underline hidden" id="reset-filter-btn">
+                        <span data-i18n="clear_filter">Xóa bộ lọc</span>
+                    </button>
+                </div>
+                
+                <!-- Filters Box -->
+                <div class="bg-slate-50 dark:bg-slate-850 p-3 sm:p-4 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                    <div class="flex flex-wrap gap-2.5 items-center">
+                        <div class="font-semibold text-xs text-slate-700 dark:text-slate-300 shrink-0" data-i18n="difficulty">Độ khó:</div>
+                        <div class="flex flex-wrap gap-1.5" id="difficulty-filters">
+                            <button onclick="filterByDifficulty('All')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-800 text-white dark:bg-amber-600 dark:text-white transition-colors difficulty-btn" data-level="All"><span data-i18n="all">Tất cả</span></button>
+                            <button onclick="filterByDifficulty('Basic')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors difficulty-btn" data-level="Basic">Basic</button>
+                            <button onclick="filterByDifficulty('Intermediate')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors difficulty-btn" data-level="Intermediate">Intermediate</button>
+                            <button onclick="filterByDifficulty('Advanced')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors difficulty-btn" data-level="Advanced">Advanced</button>
+                            <button onclick="filterByDifficulty('Senior')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors difficulty-btn" data-level="Senior">Senior</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2.5 items-center mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+                        <div class="font-semibold text-xs text-slate-700 dark:text-slate-300 shrink-0" data-i18n="topic">Chủ đề:</div>
+                        <div class="flex flex-wrap gap-1.5" id="tag-filters">
+                            <button onclick="filterByTag('#Frame')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#Frame">#Frame</button>
+                            <button onclick="filterByTag('#Stuffing')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#Stuffing">#Stuffing</button>
+                            <button onclick="filterByTag('#BitTiming')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#BitTiming">#BitTiming</button>
+                            <button onclick="filterByTag('#Error')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#Error">#Error</button>
+                            <button onclick="filterByTag('#AUTOSAR')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#AUTOSAR">#AUTOSAR</button>
+                            <button onclick="filterByTag('#Physical')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#Physical">#Physical</button>
+                            <button onclick="filterByTag('#Diagnostics')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#Diagnostics">#Diagnostics</button>
+                            <button onclick="filterByTag('#SecOC')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#SecOC">#SecOC</button>
+                            <button onclick="filterByTag('#Strategic')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 dark:text-blue-400 dark:bg-blue-950/40 dark:border-blue-800/60 dark:hover:bg-blue-900/50 transition-colors tag-btn" data-tag="#Strategic">#Strategic</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q&A List Container -->
+            <div id="qa-container" class="space-y-4">
+                <!-- Data-driven Q&A cards will be injected here -->
+            </div>
+            
+            <div id="qa-empty-state" class="hidden p-8 text-center text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-850 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+                <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 text-slate-400"></i>
+                <p><span data-i18n="qa_empty">Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.</span></p>
+                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors"><span data-i18n="clear_filter">Xóa bộ lọc</span></button>
+            </div>
+
+            <div id="qa-wip-state" class="mt-4 p-5 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/40 rounded-r-xl">
+                <div class="flex items-center gap-3 mb-2 text-amber-800 dark:text-amber-200">
+                    <i data-lucide="construction" class="w-6 h-6"></i>
+                    <h3 class="font-bold text-lg"><span data-i18n="qa_wip_title">Chuyên mục đang được biên soạn</span></h3>
+                </div>
+                <p class="text-amber-700 dark:text-amber-300 text-sm leading-relaxed ml-9">
+                    <span data-i18n="qa_wip_desc">Nội dung phỏng vấn chuyên sâu cho CAN FD đang được cập nhật dần theo từng Phase. Các câu hỏi sẽ sớm xuất hiện tại đây.</span>
+                </p>
+            </div>
+        </div>
+
+        </div> <!-- End of #main-content-view -->
+
+    </div>
+
+    <!-- CONTROLLER SCRIPT (FAULT-TOLERANT VANILLA JS) -->
+    <script>
+        
+        let currentLang = 'vi';
+
+        const i18n = {
+            vi: {
+                main_title: "CAN FD Protocol Explorer",
+                main_desc: "Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)",
+                tab1: "1. Cấu Trúc Khung (Frame)",
+                tab2: "2. So Sánh Các Thế Hệ",
+                tab3: "3. Q&A Phỏng Vấn",
+                tab1_title: "Cấu Trúc Bit Khung Truyền CAN FD (Base Frame Format)",
+                tab1_desc: "Mô phỏng luồng bit thực tế trên bus (Từ trái sang phải). Click vào từng trường (field) để xem giải thích chi tiết.",
+                select_segment: "Chọn một phân đoạn phía trên để xem chi tiết",
+                segment_default: "Widget hỗ trợ trực quan hóa điểm khác biệt lớn nhất của CAN FD so với Classic CAN: Cờ <strong class='text-red-600 font-semibold'>BRS (Bit Rate Switch)</strong> giúp chuyển đổi tốc độ baudrate trong vùng Data Phase, và kích thước Payload được mở rộng lên tới 64 Bytes.",
+                tab2_title: "Sự Tiến Hóa Của Giao Thức CAN",
+                feature: "Đặc tính",
+                max_payload: "Max Payload",
+                max_rate: "Max Data Bit Rate",
+                baudrate: "Cơ Chế Baudrate",
+                app: "Ứng dụng ô tô",
+                tab3_title: "Ngân Hàng Câu Hỏi Phỏng Vấn",
+                difficulty: "Độ khó:",
+                topic: "Chủ đề:",
+                all: "Tất cả",
+                clear_filter: "Xóa bộ lọc",
+                qa_empty: "Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.",
+                qa_wip_title: "Chuyên mục đang được biên soạn",
+                qa_theory: "📖 Lý Thuyết",
+                qa_modeling: "🖥️ SystemC/C++ Modeling",
+                qa_practice: "🔧 ECU/AUTOSAR",
+                qa_trap: "⚠️ Bẫy Phỏng Vấn (Trap)",
+                discussion_section_title: "Thảo Luận & Ghi Chú Kỹ Thuật",
+                discussion_section_subtitle: "Để lại ghi chú, thảo luận hoặc concern cho 4 phần: Lý Thuyết / C++ Modeling / ECU & AUTOSAR / Bẫy Phỏng Vấn",
+                target_section_label: "Phần liên quan:",
+                scope_theory: "📖 Lý Thuyết",
+                scope_modeling: "🖥️ C++ Modeling",
+                scope_practice: "🔧 ECU / AUTOSAR",
+                scope_trap: "⚠️ Bẫy Phỏng Vấn",
+                scope_all: "📌 Chung cho câu hỏi",
+                filter_by: "Lọc:",
+                filter_all: "Tất cả",
+                filter_theory: "📖 Lý Thuyết",
+                filter_modeling: "🖥️ C++ Modeling",
+                filter_practice: "🔧 ECU / AUTOSAR",
+                filter_trap: "⚠️ Bẫy Phỏng Vấn",
+                modal_auth_title: "Đăng Nhập Với Google",
+                modal_auth_desc: "Đăng nhập tài khoản Google để tham gia thảo luận, trả lời và ghim ghi chú kỹ thuật",
+                btn_continue_google: "Tiếp tục với Google",
+                sign_in_google: "Đăng nhập Google",
+                sign_out: "Đăng xuất",
+                logged_in_as: "Kỹ sư",
+                comment_placeholder: "Chia sẻ câu hỏi hoặc góc nhìn phản biện...",
+                btn_post_comment: "Gửi thảo luận",
+                login_to_discuss: "Đăng nhập Google để gửi bình luận cho câu hỏi này",
+                btn_login_now: "Đăng nhập ngay",
+                no_comments_yet: "Chưa có thảo luận nào cho câu hỏi này. Hãy là người đầu tiên đặt câu hỏi!",
+                delete_confirm: "Bạn có chắc muốn xóa bình luận này không?",
+                just_now: "Vừa xong",
+                time_ago_hours: "giờ trước",
+                like: "Thích",
+                reply: "Trả lời",
+                replying_to: "Đang trả lời",
+                cancel: "Hủy",
+                send_reply: "Gửi phản hồi",
+                author_badge: "Tác Giả",
+                switch_account: "Đổi tài khoản Google",
+                user_role_author: "Tác Giả Blog (Admin)",
+                user_role_reader: "Kỹ sư / Độc giả",
+                pin_note: "Ghim Note",
+                unpin_note: "Bỏ ghim",
+                pinned_badge: "📌 Note của Tác Giả",
+                pin_note_checkbox: "Ghim làm Note quan trọng",
+                theme_light: "Chuyển sang giao diện Sáng",
+                theme_dark: "Chuyển sang giao diện Tối",
+                portal_welcome_badge: "CỔNG TƯƠNG TÁC KỸ THUẬT Ô TÔ",
+                portal_welcome_title: "Khám Phá Giao Thức Mạng CAN FD",
+                portal_welcome_desc: "Lựa chọn chuyên đề bên dưới để bắt đầu mô phỏng trực quan hóa ở cấp độ bit, đối chiếu thế hệ và ôn luyện phỏng vấn kỹ sư ECU.",
+                portal_card1_tag: "01 • PHÂN TÍCH BITSTREAM",
+                portal_card1_title: "Cấu Trúc Khung & Cơ Chế Bit Rate Switch (BRS)",
+                portal_card1_desc: "Giải phẫu chi tiết 10 trường bit từ SOF đến EOF. Trực quan hóa bước nhảy tốc độ BRS từ 1 Mbps lên 8 Mbps, quy tắc nhồi bit Stuff-bit động và mã kiểm tra CRC 17/21 bit.",
+                portal_btn_frame: "Khám Phá Cấu Trúc Frame",
+                portal_card2_tag: "02 • MA TRẬN ĐỐI CHIẾU",
+                portal_card2_title: "So Sánh Băng Thông & Các Thế Hệ CAN",
+                portal_card2_desc: "Phân tích đối chiếu toàn diện giữa Classic CAN, CAN FD và CAN XL về hiệu suất truyền dẫn, tối ưu Bus Load, kích thước gói tin đến 64 Bytes và chuẩn an toàn ISO 11898-1.",
+                portal_btn_compare: "Xem Bảng So Sánh Thế Hệ",
+                portal_card3_tag: "03 • NGÂN HÀNG CÂU HỎI",
+                portal_card3_title: "Ngân Hàng Q&A Phỏng Vấn Kỹ Sư ECU & AUTOSAR",
+                portal_card3_desc: "Bộ câu hỏi kỹ thuật ô tô chuyên sâu 4 tầng: Lý thuyết, Mô phỏng C++, Thực hành AUTOSAR BSW và Bẫy phỏng vấn phản biện kép kèm hệ sinh thái thảo luận Cloud.",
+                portal_btn_interview: "Luyện Phỏng Vấn Ngay",
+                nav_portal: "Tổng Quan"
+            },
+            en: {
+                main_title: "CAN FD Protocol Explorer",
+                main_desc: "Visualizing Frame Structure at the bit level and the Bit Rate Switch (BRS) mechanism",
+                tab1: "1. Frame Structure",
+                tab2: "2. Generation Comparison",
+                tab3: "3. Interview Q&A",
+                tab1_title: "CAN FD Base Frame Format",
+                tab1_desc: "Simulating the actual bitstream on the bus (Left to Right). Click on each field to see detailed explanations.",
+                select_segment: "Select a segment above to view details",
+                segment_default: "This widget visualizes the biggest difference between CAN FD and Classic CAN: The <strong class='text-red-600 font-semibold'>BRS (Bit Rate Switch)</strong> flag enables baudrate switching in the Data Phase, and Payload size is expanded up to 64 Bytes.",
+                tab2_title: "Evolution of CAN Protocol",
+                feature: "Feature",
+                max_payload: "Max Payload",
+                max_rate: "Max Data Bit Rate",
+                baudrate: "Baudrate Mechanism",
+                app: "Automotive App",
+                tab3_title: "Interview Q&A Bank",
+                difficulty: "Difficulty:",
+                topic: "Topic:",
+                all: "All",
+                clear_filter: "Clear filters",
+                qa_empty: "No questions found matching the current filters.",
+                qa_wip_title: "Section Under Construction",
+                qa_wip_desc: "Deep-dive interview content for CAN FD is being gradually updated across Phases. Questions will appear here soon.",
+                qa_theory: "📖 Theory",
+                qa_modeling: "🖥️ SystemC/C++ Modeling",
+                qa_practice: "🔧 ECU/AUTOSAR",
+                qa_trap: "⚠️ Interview Trap",
+                discussion_section_title: "Discussions & Technical Notes",
+                discussion_section_subtitle: "Leave notes, ask questions or add concerns for: Theory / C++ Modeling / ECU & AUTOSAR / Interview Traps",
+                target_section_label: "Target Section:",
+                scope_theory: "📖 Theory",
+                scope_modeling: "🖥️ C++ Modeling",
+                scope_practice: "🔧 ECU / AUTOSAR",
+                scope_trap: "⚠️ Interview Trap",
+                scope_all: "📌 General Question Note",
+                filter_by: "Filter:",
+                filter_all: "All",
+                filter_theory: "📖 Theory",
+                filter_modeling: "🖥️ C++ Modeling",
+                filter_practice: "🔧 ECU / AUTOSAR",
+                filter_trap: "⚠️ Interview Trap",
+                modal_auth_title: "Sign in with Google",
+                modal_auth_desc: "Sign in with your Google account to participate in discussions, replies and pin technical notes",
+                btn_continue_google: "Continue with Google",
+                sign_in_google: "Sign in with Google",
+                sign_out: "Sign out",
+                logged_in_as: "Engineer",
+                comment_placeholder: "Share your questions or counter-arguments...",
+                btn_post_comment: "Post Discussion",
+                login_to_discuss: "Sign in with Google to post comments on this question",
+                btn_login_now: "Sign In Now",
+                no_comments_yet: "No discussions yet for this question. Be the first to start the thread!",
+                delete_confirm: "Are you sure you want to delete this comment?",
+                just_now: "Just now",
+                time_ago_hours: "h ago",
+                like: "Like",
+                reply: "Reply",
+                replying_to: "Replying to",
+                cancel: "Cancel",
+                send_reply: "Send Reply",
+                author_badge: "Author",
+                switch_account: "Switch Google Account",
+                user_role_author: "Blog Author (Admin)",
+                user_role_reader: "Engineer / Reader",
+                pin_note: "Pin Note",
+                unpin_note: "Unpin",
+                pinned_badge: "📌 Author's Note",
+                pin_note_checkbox: "Pin as Author Note",
+                theme_light: "Switch to Light Theme",
+                theme_dark: "Switch to Dark Theme",
+                portal_welcome_badge: "AUTOMOTIVE INTERACTIVE PORTAL",
+                portal_welcome_title: "Explore CAN FD Protocol Architecture",
+                portal_welcome_desc: "Select a module below to start bit-level visual simulation, generation benchmarks, and ECU engineer interview practice.",
+                portal_card1_tag: "01 • BITSTREAM ANALYSIS",
+                portal_card1_title: "Frame Architecture & Bit Rate Switch (BRS)",
+                portal_card1_desc: "Detailed bit-level anatomy from SOF to EOF. Visualize the BRS speed jump from 1 Mbps to 8 Mbps, dynamic stuff-bit rules, and 17/21-bit CRC verification.",
+                portal_btn_frame: "Explore Frame Structure",
+                portal_card2_tag: "02 • BENCHMARK MATRIX",
+                portal_card2_title: "Generations Comparison (Classic vs FD vs XL)",
+                portal_card2_desc: "Comprehensive benchmark comparing Classic CAN, CAN FD, and CAN XL across data throughput, bus load reduction, 64-byte payload, and ISO 11898-1 standards.",
+                portal_btn_compare: "View Generation Matrix",
+                portal_card3_tag: "03 • QUESTION BANK",
+                portal_card3_title: "ECU & AUTOSAR Interview Q&A Bank",
+                portal_card3_desc: "Exclusive 4-tier automotive questions: Protocol Theory, C++ Modeling, AUTOSAR BSW, and Double-Angle Interview Traps with live cloud discussions.",
+                portal_btn_interview: "Practice Interview Q&A",
+                nav_portal: "Overview"
+            }
+        };
+
+        // =========================================================================
+        // DATA LAYER FOR Q&A (Compiled from src/data/can_fd/questions.json)
+        // TO ADD OR EDIT QUESTIONS: Edit `src/data/can_fd/questions.json` directly!
+        // =========================================================================
+        /* QA_DATA_AUTO_SYNC_START */
+        const qaData = [];
+        /* QA_DATA_AUTO_SYNC_END */
+
+        let currentDifficulty = 'All';
+        let currentTag = '';
+        let currentSegment = null;
+        const qaState = {};
+
+        // ==========================================
+        // FIREBASE AUTH & CLOUD FIRESTORE CONTROLLER
+        // ==========================================
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVA-0_rwfddgpQPZAGXH9bhy9t6YK_Jno",
+            authDomain: "tech-blogger-widgets.firebaseapp.com",
+            projectId: "tech-blogger-widgets",
+            storageBucket: "tech-blogger-widgets.firebasestorage.app",
+            messagingSenderId: "807910437975",
+            appId: "1:807910437975:web:2ecedb68e8a9967817df12"
+        };
+
+        const AUTHOR_EMAIL = "thathcmus@gmail.com";
+
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        let firestoreDb = null;
+        let isFirebaseReady = false;
+        let firestoreCommentsCache = [];
+        let isFirestoreConnected = false;
+        let activeUser = null;
+
+        // Safely initialize Firebase Compat SDK
+        try {
+            if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                firebaseAuth = firebase.auth();
+                firestoreDb = firebase.firestore();
+                isFirebaseReady = true;
+                console.log("Firebase initialized:", firebaseConfig.projectId);
+            }
+        } catch (e) {
+            console.warn("Firebase Init Warning:", e);
+        }
+
+        // Clean up any legacy mock/test sessions and comments from previous versions
+        try {
+            const oldUserRaw = localStorage.getItem('canfd_active_user');
+            if (oldUserRaw) {
+                const u = JSON.parse(oldUserRaw);
+                if (!u || !u.isFirebase) {
+                    localStorage.removeItem('canfd_active_user');
+                }
+            }
+            localStorage.removeItem('canfd_mock_comments');
+        } catch(e) {}
+
+        function getActiveUser() {
+            if (activeUser) {
+                if (!activeUser.isFirebase) {
+                    activeUser = null;
+                    try { localStorage.removeItem('canfd_active_user'); } catch(e){}
+                    return null;
+                }
+                return activeUser;
+            }
+            try {
+                const stored = localStorage.getItem('canfd_active_user');
+                if (stored && stored !== 'null') {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && parsed.isFirebase) {
+                        activeUser = parsed;
+                        return activeUser;
+                    } else {
+                        localStorage.removeItem('canfd_active_user');
+                    }
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function isUserAuthor(user) {
+            if (!user) return false;
+            return user.role === 'Author' || user.email === AUTHOR_EMAIL;
+        }
+
+        function setActiveUser(user) {
+            activeUser = user;
+            try {
+                if (user && user.isFirebase) {
+                    localStorage.setItem('canfd_active_user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('canfd_active_user');
+                }
+            } catch (e) {
+                console.warn("Storage error:", e);
+            }
+            renderAuthHeader();
+            refreshAllCommentsUI();
+        }
+
+        function initFirebaseAuthListener() {
+            if (!isFirebaseReady || !firebaseAuth) return;
+            try {
+                firebaseAuth.onAuthStateChanged((user) => {
+                    if (user) {
+                        const isAuthor = (user.email === AUTHOR_EMAIL);
+                        const userProfile = {
+                            id: user.uid,
+                            name: user.displayName || (user.email ? user.email.split('@')[0] : 'Engineer'),
+                            email: user.email || '',
+                            avatar: user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60',
+                            role: isAuthor ? 'Author' : 'Engineer',
+                            isFirebase: true
+                        };
+                        setActiveUser(userProfile);
+                    } else {
+                        setActiveUser(null);
+                    }
+                });
+            } catch (e) {
+                console.warn("Auth Listener Error:", e);
+            }
+        }
+
+        async function signInWithGoogle() {
+            if (!isFirebaseReady || !firebaseAuth) {
+                showModalNotice("Firebase SDK đang khởi tạo hoặc chưa sẵn sàng. Vui lòng tải lại trang.");
+                return;
+            }
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                await firebaseAuth.signInWithPopup(provider);
+                closeAuthModal();
+            } catch (err) {
+                console.warn("Google Sign-In Popup Warning:", err);
+                if (err.code === 'auth/unauthorized-domain') {
+                    const host = window.location.hostname || 'domain hiện tại';
+                    showModalNotice(`
+                        <div class="text-xs text-amber-900 leading-relaxed text-left">
+                            <div class="font-bold text-rose-600 mb-1 flex items-center gap-1">
+                                <span>⚠️ Domain chưa được ủy quyền:</span> <code>${host}</code>
+                            </div>
+                            <p class="text-slate-600 mb-2">Để đăng nhập Google trên GitHub Pages hoặc Blogger, bạn chỉ cần thêm tên miền này vào Firebase Console (khoảng 30 giây):</p>
+                            <ol class="list-decimal ml-4 space-y-1 text-slate-700 font-medium">
+                                <li>Mở <a href="https://console.firebase.google.com/project/tech-blogger-widgets/authentication/settings" target="_blank" class="underline text-blue-600 font-bold hover:text-blue-800">Firebase Console &rarr; Auth Settings &rarr; Authorized domains</a></li>
+                                <li>Bấm <strong>Add domain</strong> và nhập: <code class="bg-amber-100 px-1 py-0.5 rounded text-amber-900 select-all font-mono font-bold">${host}</code></li>
+                                <li>Bấm <strong>Add</strong> rồi thử đăng nhập lại.</li>
+                            </ol>
+                        </div>
+                    `);
+                } else if (err.code !== 'auth/popup-closed-by-user') {
+                    showModalNotice("Thông báo: " + (err.message || err.code));
+                }
+            }
+        }
+
+        async function logoutUser() {
+            if (isFirebaseReady && firebaseAuth && firebaseAuth.currentUser) {
+                try {
+                    await firebaseAuth.signOut();
+                } catch (e) {
+                    console.warn("Sign out error:", e);
+                }
+            }
+            setActiveUser(null);
+        }
+
+        function showModalNotice(msg) {
+            const el = document.getElementById('auth-environment-notice');
+            if (el) {
+                el.innerHTML = msg;
+                el.classList.remove('hidden');
+            }
+        }
+
+        function openAuthModal() {
+            const modal = document.getElementById('google-auth-modal');
+            if (modal) {
+                const noticeEl = document.getElementById('auth-environment-notice');
+                if (noticeEl) noticeEl.classList.add('hidden');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+            }
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('google-auth-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function toggleFullscreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    const docEl = document.documentElement;
+                    if (docEl.requestFullscreen) docEl.requestFullscreen();
+                    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+                    else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    else if (document.msExitFullscreen) document.msExitFullscreen();
+                }
+            } catch(e) {
+                console.warn("Fullscreen toggle warning:", e);
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const icon = document.getElementById('icon-fullscreen');
+            if (!icon) return;
+            if (document.fullscreenElement) {
+                icon.setAttribute('data-lucide', 'minimize-2');
+            } else {
+                icon.setAttribute('data-lucide', 'maximize-2');
+            }
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        });
+
+        function initFirestoreSync() {
+            if (!isFirebaseReady || !firestoreDb) {
+                console.log("Firestore using local cache mode.");
+                return;
+            }
+            try {
+                firestoreDb.collection('canfd_comments')
+                    .onSnapshot((snapshot) => {
+                        if (snapshot.empty) {
+                            firestoreCommentsCache = [];
+                            isFirestoreConnected = true;
+                            try {
+                                localStorage.setItem('canfd_comments_cache', JSON.stringify([]));
+                            } catch(e){}
+                            refreshAllCommentsUI();
+                            updateAllBadgeCounts();
+                            return;
+                        }
+                        const items = [];
+                        snapshot.forEach(doc => {
+                            if (doc.id.startsWith('cmt_seed_')) return;
+                            const data = doc.data();
+                            items.push({
+                                id: doc.id,
+                                ...data,
+                                createdAt: typeof data.createdAt === 'number' ? data.createdAt : (data.createdAt && data.createdAt.toMillis ? data.createdAt.toMillis() : Date.now())
+                            });
+                        });
+                        firestoreCommentsCache = items;
+                        isFirestoreConnected = true;
+                        try {
+                            localStorage.setItem('canfd_comments_cache', JSON.stringify(items));
+                        } catch(e){}
+
+                        refreshAllCommentsUI();
+                        updateAllBadgeCounts();
+                    }, (error) => {
+                        console.warn("Firestore snapshot listener error (fallback to local):", error);
+                    });
+            } catch (e) {
+                console.warn("Firestore listener setup error:", e);
+            }
+        }
+
+        function getAllComments() {
+            if (isFirestoreConnected) {
+                return firestoreCommentsCache;
+            }
+            try {
+                const stored = localStorage.getItem('canfd_comments_cache');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        return parsed.filter(c => c && c.id && !c.id.startsWith('cmt_seed_'));
+                    }
+                }
+            } catch (e) {}
+            return [];
+        }
+
+        function saveAllCommentsLocally(list) {
+            try {
+                localStorage.setItem('canfd_comments_cache', JSON.stringify(list));
+            } catch (e) {
+                console.warn("Storage error:", e);
+            }
+        }
+
+        function getCommentsForQuestion(questionId) {
+            const list = getAllComments();
+            return list.filter(c => c.questionId === questionId);
+        }
+
+        function refreshAllCommentsUI() {
+            document.querySelectorAll('[id^="content-"][id$="-comments"]').forEach(el => {
+                const qId = el.id.replace('content-', '').replace('-comments', '');
+                renderCommentsUI(qId);
+            });
+        }
+
+        function updateAllBadgeCounts() {
+            qaData.forEach(item => {
+                updateBadgeCount(item.id);
+            });
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatRelativeTime(timestamp) {
+            const now = Date.now();
+            const diffMin = Math.round((now - timestamp) / 60000);
+            const labels = i18n[currentLang];
+            if (diffMin < 2) return labels.just_now;
+            if (diffMin < 60) return `${diffMin}m`;
+            const diffHour = Math.round(diffMin / 60);
+            if (diffHour < 24) return `${diffHour} ${labels.time_ago_hours}`;
+            const diffDay = Math.round(diffHour / 24);
+            return `${diffDay}d`;
+        }
+
+        function renderAuthHeader() {
+            const container = document.getElementById('auth-header-container');
+            if (!container) return;
+            const user = getActiveUser();
+            const labels = i18n[currentLang];
+
+            if (user) {
+                const isAuthor = isUserAuthor(user);
+                const roleBadge = isAuthor 
+                    ? `<span class="px-1.5 py-0.5 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5 shadow-xs"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
+                    : '';
+                const borderClass = isAuthor ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-900/50' : 'border-slate-300 dark:border-slate-700';
+
+                container.innerHTML = `
+                    <div class="relative" id="user-profile-menu-container">
+                        <!-- Compact User Pill Trigger -->
+                        <button onclick="toggleUserProfileMenu(event)" class="flex items-center gap-2 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 px-2.5 py-1.5 rounded-full border ${borderClass} shadow-sm text-xs transition-all cursor-pointer group">
+                            <img src="${user.avatar}" alt="${escapeHtml(user.name)}" class="w-5 h-5 rounded-full border border-slate-300 dark:border-slate-700 object-cover shrink-0">
+                            <span class="font-bold text-slate-800 dark:text-slate-200 max-w-[90px] sm:max-w-[120px] truncate">${escapeHtml(user.name)}</span>
+                            ${roleBadge}
+                            <i data-lucide="chevron-down" id="user-menu-chevron" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200"></i>
+                        </button>
+
+                        <!-- Profile Popover Dropdown -->
+                        <div id="user-profile-dropdown" class="hidden absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 py-2 animate-fadeIn">
+                            <div class="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/70 rounded-t-2xl">
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate flex items-center gap-1.5">
+                                    <span>${escapeHtml(user.name)}</span>
+                                    ${isAuthor ? `<i data-lucide="crown" class="w-3 h-3 text-amber-500 fill-amber-500"></i>` : ''}
+                                </p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${escapeHtml(user.email || '')}</p>
+                                <div class="mt-2">
+                                    ${isAuthor 
+                                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 rounded-md border border-amber-300/60 dark:border-amber-700/60">⭐ ${labels.user_role_author || 'Tác Giả Blog (Admin)'}</span>`
+                                        : `<span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800/60">${labels.user_role_reader || 'Kỹ sư / Độc giả'}</span>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="p-1.5 space-y-0.5">
+                                <button onclick="openAuthModal(); closeUserProfileMenu();" class="w-full text-left px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl flex items-center gap-2.5 transition-colors">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400"></i>
+                                    <span>${labels.switch_account || 'Đổi tài khoản Google'}</span>
+                                </button>
+                                <button onclick="logoutUser(); closeUserProfileMenu();" class="w-full text-left px-3 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-xl flex items-center gap-2.5 transition-colors font-medium">
+                                    <i data-lucide="log-out" class="w-3.5 h-3.5 text-rose-500"></i>
+                                    <span>${labels.sign_out || 'Đăng xuất'}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal()" class="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-full text-xs font-semibold transition-all border border-slate-300 dark:border-slate-700 shadow-sm hover:shadow hover:border-slate-400 dark:hover:border-slate-600 group">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span class="group-hover:text-slate-900 dark:group-hover:text-white">${labels.sign_in_google}</span>
+                    </button>
+                `;
+            }
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        }
+
+        function toggleUserProfileMenu(event) {
+            if (event) event.stopPropagation();
+            const dropdown = document.getElementById('user-profile-dropdown');
+            const chevron = document.getElementById('user-menu-chevron');
+            if (!dropdown) return;
+            const isHidden = dropdown.classList.contains('hidden');
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+            } else {
+                dropdown.classList.add('hidden');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function closeUserProfileMenu() {
+            const dropdown = document.getElementById('user-profile-dropdown');
+            const chevron = document.getElementById('user-menu-chevron');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const menuContainer = document.getElementById('user-profile-menu-container');
+            if (menuContainer && !menuContainer.contains(e.target)) {
+                closeUserProfileMenu();
+            }
+        });
+
+        const qaCommentFilter = {};
+
+        function setCommentFilter(questionId, filter) {
+            qaCommentFilter[questionId] = filter;
+            renderCommentsUI(questionId);
+        }
+
+        function renderCommentsUI(questionId) {
+            const user = getActiveUser();
+            const allQComments = getCommentsForQuestion(questionId);
+            const labels = i18n[currentLang];
+            const container = document.getElementById(`content-${questionId}-comments`);
+            if (!container) return;
+
+            const isAuthor = isUserAuthor(user);
+            const activeFilter = qaCommentFilter[questionId] || 'all';
+
+            // Separate root comments and threaded replies
+            const rootComments = allQComments.filter(c => !c.parentId);
+            
+            // Count comments per section
+            const countAll = rootComments.length;
+            const countTheory = rootComments.filter(c => c.targetSection === 'theory').length;
+            const countModeling = rootComments.filter(c => c.targetSection === 'modeling').length;
+            const countPractice = rootComments.filter(c => c.targetSection === 'practice').length;
+            const countTrap = rootComments.filter(c => c.targetSection === 'trap').length;
+
+            // Filter by activeFilter
+            let displayedRoots = rootComments;
+            if (activeFilter !== 'all') {
+                displayedRoots = rootComments.filter(c => c.targetSection === activeFilter);
+            }
+
+            // Sort: Pinned first, then by timestamp descending
+            displayedRoots.sort((a, b) => {
+                if (a.isPinned && !b.isPinned) return -1;
+                if (!a.isPinned && b.isPinned) return 1;
+                return b.createdAt - a.createdAt;
+            });
+
+            // Map to group replies by parentId
+            const repliesMap = {};
+            allQComments.filter(c => c.parentId).forEach(r => {
+                if (!repliesMap[r.parentId]) repliesMap[r.parentId] = [];
+                repliesMap[r.parentId].push(r);
+            });
+            Object.keys(repliesMap).forEach(pId => {
+                repliesMap[pId].sort((a, b) => a.createdAt - b.createdAt);
+            });
+
+            // Scope badge configs
+            const sectionScopeConfig = {
+                'theory': { text: labels.scope_theory || '📖 Lý Thuyết', class: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60' },
+                'modeling': { text: labels.scope_modeling || '🖥️ C++ Modeling', class: 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60' },
+                'practice': { text: labels.scope_practice || '🔧 ECU / AUTOSAR', class: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60' },
+                'trap': { text: labels.scope_trap || '⚠️ Bẫy Phỏng Vấn', class: 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60' },
+                'all': { text: labels.scope_all || '📌 Ghi chú chung', class: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700' }
+            };
+
+            // Filter button helper
+            const filterBtn = (key, label, count) => {
+                const isActive = activeFilter === key;
+                const activeStyle = isActive 
+                    ? 'bg-amber-600 text-white shadow-xs font-bold border-amber-600' 
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750 border-slate-200 dark:border-slate-700';
+                return `
+                    <button onclick="setCommentFilter('${questionId}', '${key}')" class="px-2.5 py-0.5 rounded-full text-[11px] border transition-colors flex items-center gap-1 ${activeStyle}">
+                        <span>${label}</span>
+                        <span class="text-[10px] opacity-80">(${count})</span>
+                    </button>
+                `;
+            };
+
+            const headerHtml = `
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
+                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm">
+                                    ${labels.discussion_section_title || 'Thảo Luận & Ghi Chú Kỹ Thuật'}
+                                </h4>
+                                <span id="badge-count-${questionId}" class="px-2 py-0.2 text-[10px] font-bold rounded-full ${allQComments.length > 0 ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">
+                                    ${allQComments.length}
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                ${labels.discussion_section_subtitle}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-slate-400 dark:text-slate-500 text-[10px] font-medium mr-0.5 hidden sm:inline">${labels.filter_by || 'Lọc:'}</span>
+                        ${filterBtn('all', labels.filter_all || 'Tất cả', countAll)}
+                        ${filterBtn('theory', labels.filter_theory || '📖 Lý Thuyết', countTheory)}
+                        ${filterBtn('modeling', labels.filter_modeling || '🖥️ C++ Modeling', countModeling)}
+                        ${filterBtn('practice', labels.filter_practice || '🔧 ECU / AUTOSAR', countPractice)}
+                        ${filterBtn('trap', labels.filter_trap || '⚠️ Bẫy Phỏng Vấn', countTrap)}
+                    </div>
+                </div>
+            `;
+
+            // Active QA Tab for initial select option
+            const currentQATab = (qaState[questionId] && qaState[questionId].tab) || 'theory';
+
+            // Comment submission form
+            let inputHtml = '';
+            if (user) {
+                const placeholder = isAuthor ? labels.author_placeholder : labels.comment_placeholder;
+                const authorBadgeBar = isAuthor ? `
+                    <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-amber-100 dark:border-amber-900/40 text-xs flex-wrap gap-2">
+                        <span class="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5 text-xs">
+                            <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400"></i>
+                            ⭐ Soạn thảo với tư cách Tác Giả Blog
+                        </span>
+                        <label class="flex items-center gap-1.5 text-amber-900 dark:text-amber-200 text-[11px] cursor-pointer select-none font-medium">
+                            <input type="checkbox" id="pin-checkbox-${questionId}" class="rounded text-amber-600 focus:ring-amber-500">
+                            <span>${labels.pin_note_checkbox || '📌 Ghim làm Note quan trọng'}</span>
+                        </label>
+                    </div>
+                ` : '';
+
+                inputHtml = `
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border ${isAuthor ? 'border-amber-300 dark:border-amber-700 ring-2 ring-amber-100 dark:ring-amber-950/60 bg-amber-50/15 dark:bg-amber-950/20' : 'border-slate-200 dark:border-slate-800'} shadow-sm mb-4">
+                        ${authorBadgeBar}
+                        <!-- Scope Selector Bar -->
+                        <div class="flex items-center justify-between mb-2 pb-1.5 text-xs flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-500 dark:text-slate-400 text-[11px] font-medium flex items-center gap-1">
+                                    <i data-lucide="tag" class="w-3 h-3 text-slate-400 dark:text-slate-500"></i>
+                                    ${labels.target_section_label || 'Ghi chú cho phần:'}
+                                </span>
+                                <select id="input-scope-${questionId}" class="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1 font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer">
+                                    <option value="theory" ${currentQATab === 'theory' ? 'selected' : ''}>${labels.scope_theory}</option>
+                                    <option value="modeling" ${currentQATab === 'modeling' ? 'selected' : ''}>${labels.scope_modeling}</option>
+                                    <option value="practice" ${currentQATab === 'practice' ? 'selected' : ''}>${labels.scope_practice}</option>
+                                    <option value="trap" ${currentQATab === 'trap' ? 'selected' : ''}>${labels.scope_trap}</option>
+                                    <option value="all">${labels.scope_all}</option>
+                                </select>
+                            </div>
+                            <span class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
+                                Tự động đồng bộ với tab bạn đang xem ở trên
+                            </span>
+                        </div>
+
+                        <!-- Textarea & Action -->
+                        <div class="flex items-start gap-3">
+                            <img src="${user.avatar}" alt="Avatar" class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover mt-1 shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <textarea id="input-comment-${questionId}" rows="2" placeholder="${placeholder}" class="w-full p-2.5 text-xs sm:text-sm bg-slate-50 hover:bg-white dark:bg-slate-800 dark:hover:bg-slate-850 focus:bg-white dark:focus:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all resize-none text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"></textarea>
+                                <div class="flex justify-between items-center mt-2 flex-wrap gap-2">
+                                    <span class="text-[11px] text-slate-400 dark:text-slate-500">Ctrl + Enter để gửi</span>
+                                    <button onclick="postComment('${questionId}')" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 shrink-0">
+                                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                        <span>${labels.btn_post_comment}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                inputHtml = `
+                    <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 p-4 rounded-xl mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm shrink-0 border border-amber-200 dark:border-amber-800/60">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-amber-900 dark:text-amber-200 text-sm">${labels.login_to_discuss}</h4>
+                                <p class="text-xs text-amber-700 dark:text-amber-400">Đăng nhập tài khoản Google để gửi bình luận, giải đáp hoặc lưu note kỹ thuật cho 4 phần ở trên</p>
+                            </div>
+                        </div>
+                        <button onclick="openAuthModal()" class="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700 text-amber-900 dark:text-amber-200 font-bold rounded-lg border border-amber-300 dark:border-amber-700 shadow-sm text-xs transition-colors shrink-0">
+                            ${labels.btn_login_now}
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Comments list
+            let listHtml = '';
+            if (displayedRoots.length === 0) {
+                const emptyMsg = rootComments.length === 0 
+                    ? labels.no_comments_yet 
+                    : `Không có thảo luận nào trong mục ${sectionScopeConfig[activeFilter]?.text || activeFilter}.`;
+                listHtml = `
+                    <div class="text-center py-6 text-slate-400 dark:text-slate-500 bg-white/60 dark:bg-slate-900/60 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                        <i data-lucide="message-square-dashed" class="w-7 h-7 mx-auto mb-1.5 text-slate-300 dark:text-slate-600"></i>
+                        <p class="text-xs">${emptyMsg}</p>
+                    </div>
+                `;
+            } else {
+                listHtml = `
+                    <div class="space-y-3.5">
+                        ${displayedRoots.map(c => {
+                            const isLiked = user && c.likedBy && c.likedBy.includes(user.id);
+                            const canDelete = user && (user.id === c.userId || user.email === c.userEmail || isAuthor);
+                            const likeClass = isLiked ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60 font-bold' : 'text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border-slate-200 dark:border-slate-700';
+                            const cIsAuthor = c.userRole === 'Author' || c.userEmail === AUTHOR_EMAIL;
+
+                            const authorBadge = cIsAuthor 
+                                ? `<span class="px-1.5 py-0.2 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5 shadow-xs"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
+                                : `<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 rounded">Google User</span>`;
+
+                            const cScope = sectionScopeConfig[c.targetSection] || sectionScopeConfig['all'];
+                            const scopeBadge = `<span class="px-1.5 py-0.2 text-[9px] font-semibold rounded border ${cScope.class}">${cScope.text}</span>`;
+
+                            const pinnedBanner = c.isPinned ? `
+                                <div class="bg-amber-100/90 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 px-3 py-1.5 text-[11px] font-bold flex items-center justify-between border-b border-amber-200 dark:border-amber-800/60">
+                                    <span class="flex items-center gap-1.5">
+                                        <i data-lucide="pin" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400"></i>
+                                        <span>${labels.pinned_badge}</span>
+                                        <span class="text-amber-800 dark:text-amber-300 font-normal hidden sm:inline">&bull; Gắn với: <strong>${cScope.text}</strong></span>
+                                    </span>
+                                    ${isAuthor ? `
+                                        <button onclick="togglePinComment('${questionId}', '${c.id}')" class="text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 text-[10px] font-semibold hover:underline">
+                                            ${labels.unpin_note}
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : '';
+
+                            const cardBorder = c.isPinned 
+                                ? 'border-amber-300 dark:border-amber-700 ring-2 ring-amber-100 dark:ring-amber-950/60 bg-amber-50/15 dark:bg-amber-950/20' 
+                                : (cIsAuthor ? 'border-amber-200 dark:border-amber-800/60 bg-amber-50/10 dark:bg-amber-950/10' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900');
+
+                            const replies = repliesMap[c.id] || [];
+                            const repliesHtml = replies.length > 0 ? `
+                                <div class="space-y-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                    ${replies.map(r => {
+                                        const rLiked = user && r.likedBy && r.likedBy.includes(user.id);
+                                        const rCanDelete = user && (user.id === r.userId || user.email === r.userEmail || isAuthor);
+                                        const rLikeClass = rLiked ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60 font-bold' : 'text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 border-slate-200 dark:border-slate-700';
+                                        const rIsAuthor = r.userRole === 'Author' || r.userEmail === AUTHOR_EMAIL;
+
+                                        const rBadge = rIsAuthor 
+                                            ? `<span class="px-1.5 py-0.2 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
+                                            : `<span class="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 rounded">Google User</span>`;
+
+                                        return `
+                                            <div class="ml-3 sm:ml-8 pl-3 border-l-2 ${rIsAuthor ? 'border-amber-400 dark:border-amber-500 bg-amber-50/40 dark:bg-amber-950/30' : 'border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-850/80'} p-3 rounded-r-xl transition-all">
+                                                <div class="flex items-center justify-between gap-2 mb-1">
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <img src="${r.userAvatar}" alt="${escapeHtml(r.userName)}" class="w-5 h-5 rounded-full border border-slate-200 dark:border-slate-700 object-cover shrink-0">
+                                                        <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">${escapeHtml(r.userName)}</span>
+                                                        ${rBadge}
+                                                        <span class="text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1 rounded font-medium">@${escapeHtml(r.replyToUser || c.userName)}</span>
+                                                        <span class="text-[10px] text-slate-400 dark:text-slate-500">&bull; ${formatRelativeTime(r.createdAt)}</span>
+                                                    </div>
+                                                    ${rCanDelete ? `
+                                                        <button onclick="deleteComment('${questionId}', '${r.id}')" title="Xóa" class="text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 p-1 rounded transition-colors">
+                                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                        </button>
+                                                    ` : ''}
+                                                </div>
+                                                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap ml-6">${escapeHtml(r.content)}</p>
+                                                <div class="mt-2 ml-6 flex items-center gap-2">
+                                                    <button onclick="toggleLike('${questionId}', '${r.id}')" class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] border transition-colors ${rLikeClass}">
+                                                        <i data-lucide="heart" class="w-3 h-3 ${rLiked ? 'fill-rose-500 text-rose-500' : ''}"></i>
+                                                        <span>${r.likes || 0}</span>
+                                                    </button>
+                                                    <button onclick="toggleReplyBox('${c.id}', '${escapeHtml(r.userName)}')" class="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 transition-colors">
+                                                        <i data-lucide="reply" class="w-3 h-3 text-slate-400 dark:text-slate-500"></i>
+                                                        <span>${labels.reply}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : '';
+
+                            return `
+                                <div class="rounded-xl border ${cardBorder} shadow-xs overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700">
+                                    ${pinnedBanner}
+                                    <div class="p-3.5 sm:p-4">
+                                        <div class="flex items-start gap-3">
+                                            <img src="${c.userAvatar}" alt="${escapeHtml(c.userName)}" class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover shrink-0 mt-0.5">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center justify-between gap-2 mb-1.5">
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">${escapeHtml(c.userName)}</span>
+                                                        ${authorBadge}
+                                                        ${scopeBadge}
+                                                        <span class="text-[10px] text-slate-400 dark:text-slate-500">&bull; ${formatRelativeTime(c.createdAt)}</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-1">
+                                                        ${isAuthor && !c.isPinned ? `
+                                                            <button onclick="togglePinComment('${questionId}', '${c.id}')" title="${labels.pin_note}" class="text-slate-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 p-1 rounded transition-colors">
+                                                                <i data-lucide="pin" class="w-3.5 h-3.5"></i>
+                                                            </button>
+                                                        ` : ''}
+                                                        ${canDelete ? `
+                                                            <button onclick="deleteComment('${questionId}', '${c.id}')" title="Xóa" class="text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 p-1 rounded transition-colors">
+                                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                            </button>
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed break-words whitespace-pre-wrap">${escapeHtml(c.content)}</p>
+                                                
+                                                <!-- Action Buttons -->
+                                                <div class="mt-2.5 flex items-center gap-2 flex-wrap">
+                                                    <button onclick="toggleLike('${questionId}', '${c.id}')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] border transition-colors ${likeClass}">
+                                                        <i data-lucide="heart" class="w-3.5 h-3.5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}"></i>
+                                                        <span>${c.likes || 0}</span>
+                                                    </button>
+                                                    
+                                                    <button onclick="toggleReplyBox('${c.id}', '${escapeHtml(c.userName)}')" class="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 font-medium transition-colors">
+                                                        <i data-lucide="reply" class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500"></i>
+                                                        <span>${labels.reply}</span>
+                                                        ${replies.length > 0 ? `<span class="ml-1 text-[10px] text-slate-400 dark:text-slate-500 font-bold">(${replies.length})</span>` : ''}
+                                                    </button>
+                                                </div>
+
+                                                <!-- Form Reply Box -->
+                                                <div id="reply-box-${c.id}" class="hidden mt-3 p-3 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                    <div class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                                                        <span>${labels.replying_to} <strong class="text-blue-600 dark:text-blue-400">@${escapeHtml(c.userName)}</strong>:</span>
+                                                        <button onclick="toggleReplyBox('${c.id}')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-[10px] hover:underline">${labels.cancel}</button>
+                                                    </div>
+                                                    <textarea id="reply-input-${c.id}" rows="2" placeholder="Nhập câu trả lời cho @${escapeHtml(c.userName)}..." class="w-full p-2 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"></textarea>
+                                                    <div class="flex justify-end gap-2 mt-2">
+                                                        <button onclick="toggleReplyBox('${c.id}')" class="px-3 py-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium">${labels.cancel}</button>
+                                                        <button onclick="postReply('${questionId}', '${c.id}')" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1">
+                                                            <i data-lucide="send" class="w-3 h-3"></i>
+                                                            <span>${labels.send_reply}</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Child replies -->
+                                                ${repliesHtml}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="animate-fadeIn">
+                    ${headerHtml}
+                    ${inputHtml}
+                    ${listHtml}
+                </div>
+            `;
+
+            // Keyboard shortcut: Ctrl+Enter / Cmd+Enter to submit
+            const textarea = document.getElementById(`input-comment-${questionId}`);
+            if (textarea) {
+                textarea.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        postComment(questionId);
+                    }
+                });
+            }
+
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        }
+
+        function toggleReplyBox(commentId, targetUserName) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const box = document.getElementById(`reply-box-${commentId}`);
+            if (!box) return;
+            const isHidden = box.classList.contains('hidden');
+            if (isHidden) {
+                box.classList.remove('hidden');
+                const textarea = document.getElementById(`reply-input-${commentId}`);
+                if (textarea) {
+                    if (targetUserName) textarea.setAttribute('data-target-user', targetUserName);
+                    textarea.focus();
+                }
+            } else {
+                box.classList.add('hidden');
+            }
+            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+        }
+
+        function postComment(questionId) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const textarea = document.getElementById(`input-comment-${questionId}`);
+            if (!textarea) return;
+            const text = textarea.value.trim();
+            if (!text) {
+                textarea.focus();
+                textarea.classList.add('ring-2', 'ring-rose-500');
+                setTimeout(() => textarea.classList.remove('ring-2', 'ring-rose-500'), 1500);
+                return;
+            }
+
+            const scopeSelect = document.getElementById(`input-scope-${questionId}`);
+            const selectedScope = scopeSelect ? scopeSelect.value : (qaState[questionId]?.tab || 'theory');
+
+            const isAuthor = isUserAuthor(user);
+            const pinCheckbox = document.getElementById(`pin-checkbox-${questionId}`);
+            const shouldPin = isAuthor && pinCheckbox && pinCheckbox.checked;
+
+            const newCmt = {
+                id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                questionId: questionId,
+                userId: user.id,
+                userName: user.name,
+                userEmail: user.email,
+                userAvatar: user.avatar,
+                userRole: isAuthor ? "Author" : (user.role || "Engineer"),
+                targetSection: selectedScope,
+                content: text,
+                createdAt: Date.now(),
+                likes: 0,
+                likedBy: [],
+                parentId: null,
+                isPinned: Boolean(shouldPin)
+            };
+
+            const all = getAllComments();
+            all.unshift(newCmt);
+            saveAllCommentsLocally(all);
+            if (isFirestoreConnected) {
+                firestoreCommentsCache.unshift(newCmt);
+            }
+
+            // Sync to Cloud Firestore
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(newCmt.id).set(newCmt).catch(err => {
+                    console.warn("Firestore save error:", err);
+                });
+            }
+
+            textarea.value = '';
+            renderCommentsUI(questionId);
+            updateBadgeCount(questionId);
+        }
+
+        function postReply(questionId, parentId) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const textarea = document.getElementById(`reply-input-${parentId}`);
+            if (!textarea) return;
+            const text = textarea.value.trim();
+            if (!text) {
+                textarea.focus();
+                textarea.classList.add('ring-2', 'ring-rose-500');
+                setTimeout(() => textarea.classList.remove('ring-2', 'ring-rose-500'), 1500);
+                return;
+            }
+
+            const targetUser = textarea.getAttribute('data-target-user') || '';
+            const isAuthor = isUserAuthor(user);
+
+            const all = getAllComments();
+            const parentComment = all.find(c => c.id === parentId);
+            const parentScope = parentComment ? (parentComment.targetSection || 'all') : 'all';
+
+            const newReply = {
+                id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                questionId: questionId,
+                userId: user.id,
+                userName: user.name,
+                userEmail: user.email,
+                userAvatar: user.avatar,
+                userRole: isAuthor ? "Author" : (user.role || "Engineer"),
+                targetSection: parentScope,
+                content: text,
+                createdAt: Date.now(),
+                likes: 0,
+                likedBy: [],
+                parentId: parentId,
+                replyToUser: targetUser,
+                isPinned: false
+            };
+
+            all.push(newReply);
+            saveAllCommentsLocally(all);
+            if (isFirestoreConnected) {
+                firestoreCommentsCache.push(newReply);
+            }
+
+            // Sync to Cloud Firestore
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(newReply.id).set(newReply).catch(err => {
+                    console.warn("Firestore reply error:", err);
+                });
+            }
+
+            textarea.value = '';
+            renderCommentsUI(questionId);
+            updateBadgeCount(questionId);
+        }
+
+        function togglePinComment(questionId, commentId) {
+            const user = getActiveUser();
+            if (!isUserAuthor(user)) return;
+            const all = getAllComments();
+            const target = all.find(c => c.id === commentId);
+            if (!target) return;
+            target.isPinned = !target.isPinned;
+            saveAllCommentsLocally(all);
+
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(commentId).update({
+                    isPinned: target.isPinned
+                }).catch(err => console.warn(err));
+            }
+
+            renderCommentsUI(questionId);
+        }
+
+        function toggleLike(questionId, commentId) {
+            const user = getActiveUser();
+            if (!user) {
+                openAuthModal();
+                return;
+            }
+            const all = getAllComments();
+            const target = all.find(c => c.id === commentId);
+            if (!target) return;
+
+            if (!target.likedBy) target.likedBy = [];
+            const idx = target.likedBy.indexOf(user.id);
+            if (idx >= 0) {
+                target.likedBy.splice(idx, 1);
+                target.likes = Math.max(0, (target.likes || 1) - 1);
+            } else {
+                target.likedBy.push(user.id);
+                target.likes = (target.likes || 0) + 1;
+            }
+
+            saveAllCommentsLocally(all);
+
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(commentId).update({
+                    likes: target.likes,
+                    likedBy: target.likedBy
+                }).catch(err => console.warn(err));
+            }
+
+            renderCommentsUI(questionId);
+        }
+
+        function deleteComment(questionId, commentId) {
+            const labels = i18n[currentLang];
+            if (!confirm(labels.delete_confirm)) return;
+            let all = getAllComments();
+            const repliesToDelete = all.filter(c => c.parentId === commentId);
+            all = all.filter(c => c.id !== commentId && c.parentId !== commentId);
+            saveAllCommentsLocally(all);
+            if (isFirestoreConnected) {
+                firestoreCommentsCache = all;
+            }
+
+            if (isFirebaseReady && firestoreDb) {
+                firestoreDb.collection('canfd_comments').doc(commentId).delete().catch(err => console.warn(err));
+                repliesToDelete.forEach(r => {
+                    firestoreDb.collection('canfd_comments').doc(r.id).delete().catch(err => console.warn(err));
+                });
+            }
+
+            renderCommentsUI(questionId);
+            updateBadgeCount(questionId);
+        }
+
+        function updateBadgeCount(questionId) {
+            const count = getCommentsForQuestion(questionId).length;
+            const badge = document.getElementById(`badge-count-${questionId}`);
+            if (badge) {
+                badge.textContent = count;
+                badge.className = `px-2 py-0.2 text-[10px] font-bold rounded-full ${count > 0 ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`;
+            }
+            const cardBadge = document.getElementById(`card-comment-badge-${questionId}`);
+            if (cardBadge) {
+                const span = cardBadge.querySelector('span');
+                if (span) span.textContent = count;
+                cardBadge.className = `px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${count > 0 ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`;
+            }
+        }
+
+        function applyI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    el.innerHTML = i18n[currentLang][key];
+                }
+            });
+            document.getElementById('lang-indicator').textContent = currentLang === 'vi' ? 'EN' : 'VN';
+            
+            // Re-render theme button tooltip
+            const isDark = document.documentElement.classList.contains('dark') || (document.getElementById('canfd-explorer-root') && document.getElementById('canfd-explorer-root').classList.contains('dark'));
+            const btnTheme = document.getElementById('btn-theme');
+            if (btnTheme) {
+                btnTheme.setAttribute('title', isDark ? i18n[currentLang].theme_light : i18n[currentLang].theme_dark);
+            }
+
+            // Re-render components with dynamic text
+            renderAuthHeader();
+            applyFilters();
+            if (currentSegment) {
+                selectSegment(currentSegment);
+            }
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'vi' ? 'en' : 'vi';
+            applyI18n();
+        }
+
+        function renderQACards(data) {
+            const container = document.getElementById('qa-container');
+            const emptyState = document.getElementById('qa-empty-state');
+            const wipState = document.getElementById('qa-wip-state');
+            
+            container.innerHTML = '';
+            
+            if (data.length === 0 && qaData.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                if (wipState) wipState.classList.remove('hidden');
+                return;
+            } else if (data.length === 0 && qaData.length > 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                if (wipState) wipState.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            if (wipState) wipState.classList.add('hidden');
+
+            const diffColors = {
+                'Basic': 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800/60',
+                'Intermediate': 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60',
+                'Advanced': 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60',
+                'Senior': 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60'
+            };
+
+            data.forEach(item => {
+                const diffClass = diffColors[item.difficulty] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                const absoluteIndex = qaData.findIndex(q => q.id === item.id) + 1;
+                
+                let tagsHtml = item.tags.map(tag => `<span class="px-2 py-0.5 text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-700">${tag}</span>`).join('');
+
+                const content = item[currentLang];
+                const labels = i18n[currentLang];
+                
+                // Retrieve saved card state; default to collapsed with theory tab
+                const state = qaState[item.id] || { expanded: false, tab: 'theory' };
+                if (state.tab === 'comments') state.tab = 'theory';
+                const answerHidden = state.expanded ? '' : 'hidden';
+                const iconClasses = state.expanded ? 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/60' : 'text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800';
+                const iconStyle = state.expanded ? 'style="transform: rotate(180deg);"' : '';
+                
+                const activeBtnClass = "px-4 py-2 text-sm font-medium border-b-2 border-amber-600 dark:border-amber-400 text-amber-700 dark:text-amber-300 bg-white dark:bg-slate-900 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                const inactiveBtnClass = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                
+                const theoryBtn = state.tab === 'theory' ? activeBtnClass : inactiveBtnClass;
+                const modelingBtn = state.tab === 'modeling' ? activeBtnClass : inactiveBtnClass;
+                const practiceBtn = state.tab === 'practice' ? activeBtnClass : inactiveBtnClass;
+                const trapBtn = state.tab === 'trap' ? activeBtnClass : inactiveBtnClass;
+                
+                const theoryContent = state.tab === 'theory' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+                const modelingContent = state.tab === 'modeling' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+                const practiceContent = state.tab === 'practice' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+                const trapContent = state.tab === 'trap' ? 'animate-fadeIn' : 'hidden animate-fadeIn';
+
+                const commentCount = getCommentsForQuestion(item.id).length;
+                const cardCommentBadgeClass = commentCount > 0 
+                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+
+                const cardHtml = `
+                    <div id="qa-card-${item.id}" class="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-sm transition-all hover:border-amber-300 dark:hover:border-amber-600/60">
+                        <!-- Question Header -->
+                        <div class="qa-card-header p-4 sm:p-5 cursor-pointer flex justify-between items-start gap-4 select-none ${state.expanded ? 'border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850/50' : 'hover:bg-slate-50/50 dark:hover:bg-slate-850/50'} transition-colors rounded-t-xl" onclick="toggleAnswer('${item.id}')">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase border ${diffClass}">${item.difficulty}</span>
+                                    <div class="flex gap-1 flex-wrap">${tagsHtml}</div>
+                                    <span id="card-comment-badge-${item.id}" class="px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${cardCommentBadgeClass}" title="Số lượt ghi chú & thảo luận">
+                                        <i data-lucide="message-square" class="w-3 h-3 text-amber-600 dark:text-amber-400"></i>
+                                        <span>${commentCount}</span>
+                                    </span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors flex items-start gap-2">
+                                    <span class="text-amber-600 dark:text-amber-400 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
+                                    <span>${content.question}</span>
+                                </h3>
+                            </div>
+                            <div class="p-2 rounded-lg ${iconClasses}" id="icon-${item.id}">
+                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" ${iconStyle}></i>
+                            </div>
+                        </div>
+
+                        <!-- 4-Tab Bar & Answer Content -->
+                        <div id="qa-expanded-body-${item.id}" class="${answerHidden}">
+                            <!-- Answer Tabs Navigation: 4 core knowledge tabs -->
+                            <div class="flex border-b border-slate-200 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-850/90 px-4 pt-2.5 gap-2 overflow-x-auto no-scrollbar">
+                                <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
+                                    ${labels.qa_theory}
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'modeling')" id="btn-${item.id}-modeling" class="${modelingBtn}">
+                                    ${labels.qa_modeling}
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="${practiceBtn}">
+                                    ${labels.qa_practice}
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="${trapBtn}">
+                                    ${labels.qa_trap}
+                                </button>
+                            </div>
+                            
+                            <!-- Answer Content Box: Full natural height, beautiful typography, no nested scrollbar -->
+                            <div class="p-4 sm:p-6 text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                                <div id="content-${item.id}-theory" class="${theoryContent}">
+                                    ${content.answer.theory}
+                                </div>
+                                <div id="content-${item.id}-modeling" class="${modelingContent}">
+                                    ${content.answer.modeling || ''}
+                                </div>
+                                <div id="content-${item.id}-practice" class="${practiceContent}">
+                                    ${content.answer.practice}
+                                </div>
+                                <div id="content-${item.id}-trap" class="${trapContent}">
+                                    ${content.answer.trap}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DISCUSSION & TECHNICAL NOTES BLOCK: Flow naturally below answer -->
+                        <div id="answer-discussion-${item.id}" class="${answerHidden}">
+                            <div id="discussion-wrapper-${item.id}" class="bg-slate-50/90 dark:bg-slate-850/90 p-4 sm:p-5 rounded-b-xl">
+                                <div id="content-${item.id}-comments"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+
+                // Render comments directly for this card
+                renderCommentsUI(item.id);
+            });
+
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide render failed:", e);
+            }
+        }
+
+        function toggleAnswer(id) {
+            if (!qaState[id]) qaState[id] = { expanded: false, tab: 'theory' };
+            const expandedBody = document.getElementById(`qa-expanded-body-${id}`);
+            const discussionSection = document.getElementById(`answer-discussion-${id}`);
+            const iconDiv = document.getElementById(`icon-${id}`);
+            const cardEl = document.getElementById(`qa-card-${id}`);
+            const headerEl = cardEl ? cardEl.querySelector('.qa-card-header') : null;
+            const willExpand = expandedBody ? expandedBody.classList.contains('hidden') : false;
+            
+            if (willExpand) {
+                // Single-open accordion: Auto-collapse all other questions
+                qaData.forEach(item => {
+                    if (item.id !== id) {
+                        const otherExp = document.getElementById(`qa-expanded-body-${item.id}`);
+                        const otherDisc = document.getElementById(`answer-discussion-${item.id}`);
+                        const otherIcon = document.getElementById(`icon-${item.id}`);
+                        const otherCard = document.getElementById(`qa-card-${item.id}`);
+                        const otherHeader = otherCard ? otherCard.querySelector('.qa-card-header') : null;
+
+                        if (otherExp && !otherExp.classList.contains('hidden')) {
+                            otherExp.classList.add('hidden');
+                        }
+                        if (otherDisc && !otherDisc.classList.contains('hidden')) {
+                            otherDisc.classList.add('hidden');
+                        }
+                        if (otherIcon) {
+                            otherIcon.className = 'p-2 rounded-lg text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800';
+                            const otherIconEl = otherIcon.querySelector('i') || otherIcon.querySelector('svg');
+                            if (otherIconEl) otherIconEl.style.transform = 'rotate(0deg)';
+                        }
+                        if (otherHeader) {
+                            otherHeader.classList.remove('border-b', 'border-slate-200', 'dark:border-slate-800', 'bg-slate-50/50', 'dark:bg-slate-850/50');
+                            otherHeader.classList.add('hover:bg-slate-50/50', 'dark:hover:bg-slate-850/50');
+                        }
+                        if (otherCard) {
+                            otherCard.classList.remove('ring-1', 'ring-amber-300', 'dark:ring-amber-500/60', 'shadow-md');
+                        }
+                        if (!qaState[item.id]) qaState[item.id] = { expanded: false, tab: 'theory' };
+                        qaState[item.id].expanded = false;
+                    }
+                });
+
+                // Expand target question
+                if (expandedBody) expandedBody.classList.remove('hidden');
+                if (discussionSection) discussionSection.classList.remove('hidden');
+                if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/60';
+                const iconElement = iconDiv ? (iconDiv.querySelector('i') || iconDiv.querySelector('svg')) : null;
+                if (iconElement) iconElement.style.transform = 'rotate(180deg)';
+                if (headerEl) {
+                    headerEl.classList.add('border-b', 'border-slate-200', 'dark:border-slate-800', 'bg-slate-50/50', 'dark:bg-slate-850/50');
+                    headerEl.classList.remove('hover:bg-slate-50/50', 'dark:hover:bg-slate-850/50');
+                }
+                if (cardEl) {
+                    cardEl.classList.add('ring-1', 'ring-amber-300', 'dark:ring-amber-500/60', 'shadow-md');
+                }
+                qaState[id].expanded = true;
+
+                // Smooth scroll focus: Gently bring question header into clear view if obscured
+                if (cardEl) {
+                    requestAnimationFrame(() => {
+                        const rect = cardEl.getBoundingClientRect();
+                        const topNav = document.getElementById('main-nav-tabs');
+                        const navHeight = topNav ? (topNav.offsetHeight + 24) : 60;
+                        if (rect.top < navHeight || rect.top > window.innerHeight - 80) {
+                            const targetScrollY = window.pageYOffset + rect.top - navHeight;
+                            window.scrollTo({
+                                top: Math.max(0, targetScrollY),
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                }
+            } else {
+                // Collapse target question
+                if (expandedBody) expandedBody.classList.add('hidden');
+                if (discussionSection) discussionSection.classList.add('hidden');
+                if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800';
+                const iconElement = iconDiv ? (iconDiv.querySelector('i') || iconDiv.querySelector('svg')) : null;
+                if (iconElement) iconElement.style.transform = 'rotate(0deg)';
+                if (headerEl) {
+                    headerEl.classList.remove('border-b', 'border-slate-200', 'dark:border-slate-800', 'bg-slate-50/50', 'dark:bg-slate-850/50');
+                    headerEl.classList.add('hover:bg-slate-50/50', 'dark:hover:bg-slate-850/50');
+                }
+                if (cardEl) {
+                    cardEl.classList.remove('ring-1', 'ring-amber-300', 'dark:ring-amber-500/60', 'shadow-md');
+                }
+                qaState[id].expanded = false;
+
+                // If scrolled deep into comments upon collapsing, smoothly realign view back to card header
+                if (cardEl) {
+                    const rect = cardEl.getBoundingClientRect();
+                    const topNav = document.getElementById('main-nav-tabs');
+                    const navHeight = topNav ? (topNav.offsetHeight + 24) : 60;
+                    if (rect.top < 0) {
+                        const targetScrollY = window.pageYOffset + rect.top - navHeight;
+                        window.scrollTo({
+                            top: Math.max(0, targetScrollY),
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            }
+        }
+
+        function switchQATab(id, tab) {
+            if (!qaState[id]) qaState[id] = { expanded: true, tab: 'theory' };
+            qaState[id].tab = tab;
+            
+            const tabs = ['theory', 'modeling', 'practice', 'trap'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btn-${id}-${t}`);
+                const content = document.getElementById(`content-${id}-${t}`);
+                if (!btn || !content) return;
+                
+                if (t === tab) {
+                    btn.className = "px-4 py-2 text-sm font-medium border-b-2 border-amber-600 dark:border-amber-400 text-amber-700 dark:text-amber-300 bg-white dark:bg-slate-900 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                    content.classList.add('hidden');
+                }
+            });
+
+            // Automatically sync section selector in comment form with active tab
+            const scopeSelect = document.getElementById(`input-scope-${id}`);
+            if (scopeSelect && ['theory', 'modeling', 'practice', 'trap'].includes(tab)) {
+                scopeSelect.value = tab;
+            }
+
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide render failed:", e);
+            }
+        }
+
+        function applyFilters() {
+            let filtered = qaData;
+            
+            if (currentDifficulty !== 'All') {
+                filtered = filtered.filter(item => item.difficulty === currentDifficulty);
+            }
+            
+            if (currentTag !== '') {
+                filtered = filtered.filter(item => item.tags.includes(currentTag));
+            }
+            
+            renderQACards(filtered);
+            updateFilterUI();
+        }
+
+        function filterByDifficulty(level) {
+            currentDifficulty = level;
+            applyFilters();
+        }
+
+        function filterByTag(tag) {
+            currentTag = currentTag === tag ? '' : tag; // Toggle nếu click lại
+            applyFilters();
+        }
+
+        function resetFilters() {
+            currentDifficulty = 'All';
+            currentTag = '';
+            applyFilters();
+        }
+
+        function updateFilterUI() {
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                const level = btn.getAttribute('data-level');
+                if (level === currentDifficulty) {
+                    btn.className = "px-3 py-1 text-xs font-medium rounded-full bg-slate-800 dark:bg-amber-600 text-white transition-colors difficulty-btn shadow-xs";
+                } else {
+                    btn.className = "px-3 py-1 text-xs font-medium rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-750 transition-colors difficulty-btn";
+                }
+            });
+            
+            document.querySelectorAll('.tag-btn').forEach(btn => {
+                const tag = btn.getAttribute('data-tag');
+                if (tag === currentTag) {
+                    btn.className = "px-2 py-1 text-xs font-medium rounded bg-blue-600 text-white shadow transition-colors tag-btn";
+                } else {
+                    btn.className = "px-2 py-1 text-xs font-medium rounded text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800/60 transition-colors tag-btn";
+                }
+            });
+            
+            const resetBtn = document.getElementById('reset-filter-btn');
+            if (currentDifficulty !== 'All' || currentTag !== '') {
+                resetBtn.classList.remove('hidden');
+            } else {
+                resetBtn.classList.add('hidden');
+            }
+        }
+
+        const segmentData = {
+            arbitration: {
+                icon: "shield",
+                color: "text-indigo-600 dark:text-indigo-400",
+                vi: {
+                    title: "Arbitration Phase (Phân Xử Đồng Tốc)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>SOF (Start of Frame - 1 bit):</strong> Bit báo hiệu bắt đầu khung truyền (Dominant - 0). Mọi node trên mạng dùng bit này để đồng bộ ban đầu (Hard Sync).</li>
+                            <li><strong>ID (Identifier - 11 bit):</strong> Định danh khung truyền. Node nào có ID nhỏ hơn sẽ chiến thắng phân xử và được quyền phát do đặc tính "Dominant (0) đè Recessive (1)".</li>
+                            <li><strong>RRS (Remote Request Substitution - 1 bit):</strong> Ở CAN FD không còn Remote Frame, bit này thay thế RTR và luôn mang giá trị Dominant (0).</li>
+                            <li><strong>IDE (Identifier Extension - 1 bit):</strong> Xác định đây là Base frame (0) hay Extended 29-bit frame (1).</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-indigo-50 dark:bg-indigo-950/40 rounded text-indigo-900 dark:text-indigo-200 border border-indigo-100 dark:border-indigo-800/60"><strong>Tốc độ:</strong> Giai đoạn này bắt buộc chạy ở tốc độ <em>Nominal Bit Rate</em> (Ví dụ 500 kbps) để đảm bảo tín hiệu đủ thời gian lan truyền trên toàn xe trong quá trình phân xử.</p>`
+                },
+                en: {
+                    title: "Arbitration Phase",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>SOF (Start of Frame - 1 bit):</strong> Signifies the start of transmission (Dominant - 0). All nodes use this bit for initial synchronization (Hard Sync).</li>
+                            <li><strong>ID (Identifier - 11 bit):</strong> Frame identifier. The node with the lower ID wins arbitration due to the "Dominant (0) overwrites Recessive (1)" characteristic.</li>
+                            <li><strong>RRS (Remote Request Substitution - 1 bit):</strong> CAN FD no longer has Remote Frames; this bit replaces RTR and is always Dominant (0).</li>
+                            <li><strong>IDE (Identifier Extension - 1 bit):</strong> Determines if this is a Base frame (0) or Extended 29-bit frame (1).</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-indigo-50 dark:bg-indigo-950/40 rounded text-indigo-900 dark:text-indigo-200 border border-indigo-100 dark:border-indigo-800/60"><strong>Speed:</strong> This phase must run at the <em>Nominal Bit Rate</em> (e.g., 500 kbps) to ensure signals have enough time to propagate across the entire vehicle during arbitration.</p>`
+                }
+            },
+            control: {
+                icon: "settings",
+                color: "text-amber-600 dark:text-amber-400",
+                vi: {
+                    title: "Control Field & Bí Mật Tăng Tốc (BRS)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>FDF (FD Format - 1 bit):</strong> Bit xác định đây là CAN FD. Mang giá trị Recessive (1) để phân biệt với Classic CAN (có giá trị 0).</li>
+                            <li><strong>res (Reserved - 1 bit):</strong> Bit dự trữ, luôn là Dominant (0).</li>
+                            <li><strong>BRS (Bit Rate Switch - 1 bit): <span class="text-red-600 dark:text-red-400 font-bold bg-red-50 dark:bg-red-950/40 px-1 rounded">TRÁI TIM CAN FD</span></strong> 
+                                Nếu BRS = 1 (Recessive), ngay sau bit này toàn bộ các bit tiếp theo (Data, CRC) sẽ được truyền ở tốc độ cao <em>Data Bit Rate</em> (VD: 2 Mbps, 5 Mbps). Nếu BRS = 0, tốc độ không đổi.</li>
+                            <li><strong>ESI (Error State Indicator - 1 bit):</strong> Chỉ báo trạng thái lỗi của node phát (0 = Error Active, 1 = Error Passive).</li>
+                            <li><strong>DLC (Data Length Code - 4 bit):</strong> Do chỉ có 4 bit (giá trị max = 15), các giá trị từ 9-15 được CAN FD quy ước lại thành số byte phi tuyến tính: 12, 16, 20, 24, 32, 48, 64 Bytes.</li>
+                           </ul>`
+                },
+                en: {
+                    title: "Control Field & Speed Secret (BRS)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>FDF (FD Format - 1 bit):</strong> Determines this is CAN FD. Set to Recessive (1) to distinguish it from Classic CAN (which is 0).</li>
+                            <li><strong>res (Reserved - 1 bit):</strong> Reserved bit, always Dominant (0).</li>
+                            <li><strong>BRS (Bit Rate Switch - 1 bit): <span class="text-red-600 dark:text-red-400 font-bold bg-red-50 dark:bg-red-950/40 px-1 rounded">HEART OF CAN FD</span></strong> 
+                                If BRS = 1 (Recessive), immediately after this bit, all subsequent bits (Data, CRC) are transmitted at the high <em>Data Bit Rate</em> (e.g., 2 Mbps, 5 Mbps). If BRS = 0, the speed remains unchanged.</li>
+                            <li><strong>ESI (Error State Indicator - 1 bit):</strong> Indicates the error state of the transmitting node (0 = Error Active, 1 = Error Passive).</li>
+                            <li><strong>DLC (Data Length Code - 4 bit):</strong> With only 4 bits (max value = 15), values from 9-15 are mapped non-linearly to byte lengths in CAN FD: 12, 16, 20, 24, 32, 48, 64 Bytes.</li>
+                           </ul>`
+                }
+            },
+            data: {
+                icon: "database",
+                color: "text-emerald-600 dark:text-emerald-400",
+                vi: {
+                    title: "Data Phase (Dữ Liệu Tốc Độ Cao)",
+                    desc: `<p class="mb-2">Đây là phần payload (nội dung thực) mang dữ liệu cảm biến, lệnh điều khiển hoặc firmware.</p>
+                           <ul class="space-y-2">
+                            <li><strong>Kích thước:</strong> Nhờ thuật toán DLC mới, Payload mở rộng lên tối đa <strong>64 Bytes</strong>.</li>
+                            <li><strong>Tốc độ:</strong> Nếu cờ BRS bật, toàn bộ dữ liệu này bắn qua bus với tốc độ <em>Data Bit Rate</em> cực nhanh. Đoạn này không có cơ chế phân xử nên không sợ trễ lan truyền, tín hiệu có thể bay vèo vèo.</li>
+                            <li><strong>Ý nghĩa:</strong> 64 byte đủ để chứa các chữ ký bảo mật MAC mã hóa (dành cho SecOC - Secure Onboard Communication) mà không cần phải cắt nhỏ (Fragment) thành nhiều frame như CAN 2.0.</li>
+                           </ul>`
+                },
+                en: {
+                    title: "Data Phase (High-Speed Data)",
+                    desc: `<p class="mb-2">This is the payload containing actual sensor data, control commands, or firmware.</p>
+                           <ul class="space-y-2">
+                            <li><strong>Size:</strong> Thanks to the new DLC algorithm, Payload is expanded up to <strong>64 Bytes</strong>.</li>
+                            <li><strong>Speed:</strong> If the BRS flag is set, all this data shoots across the bus at the extremely fast <em>Data Bit Rate</em>. There is no arbitration here, so propagation delay is not a concern, allowing signals to fly.</li>
+                            <li><strong>Significance:</strong> 64 bytes is enough to hold encrypted MAC security signatures (for SecOC - Secure Onboard Communication) without needing to fragment into multiple frames like CAN 2.0.</li>
+                           </ul>`
+                }
+            },
+            crc: {
+                icon: "check-circle",
+                color: "text-purple-600 dark:text-purple-400",
+                vi: {
+                    title: "CRC Field (Kiểm Tra Lỗi Khắt Khe Hơn)",
+                    desc: `<p class="mb-2">Do payload tăng lên 64 bytes, CAN FD phải thiết kế lại cơ chế kiểm tra lỗi để tránh tỉ lệ rủi ro lỗi không phát hiện được.</p>
+                           <ul class="space-y-2">
+                            <li><strong>SBC (Stuff Bit Count - 4 bit):</strong> Trường mới thêm vào để đếm số lượng Stuff Bit đã được chèn vào trước đó, kết hợp bit Parity bảo vệ. Giúp node nhận bắt lỗi đồng bộ tốt hơn.</li>
+                            <li><strong>CRC Sequence (17 hoặc 21 bit):</strong> Nếu Payload &le; 16 bytes thì dùng đa thức CRC-17. Nếu Payload &gt; 16 bytes thì dùng CRC-21.</li>
+                            <li><strong>DEL (CRC Delimiter - 1 bit):</strong> Cột mốc <strong>Giảm tốc</strong>. Ngay tại bit này (có giá trị Recessive - 1), node tự động hạ xung nhịp trở về lại <em>Nominal Bit Rate</em> ban đầu.</li>
+                           </ul>`
+                },
+                en: {
+                    title: "CRC Field (Stricter Error Checking)",
+                    desc: `<p class="mb-2">With payload increasing to 64 bytes, CAN FD had to redesign its error-checking mechanism to avoid undetectable error risks.</p>
+                           <ul class="space-y-2">
+                            <li><strong>SBC (Stuff Bit Count - 4 bit):</strong> A new field added to count the number of inserted Stuff Bits, combined with a Parity protection bit. Helps receiving nodes detect synchronization errors better.</li>
+                            <li><strong>CRC Sequence (17 or 21 bits):</strong> If Payload &le; 16 bytes, the CRC-17 polynomial is used. If Payload &gt; 16 bytes, CRC-21 is used.</li>
+                            <li><strong>DEL (CRC Delimiter - 1 bit):</strong> The <strong>Slowdown</strong> milestone. Exactly at this bit (which is Recessive - 1), nodes automatically reduce their clock back to the original <em>Nominal Bit Rate</em>.</li>
+                           </ul>`
+                }
+            },
+            ack: {
+                icon: "flag",
+                color: "text-slate-600 dark:text-slate-400",
+                vi: {
+                    title: "ACK & EOF (Kết Thúc Frame)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>ACK Slot (1 bit) & ACK Delimiter (1 bit):</strong> Node phát gửi ACK Slot là Recessive (1). Bất kỳ node nào trên bus nhận được frame đúng CRC sẽ đè bit Dominant (0) vào ACK Slot này để báo "Tôi đã nhận thành công".</li>
+                            <li><strong>EOF (End Of Frame - 7 bit):</strong> Chuỗi 7 bit Recessive (1) liên tiếp đánh dấu khung truyền đã kết thúc trọn vẹn, không có hiện tượng Stuff Bit ở khu vực này.</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-slate-100 dark:bg-slate-800 rounded text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Khu vực này chạy ở <em>Nominal Bit Rate</em> để đảm bảo mọi node (dù ở xa nhất) đều đủ thời gian ghi đè ACK và nhận biết EOF kết thúc frame.</p>`
+                },
+                en: {
+                    title: "ACK & EOF (End of Frame)",
+                    desc: `<ul class="space-y-2">
+                            <li><strong>ACK Slot (1 bit) & ACK Delimiter (1 bit):</strong> The transmitting node sends a Recessive (1) ACK Slot. Any node on the bus that receives the frame with correct CRC will overwrite this with a Dominant (0) bit to signal "I received it successfully."</li>
+                            <li><strong>EOF (End Of Frame - 7 bit):</strong> A sequence of 7 consecutive Recessive (1) bits marking the complete end of the frame, with no Stuff Bits occurring in this area.</li>
+                           </ul>
+                           <p class="mt-3 p-2 bg-slate-100 dark:bg-slate-800 rounded text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">This area runs at the <em>Nominal Bit Rate</em> to ensure all nodes (even the furthest ones) have enough time to overwrite ACK and recognize the EOF.</p>`
+                }
+            }
+        };
+
+        // ==========================================
+        // 3D TILT CARDS & PORTAL HUB CONTROLLERS
+        // ==========================================
+        function initTiltCards() {
+            const cards = document.querySelectorAll('.portal-tilt-card');
+            cards.forEach(card => {
+                card.onmousemove = (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = -((y - centerY) / centerY) * 6;
+                    const rotateY = ((x - centerX) / centerX) * 6;
+
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+                };
+
+                card.onmouseleave = () => {
+                    card.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+                    setTimeout(() => {
+                        card.style.transition = 'transform 0.15s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease';
+                    }, 400);
+                };
+            });
+        }
+
+        function enterExplorer(targetTabId) {
+            const portal = document.getElementById('portal-hub-view');
+            const mainContent = document.getElementById('main-content-view');
+            if (!portal || !mainContent) return;
+
+            portal.classList.add('transition-all', 'duration-300', 'opacity-0', '-translate-y-4');
+
+            setTimeout(() => {
+                portal.classList.add('hidden');
+                portal.classList.remove('opacity-0', '-translate-y-4');
+
+                mainContent.classList.remove('hidden');
+                mainContent.classList.add('transition-all', 'duration-300', 'opacity-0', 'translate-y-4');
+
+                switchTab(targetTabId);
+
+                requestAnimationFrame(() => {
+                    mainContent.classList.remove('opacity-0', 'translate-y-4');
+                    mainContent.classList.add('opacity-100', 'translate-y-0');
+
+                    const nav = document.getElementById('smart-nav-container');
+                    if (nav) {
+                        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            }, 250);
+        }
+
+        function backToPortal() {
+            const portal = document.getElementById('portal-hub-view');
+            const mainContent = document.getElementById('main-content-view');
+            if (!portal || !mainContent) return;
+
+            mainContent.classList.add('transition-all', 'duration-250', 'opacity-0', 'translate-y-4');
+
+            setTimeout(() => {
+                mainContent.classList.add('hidden');
+                mainContent.classList.remove('opacity-0', 'translate-y-4');
+
+                portal.classList.remove('hidden');
+                portal.classList.add('transition-all', 'duration-300', 'opacity-0', '-translate-y-4');
+
+                requestAnimationFrame(() => {
+                    portal.classList.remove('opacity-0', '-translate-y-4');
+                    portal.classList.add('opacity-100', 'translate-y-0');
+
+                    const root = document.getElementById('canfd-explorer-root');
+                    if (root) {
+                        root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    try {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    } catch (e) {}
+                    initTiltCards();
+                });
+            }, 250);
+        }
+
+        function switchTab(targetId) {
+            // Hide all tabs
+            document.getElementById('tab-frame').classList.add('hidden');
+            document.getElementById('tab-compare').classList.add('hidden');
+            document.getElementById('tab-interview').classList.add('hidden');
+            
+            // Reset all buttons
+            const inactiveClass = "px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm";
+            document.getElementById('btn-tab-frame').className = inactiveClass;
+            document.getElementById('btn-tab-compare').className = inactiveClass;
+            document.getElementById('btn-tab-interview').className = inactiveClass;
+
+            // Show active tab
+            document.getElementById(`tab-${targetId}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${targetId}`).className = "px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2 text-xs sm:text-sm";
+
+            // Safe icon reload
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide render failed:", e);
+            }
+        }
+
+        function selectSegment(segmentId) {
+            const data = segmentData[segmentId];
+            if (!data) return;
+            
+            currentSegment = segmentId;
+
+            const detailBox = document.getElementById('field-details');
+            
+            // Effect: fade out briefly
+            detailBox.style.opacity = 0;
+            
+            setTimeout(() => {
+                const content = data[currentLang];
+                detailBox.innerHTML = `
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="${data.icon}" class="${data.color} w-6 h-6"></i>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">${content.title}</h3>
+                    </div>
+                    <div class="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">
+                        ${content.desc}
+                    </div>
+                `;
+                detailBox.style.opacity = 1;
+                
+                try {
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                } catch (e) {
+                    console.warn("Lucide render failed:", e);
+                }
+            }, 150);
+        }
+
+        // ==========================================
+        // THEME MANAGEMENT (DARK / LIGHT MODE)
+        // ==========================================
+        function getPreferredTheme() {
+            try {
+                const stored = localStorage.getItem('canfd_theme');
+                if (stored === 'dark' || stored === 'light') return stored;
+            } catch(e) {}
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        }
+
+        function applyTheme(theme) {
+            const isDark = (theme === 'dark');
+            const root = document.getElementById('canfd-explorer-root');
+            const htmlEl = document.documentElement;
+            const bodyEl = document.body;
+
+            if (isDark) {
+                htmlEl.classList.add('dark');
+                if (bodyEl) bodyEl.classList.add('dark');
+                if (root) root.classList.add('dark');
+            } else {
+                htmlEl.classList.remove('dark');
+                if (bodyEl) bodyEl.classList.remove('dark');
+                if (root) root.classList.remove('dark');
+            }
+
+            const icon = document.getElementById('icon-theme');
+            const btn = document.getElementById('btn-theme');
+            const labels = i18n[currentLang] || {};
+            const themeTitle = isDark ? (labels.theme_light || 'Chuyển sang giao diện Sáng') : (labels.theme_dark || 'Chuyển sang giao diện Tối');
+            if (btn) btn.setAttribute('title', themeTitle);
+            if (icon) {
+                icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+            }
+        }
+
+        function toggleTheme() {
+            const isCurrentDark = document.documentElement.classList.contains('dark') || (document.getElementById('canfd-explorer-root') && document.getElementById('canfd-explorer-root').classList.contains('dark'));
+            const nextTheme = isCurrentDark ? 'light' : 'dark';
+            try {
+                localStorage.setItem('canfd_theme', nextTheme);
+            } catch(e) {}
+            applyTheme(nextTheme);
+        }
+
+        function initTheme() {
+            const theme = getPreferredTheme();
+            applyTheme(theme);
+
+            // Listen to OS scheme changes if no manual override stored
+            try {
+                if (window.matchMedia) {
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                        const stored = localStorage.getItem('canfd_theme');
+                        if (!stored) {
+                            applyTheme(e.matches ? 'dark' : 'light');
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Initialize Theme (Dark Mode)
+            initTheme();
+
+            // 2. Initialize 3D Tilt Cards & Portal Navigation
+            initTiltCards();
+            const btnPortal = document.getElementById('btn-tab-portal');
+            if (btnPortal) btnPortal.addEventListener('click', backToPortal);
+
+            // 3. Attach tab event listeners
+            document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
+            document.getElementById('btn-tab-compare').addEventListener('click', () => switchTab('compare'));
+            document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
+
+            // 4. Init Language
+            applyI18n();
+
+            // 5. Init Firebase Auth Listener & Cloud Firestore Sync
+            initFirebaseAuthListener();
+            initFirestoreSync();
+
+            // 6. Init Q&A Cards
+            renderQACards(qaData);
+
+            // 7. Safe icon init
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide init failed:", e);
+            }
+        });
+    </script>
+</body>
+</html>

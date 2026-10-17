@@ -31,6 +31,11 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │       └── review-qa-content/
 │           └── SKILL.md                    # Hướng dẫn review & thêm Q&A 4 tầng chuẩn hóa
 │
+├── dist/                                   # Thành phẩm biên dịch độc lập (Production Bundles)
+│   ├── widget_can_fd.html                  # Bundle CAN FD hoàn chỉnh (kèm compiled Q&A)
+│   ├── widget_flexray.html                 # Bundle FlexRay hoàn chỉnh
+│   └── widget_cpp_oop.html                 # Bundle C++ OOP hoàn chỉnh
+│
 ├── docs/                                   # Tài liệu chi tiết từng widget
 │   ├── can_fd/                             # Widget CAN FD
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật CAN FD
@@ -50,6 +55,7 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 ├── README.md                               # Bộ mặt dự án cho cộng đồng & độc giả (English)
 ├── README.vi.md                            # Bộ mặt dự án cho cộng đồng & độc giả (Tiếng Việt)
 ├── LICENSE                                 # Giấy phép nguồn mở MIT
+├── package.json                            # Scripts build, sync, pack chuẩn Node.js
 ├── .gitignore                              # Chặn file rác
 │
 ├── firebase.json                           # Cấu hình triển khai Firebase (Firestore Rules)
@@ -57,17 +63,21 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 ├── repomix.config.json                     # Cấu hình chuẩn đóng gói ngữ cảnh cho AI (Repomix)
 │
 ├── scripts/                                # Công cụ tự động hóa & Kiểm soát chất lượng
+│   ├── build.js                            # Trình biên dịch mã nguồn (src/ -> dist/ & root)
 │   ├── pack-context.js                     # Đóng gói ngữ cảnh repo cho AI (LLM Context Packer)
 │   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
 │
-├── src/                                    # Dữ liệu nguồn độc lập (Source of Truth)
-│   └── data/                               # Ngân hàng nội dung tri thức (Questions, i18n)
-│       └── can_fd/
-│           └── questions.json              # Ngân hàng Q&A 4 tầng CAN FD tự động biên dịch
+├── src/                                    # Mã nguồn phát triển sạch sẽ (Source of Truth)
+│   ├── data/                               # Ngân hàng dữ liệu tri thức (Questions, i18n)
+│   │   └── can_fd/
+│   │       └── questions.json              # Ngân hàng Q&A 4 tầng CAN FD độc lập
+│   ├── widget_can_fd.html                  # Mã nguồn UI/logic CAN FD (không chứa câu hỏi thô)
+│   ├── widget_flexray.html                 # Mã nguồn UI/logic FlexRay
+│   └── widget_cpp_oop.html                 # Mã nguồn UI/logic C++ OOP
 │
-├── widget_can_fd.html                      # Widget: Trực quan hóa giao thức CAN FD
-├── widget_flexray.html                     # Widget: Trực quan hóa giao thức FlexRay
-└── widget_cpp_oop.html                     # Widget: Trực quan hóa lập trình hướng đối tượng C++
+├── widget_can_fd.html                      # [Mirror live link] Phục vụ trực tiếp GitHub Pages
+├── widget_flexray.html                     # [Mirror live link] Phục vụ trực tiếp GitHub Pages
+└── widget_cpp_oop.html                     # [Mirror live link] Phục vụ trực tiếp GitHub Pages
 ```
 
 ---

@@ -1,7 +1,7 @@
 # Đặc Tả Kỹ Thuật Hiện Trạng: CAN FD Protocol Explorer (Current Info)
 
-* **Tên file nguồn**: [`widget_can_fd.html`](../../widget_can_fd.html)
-* **Phiên bản hiện tại**: `v1.6.0` (Chuẩn hóa toàn diện Ngân Hàng Câu Hỏi theo khung 5W-1H & Micro-STAR song ngữ, tích hợp Cổng Khám Phá Landing Portal Hub tương tác 3D Tilt theo chuột, bộ quy tắc bảo mật Cloud Firestore Zero-Trust và bộ kiểm soát pre-commit tự động sync-docs.js; tổng cộng 2,815 dòng code).
+* **Tên file nguồn**: [`src/widget_can_fd.html`](../../src/widget_can_fd.html) (Mã nguồn phát triển sạch sẽ, 2,636 dòng) | [`dist/widget_can_fd.html`](../../dist/widget_can_fd.html) & [`widget_can_fd.html`](../../widget_can_fd.html) (Thành phẩm biên dịch độc lập, 2,815 dòng code)
+* **Phiên bản hiện tại**: `v1.7.0` (Triển khai kiến trúc tách bạch mã nguồn sạch `src/` và thành phẩm `dist/` theo chuẩn thương mại; tách rời 100% Data Layer sang `src/data/can_fd/questions.json`; nâng cấp Header với Responsive 2-column Flexbox và Popover Profile Dropdown; bảo toàn tính tương thích ngược cho Google Blogger và GitHub Pages; tổng cộng 2,815 dòng code).
 * **Ngày cập nhật**: `2026-10-17`
 * **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức mạng ô tô CAN FD, tích hợp Cổng mở màn Landing Portal Hub 3D theo chuột, phân tích cấu trúc Frame ở cấp độ Bit, cơ chế BRS (Bit Rate Switch), bảng so sánh Classic CAN / CAN FD / CAN XL, hệ thống ngân hàng câu hỏi ôn luyện phỏng vấn ECU/AUTOSAR chuyên sâu, và hệ sinh thái Thảo luận cộng đồng kết nối Cloud Firestore (hỗ trợ Google Auth thật, trả lời lồng nhau, ghi chú tác giả, đồng bộ đa thiết bị, hỗ trợ Dark Mode). Phục vụ nhúng vào bài viết Google Blogger hoặc học tập độc lập.
 

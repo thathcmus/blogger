@@ -7,6 +7,15 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
+### Added
+- **Kiến Trúc Tách Bạch Mã Nguồn Phát Triển (`src/`) và Thành Phẩm Biên Dịch (`dist/`) Theo Chuẩn Thương Mại (`package.json`, `scripts/build.js`, `src/widget_can_fd.html`, `dist/widget_can_fd.html`)**:
+  - Triển khai **Phương Pháp 2 (PP2)**: Tách bạch hoàn toàn giữa thư mục phát triển `src/` và thư mục phân phối `dist/`:
+    - `src/widget_can_fd.html`: Mã nguồn phát triển giao diện & logic siêu gọn nhẹ (2,636 dòng), đã loại bỏ hoàn toàn 180 dòng dữ liệu câu hỏi cứng, thay thế bằng placeholder rỗng `const qaData = [];`.
+    - `src/data/can_fd/questions.json`: Ngân hàng câu hỏi Q&A 4 tầng độc lập làm Single Source of Truth.
+    - `scripts/build.js`: Bộ compiler tự động biên dịch dữ liệu từ `src/data/` vào mã nguồn `src/`, xuất ra bundle hoàn chỉnh tại `dist/` và đồng thời mirror về thư mục gốc `widget_*.html`.
+    - `package.json`: Chuẩn hóa các lệnh thực thi (`npm run build`, `npm run sync`, `npm run pack`, `npm run pack:full`).
+  - **Bảo Toàn Invariant Không Gây Breaking Change**: Các đường dẫn nhúng iframe trên Google Blogger và GitHub Pages (`https://thathcmus.github.io/blogger/widget_can_fd.html`) tiếp tục hoạt động 100% trơn tru, không gặp lỗi CORS hay cross-origin restrictions.
+
 ### Fixed
 - **Triệt Tiêu Lỗi Xung Đột Bố Cục Đè Chữ Header (`widget_can_fd.html`)**:
   - Khắc phục triệt để lỗi va chạm chữ (Layout Collision) khiến tiêu đề `CAN FD Protocol Explorer` bị cụm User Info và Action Toolbar đè chữ "Explorer" trên các màn hình có độ rộng trung bình (768px – 1150px) hoặc khi nhúng vào Blogger iframe.
@@ -19,10 +28,6 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
     - Trạng thái đóng: Rút gọn User Pill thành chip nhỏ gọn `[Avatar + Tên + 👑 Tác Giả + ▾]`, tiết kiệm hơn 50% diện tích toolbar.
     - Trạng thái mở: Click vào mở popover dropdown menu cao cấp hiển thị chi tiết tên, email, huy hiệu `⭐ Tác Giả Blog (Admin)` / `Kỹ sư / Độc giả`, nút `🔄 Đổi tài khoản Google`, nút `🚪 Đăng xuất` an toàn, tích hợp cơ chế đóng tự động khi click ra ngoài (`click-outside listener`).
   - Bổ sung bộ từ điển `i18n` song ngữ (`switch_account`, `user_role_author`, `user_role_reader`) cho menu profile.
-- **Kiến Trúc Tách Biệt Data Layer & Tự Động Biên Dịch Q&A (`src/data/can_fd/questions.json`, `scripts/sync-docs.js`)**:
-  - Trích xuất toàn bộ ngân hàng 7 câu hỏi Q&A ra khỏi file HTML, lưu trữ tại `src/data/can_fd/questions.json` làm Single Source of Truth chuẩn JSON độc lập.
-  - Nâng cấp `scripts/sync-docs.js`: Tự động xác thực JSON và biên dịch vào vùng `/* QA_DATA_AUTO_SYNC_START */` trong `widget_can_fd.html` trong quá trình pre-commit / sync.
-  - Giúp tác giả dễ dàng chỉnh sửa/thêm câu hỏi trong file JSON sạch sẽ, triệt tiêu rủi ro cú pháp HTML/JS, trong khi widget vẫn bảo toàn khả năng nhúng độc lập và chạy offline (`file:///`) 0ms latency.
 
 ### Added
 - **Triển Khai Hoàn Thành Item 4 Trong Kế Hoạch 60 Ngày CAN FD (`widget_can_fd.html`, `docs/can_fd/MAINTENANCE_PLAN.md`)**:

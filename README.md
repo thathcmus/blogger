@@ -94,6 +94,10 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 │       ├── git-commit-push/                # Automated /commit and /push shortcut workflow
 │       ├── pack-context/                   # Automated /pack and /pack-full context packaging
 │       └── review-qa-content/              # Standardized 4-tier Q&A review & creation skill
+├── dist/                                   # Standalone compiled production bundles
+│   ├── widget_can_fd.html                  # Full CAN FD bundle (compiled with Q&A data)
+│   ├── widget_flexray.html                 # Full FlexRay bundle
+│   └── widget_cpp_oop.html                 # Full C++ OOP bundle
 ├── docs/                                   # Specifications, backlogs & maintenance plans
 │   ├── can_fd/                             # CAN FD Protocol documentation
 │   │   ├── CURRENT_INFO.md                 # Current technical specification
@@ -112,19 +116,24 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 ├── README.md                               # Project documentation (English)
 ├── README.vi.md                            # Project documentation (Vietnamese)
 ├── LICENSE                                 # MIT Open Source License
+├── package.json                            # Standard Node.js build, sync & pack scripts
 ├── firebase.json                           # Firebase deployment configuration
 ├── firestore.rules                         # Cloud Firestore Zero-Trust Security Rules
 ├── repomix.config.json                     # AI Context Packer configuration (Repomix)
 ├── scripts/                                # Automation & Quality Control
+│   ├── build.js                            # Source compiler (src/ -> dist/ & root)
 │   ├── pack-context.js                     # LLM Context Packer script
 │   └── sync-docs.js                        # Auto-verification & documentation sync script
-├── src/                                    # Raw Source Data Layer (Single Source of Truth)
-│   └── data/                               # Domain Knowledge & Question Banks
-│       └── can_fd/
-│           └── questions.json              # CAN FD 4-tier Q&A questions compiled at sync-time
-├── widget_can_fd.html                      # CAN FD Protocol Explorer widget
-├── widget_flexray.html                     # FlexRay Protocol Explorer widget
-└── widget_cpp_oop.html                     # C++ OOP Simulator widget
+├── src/                                    # Clean developer source code & data (Source of Truth)
+│   ├── data/                               # Domain Knowledge & Question Banks
+│   │   └── can_fd/
+│   │       └── questions.json              # CAN FD 4-tier Q&A questions compiled at build-time
+│   ├── widget_can_fd.html                  # Clean CAN FD UI/logic source (no raw questions)
+│   ├── widget_flexray.html                 # Clean FlexRay UI/logic source
+│   └── widget_cpp_oop.html                 # Clean C++ OOP UI/logic source
+├── widget_can_fd.html                      # [Live link mirror] Direct GitHub Pages serve
+├── widget_flexray.html                     # [Live link mirror] Direct GitHub Pages serve
+└── widget_cpp_oop.html                     # [Live link mirror] Direct GitHub Pages serve
 ```
 
 ---

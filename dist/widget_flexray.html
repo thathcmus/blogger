@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexRay Protocol Explorer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        /* Ensure smooth rendering */
+        body { margin: 0; padding: 0; }
+        
+        /* Hide scrollbar for horizontal containers */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased overflow-x-hidden">
+    <div class="min-h-screen p-4 md:p-8">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- Header -->
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-3">
+                    <i data-lucide="activity" class="text-blue-600 w-8 h-8"></i>
+                    FlexRay Protocol Explorer
+                </h1>
+                <p class="text-slate-600">Trình khám phá cấu trúc Frame và cơ chế quản lý dữ liệu của Node</p>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6 bg-white p-2 rounded-xl shadow-sm border border-slate-200 w-fit mx-auto">
+                <button id="btn-tab-frame" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md">
+                    1. Cấu trúc Frame
+                </button>
+                <button id="btn-tab-node" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100">
+                    2. Quản lý Data tại Node
+                </button>
+                <button id="btn-tab-network" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100">
+                    3. Giao tiếp trên Mạng
+                </button>
+                <button id="btn-tab-interview" class="px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-1.5">
+                    <i data-lucide="help-circle" class="w-4 h-4 text-amber-500"></i>
+                    <span>4. Góc Phỏng Vấn (Q&A)</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: FRAME STRUCTURE -->
+            <div id="tab-frame" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <i data-lucide="info" class="text-blue-500 w-6 h-6"></i> Bản đồ FlexRay Frame
+                </h2>
+                
+                <p class="text-sm text-slate-500 mb-4 italic">
+                    * Click vào các khối màu dưới đây để xem chi tiết cấu trúc bên trong.
+                </p>
+
+                <!-- Interactive Frame Diagram -->
+                <div class="flex gap-2 mb-8 overflow-x-auto pb-4 no-scrollbar">
+                    <button id="btn-seg-header" class="flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform ring-4 ring-offset-2 ring-blue-300 scale-[1.02] bg-blue-600 hover:bg-blue-500" style="min-width: 180px;">
+                        <span class="font-bold text-lg">Header Segment</span>
+                        <span class="text-sm opacity-90">5 Bytes (40 bits)</span>
+                    </button>
+                    <button id="btn-seg-payload" class="flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform opacity-90 hover:scale-105 bg-green-600 hover:bg-green-500" style="min-width: 250px;">
+                        <span class="font-bold text-lg">Payload Segment</span>
+                        <span class="text-sm opacity-90">0 đến 254 Bytes</span>
+                    </button>
+                    <button id="btn-seg-trailer" class="flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform opacity-90 hover:scale-105 bg-red-600 hover:bg-red-500" style="min-width: 180px;">
+                        <span class="font-bold text-lg">Trailer Segment</span>
+                        <span class="text-sm opacity-90">3 Bytes (24 bits)</span>
+                    </button>
+                </div>
+
+                <!-- Details Panel -->
+                <div class="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div id="seg-color" class="w-4 h-4 rounded-full bg-blue-600"></div>
+                        <h3 id="seg-name" class="text-2xl font-bold text-slate-800">Header Segment (Phần đầu)</h3>
+                        <span id="seg-size" class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm font-medium">
+                            5 Bytes (40 bits)
+                        </span>
+                    </div>
+                    <p id="seg-desc" class="text-slate-700 mb-6">Chứa các thông tin điều khiển, nhận dạng frame và kiểm tra lỗi cho phần Header.</p>
+
+                    <div id="seg-subfields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Subfields will be injected by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: NODE DATA MANAGEMENT -->
+            <div id="tab-node" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <i data-lucide="database" class="text-green-500 w-6 h-6"></i> Cách Node quản lý dữ liệu
+                </h2>
+
+                <div class="mb-6 text-slate-700 leading-relaxed">
+                    <p>
+                        Một Node trong mạng FlexRay thường là một ECU (Electronic Control Unit). Sự kết nối giữa ứng dụng (Host CPU) và mạng vật lý được thông qua <strong>FlexRay Communication Controller (CC)</strong>.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Box 1 -->
+                    <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <i data-lucide="cpu" class="text-blue-600 w-6 h-6"></i>
+                            <h3 class="font-bold text-lg text-blue-900">1. Host CPU & CHI</h3>
+                        </div>
+                        <p class="text-sm text-blue-800 mb-3">
+                            CPU giao tiếp với FlexRay Controller thông qua <strong>CHI (Controller Host Interface)</strong>.
+                        </p>
+                        <ul class="text-sm text-blue-800 list-disc list-inside space-y-1.5">
+                            <li>Cấu hình mạng ban đầu & điều khiển POC (Protocol Operation Control).</li>
+                            <li><strong>Shadow Buffers (Double Buffering):</strong> Ngăn chặn tranh chấp dữ liệu (Race Condition) giữa CPU bất đồng bộ và Controller.</li>
+                            <li>Cơ chế Input/Output Buffer Lock bảo đảm tính toàn vẹn dữ liệu nguyên tử (atomic).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Box 2 -->
+                    <div class="bg-amber-50 rounded-xl p-5 border border-amber-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <i data-lucide="database" class="text-amber-600 w-6 h-6"></i>
+                            <h3 class="font-bold text-lg text-amber-900">2. Message Buffers</h3>
+                        </div>
+                        <p class="text-sm text-amber-800 mb-3">
+                            "Kho chứa" dữ liệu trong RAM của Controller. Gán theo Frame ID, chu kỳ và hướng truyền (TX/RX).
+                        </p>
+                        <ul class="text-sm text-amber-800 space-y-2">
+                            <li><strong>Single Buffers:</strong> Gán cứng với Frame ID / Slot cho TX và RX.</li>
+                            <li><strong>Receive FIFO:</strong> Bộ đệm hàng đợi nhận linh hoạt các frame sự kiện có Frame ID khác nhau trong Dynamic Segment.</li>
+                            <li><strong>Filtering:</strong> Lọc theo Frame ID, Channel (A/B) và Cycle Repetition.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Box 3 -->
+                    <div class="bg-purple-50 rounded-xl p-5 border border-purple-100">
+                        <div class="flex items-center gap-3 mb-3">
+                            <i data-lucide="clock" class="text-purple-600 w-6 h-6"></i>
+                            <h3 class="font-bold text-lg text-purple-900">3. Scheduling (Lập lịch)</h3>
+                        </div>
+                        <p class="text-sm text-purple-800 mb-3">
+                            Giao thức <strong>Time-Triggered</strong>. Toàn bộ lịch phát sóng được định đoạt từ trước qua Schedule Table.
+                        </p>
+                        <ul class="text-sm text-purple-800 list-disc list-inside space-y-2">
+                            <li>Truyền đúng Slot dựa trên đồng hồ nội bộ đã đồng bộ (Microtick / Macrotick).</li>
+                            <li>Tự phát <strong>Null Frame</strong> (cờ Null = 0, Active-Low) nếu đến lượt Slot trong Static Segment mà Host CPU chưa kịp nạp dữ liệu mới.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Architecture Diagram -->
+                <div class="mt-8 p-6 bg-slate-900 rounded-xl flex flex-col items-center justify-center text-slate-300">
+                    <h4 class="text-white font-semibold mb-6 flex items-center gap-2">
+                        <i data-lucide="arrow-right-left" class="w-5 h-5"></i> Luồng đi của Dữ liệu (Data Flow)
+                    </h4>
+                    <div class="flex flex-col md:flex-row items-center gap-4 w-full max-w-3xl">
+                        <div class="bg-slate-800 p-4 rounded-lg text-center flex-1 w-full border border-slate-700">
+                            <p class="font-bold text-white mb-1">Host CPU</p>
+                            <p class="text-xs">Tạo dữ liệu ứng dụng</p>
+                        </div>
+                        
+                        <div class="flex flex-col items-center py-2 md:py-0">
+                            <span class="text-[10px] md:text-xs mb-1">Cập nhật qua CHI</span>
+                            <i data-lucide="arrow-right-left" class="text-green-400 w-5 h-5 rotate-90 md:rotate-0"></i>
+                        </div>
+
+                        <div class="bg-slate-800 p-4 rounded-lg text-center flex-1 w-full border border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                            <p class="font-bold text-white mb-1">FlexRay Controller</p>
+                            <p class="text-xs mb-2">Message Buffers (RAM)</p>
+                            <div class="flex justify-center gap-2 text-xs">
+                                <span class="bg-slate-700 px-2 py-1 rounded">TX ID:10</span>
+                                <span class="bg-slate-700 px-2 py-1 rounded">RX ID:25</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center py-2 md:py-0">
+                            <span class="text-[10px] md:text-xs mb-1">Đúng Slot Time</span>
+                            <i data-lucide="arrow-right-left" class="text-blue-400 w-5 h-5 rotate-90 md:rotate-0"></i>
+                        </div>
+
+                        <div class="bg-slate-800 p-4 rounded-lg text-center flex-1 w-full border border-slate-700">
+                            <p class="font-bold text-white mb-1">FlexRay Bus</p>
+                            <p class="text-xs">Physical Layer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: NETWORK COMMUNICATION -->
+            <div id="tab-network" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <i data-lucide="network" class="text-indigo-500 w-6 h-6"></i> Các loại Frame được truyền
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <!-- Startup Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-orange-100 p-2 rounded-lg"><i data-lucide="zap" class="text-orange-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">1. Startup Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Gửi bởi <strong>Coldstart Node</strong> (sau khi phát ký hiệu CAS) để khởi tạo nhịp đồng bộ chu kỳ và lịch trình toàn mạng.<br/>
+                            <span class="text-xs text-amber-700 font-medium block mt-1.5">⚠️ Lưu ý: Đánh thức phần cứng dùng tín hiệu <strong>WUP</strong> (Wakeup Pattern), không phải Startup Frame. Một Startup Frame luôn có cờ Sync = 1.</span>
+                        </p>
+                    </div>
+
+                    <!-- Sync Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-blue-100 p-2 rounded-lg"><i data-lucide="refresh-cw" class="text-blue-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">2. Sync Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Được lắng nghe để đo độ lệch thời gian (time deviation), từ đó đồng bộ Microtick/Macrotick giữa các node theo giải thuật <strong>Fault-Tolerant Midpoint (FTM)</strong>. Cần tối thiểu 2 Coldstart Nodes và 2–3 Sync Nodes.
+                        </p>
+                    </div>
+
+                    <!-- Normal Data Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-green-100 p-2 rounded-lg"><i data-lucide="file-text" class="text-green-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">3. Normal Data Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Chứa dữ liệu ứng dụng thực tế (cờ <code>Null Frame Bit = 1</code>). Trong Static Segment có độ dài cố định theo cấu hình hệ thống, trong Dynamic Segment có độ dài linh hoạt theo nhu cầu.
+                        </p>
+                    </div>
+
+                    <!-- Null Frame -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="bg-slate-100 p-2 rounded-lg"><i data-lucide="file-minus" class="text-slate-600 w-5 h-5"></i></div>
+                            <h3 class="font-bold text-slate-800">4. Null Frame</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Tự động phát ra khi đến slot trong Static Segment nhưng Host CPU chưa kịp nạp dữ liệu mới.<br/>
+                            <span class="text-xs text-rose-700 font-medium block mt-1.5">⚠️ Đặc điểm kỹ thuật: <strong>Null Frame Indicator bit = 0 (Active-Low)</strong>, Payload chứa toàn số 0.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Dual Channel Section -->
+                <div class="mb-8 p-5 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-100">
+                    <h3 class="font-bold text-indigo-900 mb-2 flex items-center gap-2">
+                        <i data-lucide="git-branch" class="w-5 h-5 text-indigo-600"></i>
+                        Kiến trúc Kênh đôi (Dual Channel A & B)
+                    </h3>
+                    <p class="text-sm text-indigo-800 mb-3 leading-relaxed">
+                        FlexRay hỗ trợ 2 kênh vật lý độc lập (Channel A & Channel B, 10 Mbps mỗi kênh) để phục vụ hai mục đích thiết kế:
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div class="bg-white p-3.5 rounded-lg border border-indigo-200/60 shadow-sm">
+                            <strong class="text-indigo-900 block mb-1">🛡️ Dự phòng an toàn (Redundancy Mode):</strong>
+                            Cùng truyền 1 dữ liệu đồng thời trên cả 2 kênh A & B. Nếu 1 kênh bị đứt hoặc lỗi, kênh còn lại vẫn hoạt động thông suốt (chuẩn an toàn Fail-Operational cho Steer-by-Wire, Brake-by-Wire, ASIL D).
+                        </div>
+                        <div class="bg-white p-3.5 rounded-lg border border-indigo-200/60 shadow-sm">
+                            <strong class="text-indigo-900 block mb-1">⚡ Nhân đôi băng thông (High Bandwidth Mode):</strong>
+                            Truyền các dữ liệu khác nhau trên mỗi kênh, nâng tổng thông lượng mạng lên <strong>20 Mbps</strong> (10 Mbps mỗi kênh).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cycle Diagram -->
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 overflow-x-auto">
+                    <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="clock" class="text-purple-600 w-5 h-5"></i> 
+                        Phân bổ Frame trong 1 Chu kỳ (Communication Cycle)
+                    </h4>
+                    <div class="flex flex-col gap-2 min-w-[650px]">
+                        <div class="flex text-xs font-semibold text-slate-500 mb-1">
+                            <div class="w-1/2">Static Segment (Bắt buộc - TDMA)</div>
+                            <div class="w-1/3">Dynamic Segment (Tùy chọn)</div>
+                            <div class="w-1/6 text-right">Symbol & NIT</div>
+                        </div>
+                        
+                        <div class="flex h-12 w-full rounded-lg overflow-hidden border border-slate-300">
+                            <!-- Static Segment -->
+                            <div class="w-1/2 flex">
+                                <div class="flex-1 bg-orange-400 text-white flex items-center justify-center text-xs font-bold border-r border-orange-500" title="Startup Frame (Static Slot 1)">ID 1<br/>(Startup)</div>
+                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600" title="Data Frame (Static Slot 2)">ID 2<br/>(Data)</div>
+                                <div class="flex-1 bg-slate-400 text-white flex items-center justify-center text-xs font-bold border-r border-slate-500" title="Null Frame (Static Slot 3, bit=0)">ID 3<br/>(Null)</div>
+                                <div class="flex-1 bg-blue-500 text-white flex items-center justify-center text-xs font-bold border-r border-blue-600" title="Sync Frame (Static Slot 4)">ID 4<br/>(Sync)</div>
+                                <div class="flex-1 bg-green-500 text-white flex items-center justify-center text-xs font-bold border-r border-green-600" title="Data Frame (Static Slot 5)">ID 5<br/>(Data)</div>
+                            </div>
+                            <!-- Dynamic Segment -->
+                            <div class="w-1/3 bg-teal-100 flex items-center px-2 border-r border-slate-300 overflow-hidden relative" title="Dynamic Segment (FTDMA Minislots - Event Triggered)">
+                                <div class="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px)]"></div>
+                                <div class="z-10 bg-teal-500 text-white text-[10px] px-2 py-1 rounded shadow-sm mr-2 whitespace-nowrap font-medium">ID 100 (Event)</div>
+                            </div>
+                            <!-- Symbol Window & NIT -->
+                            <div class="w-1/6 flex">
+                                <div class="w-1/3 bg-yellow-400 flex items-center justify-center text-[9px] font-bold text-slate-800" title="Symbol Window (Tùy chọn: Gửi Media Test Symbol)">SW</div>
+                                <div class="w-2/3 bg-slate-800 flex items-center justify-center text-[10px] text-slate-300 font-semibold" title="Network Idle Time (Bắt buộc: Bù lệch xung nhịp)">NIT</div>
+                            </div>
+                        </div>
+
+                        <!-- 4 Cycle Segments Legend -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-xs text-slate-600">
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-blue-700 block mb-0.5">Static Segment (Bắt buộc):</span>
+                                Các slot cố định (TDMA), đảm bảo tính thời gian thực cứng và độ trễ tiền định.
+                            </div>
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-teal-700 block mb-0.5">Dynamic Segment (Tùy chọn):</span>
+                                Chia theo Minislot (FTDMA), Frame ID nhỏ hơn được quyền phát trước.
+                            </div>
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-amber-700 block mb-0.5">Symbol Window (Tùy chọn):</span>
+                                Dùng để gửi Media Test Symbol (MTS) để kiểm tra đường truyền vật lý.
+                            </div>
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+                                <span class="font-bold text-slate-800 block mb-0.5">NIT (Bắt buộc):</span>
+                                Khoảng lặng cuối chu kỳ để CC tính toán bù lệch pha/tần số (Offset Correction).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: INTERVIEW Q&A DEEP-DIVE (ACCORDION QUESTION LIST) -->
+            <div id="tab-interview" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 mb-2">
+                            <i data-lucide="award" class="w-3.5 h-3.5"></i> Chuyên Đề Phỏng Vấn Kỹ Sư Ô Tô / Automotive Systems Architect
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="help-circle" class="text-amber-500 w-6 h-6"></i> 
+                            Ngân Hàng Câu Hỏi Phỏng Vấn (Interview Q&A Vault)
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-1">
+                            Tổng hợp các câu hỏi phỏng vấn thực chiến chuyên sâu về FlexRay. Nhấp vào từng câu hỏi để mở rộng hoặc thu gọn nội dung phân tích chi tiết.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Accordion Questions Container -->
+                <div class="space-y-4" id="interview-question-list">
+
+                    <!-- QUESTION 1: ACCORDION ITEM (EXPANDED BY DEFAULT) -->
+                    <div id="q-card-q1" class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all">
+                        <!-- Accordion Header Button -->
+                        <button onclick="toggleQuestion('q1')" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors text-left border-b border-slate-200">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-blue-600 text-white font-bold text-xs rounded-md shadow-sm">Q1</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base md:text-lg">
+                                        Đồng Bộ Thời Gian (Time-Triggered) & Kiến Trúc Tích Hợp FlexRay
+                                    </h3>
+                                    <span class="text-xs text-slate-500 block mt-0.5">
+                                        Phân tích Static/Dynamic Segment, bẫy thuật ngữ "POC Frame" & Synchronous vs Free-running mode
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-indigo-50 text-indigo-700 font-medium px-2.5 py-1 rounded-full border border-indigo-100 hidden md:inline-block">
+                                    Time-Triggered & POC
+                                </span>
+                                <div class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm">
+                                    <i id="q-icon-q1" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200 rotate-180"></i>
+                                </div>
+                            </div>
+                        </button>
+
+                        <!-- Accordion Content Body -->
+                        <div id="q-content-q1" class="p-4 md:p-6 bg-white animate-fadeIn">
+                            <!-- Question Quote Box -->
+                            <div class="mb-6 p-4 md:p-5 bg-gradient-to-r from-slate-900 to-indigo-950 rounded-xl text-white shadow-md border border-slate-800">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2 bg-amber-500/20 rounded-lg text-amber-400 mt-0.5">
+                                        <i data-lucide="message-square-quote" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <span class="text-xs uppercase tracking-wider font-semibold text-amber-400 block mb-1">Đề bài câu hỏi gốc:</span>
+                                        <blockquote class="text-sm md:text-base font-medium text-slate-100 leading-relaxed italic">
+                                            "Mạng FlexRay có đặc tính đồng bộ thời gian (Time-Triggered) rất đặc thù. Ở mức độ tìm hiểu và tích hợp kiến trúc (broad exposure), bạn hiểu thế nào về Static Segment vs Dynamic Segment, cơ chế đồng bộ chu kỳ qua POC frame và các chế độ chạy (Synchronous vs Free-running mode)?"
+                                        </blockquote>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 1: The POC Frame Trap -->
+                            <div class="mb-6 p-5 bg-rose-50/80 rounded-xl border border-rose-200">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-600"></i>
+                                    <h4 class="font-bold text-base md:text-lg text-rose-900">1. Bóc Tách Bẫy Thuật Ngữ: "POC Frame" Có Thực Sự Tồn Tại?</h4>
+                                </div>
+                                <p class="text-sm text-rose-950 leading-relaxed mb-4">
+                                    <strong>Không có khái niệm "POC Frame" trong đặc tả chuẩn FlexRay (ISO 17458 / FlexRay Spec v3.0.1)!</strong> Đây là một câu hỏi bẫy kinh điển để đánh giá ứng viên hiểu sâu bản chất kiến trúc hay chỉ nhớ mặt chữ:
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div class="bg-white p-4 rounded-xl border border-rose-200 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i data-lucide="cpu" class="w-4 h-4 text-blue-600"></i>
+                                            <h5 class="font-bold text-slate-900">POC (Protocol Operation Control)</h5>
+                                        </div>
+                                        <p class="text-slate-600 text-xs leading-relaxed">
+                                            POC là <strong>Bộ máy trạng thái hữu hạn (State Machine)</strong> tích hợp trong phần cứng Controller. POC điều khiển các pha vận hành của node: <code>DEFAULT_CONFIG</code> &rarr; <code>CONFIG</code> &rarr; <code>READY</code> &rarr; <code>STARTUP</code> &rarr; <code>NORMAL_ACTIVE</code> / <code>NORMAL_PASSIVE</code> &rarr; <code>HALT</code>. <em>POC không phải là một loại frame truyền trên bus.</em>
+                                        </p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-xl border border-rose-200 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-600"></i>
+                                            <h5 class="font-bold text-slate-900">Cơ Chế Đồng Bộ Qua Sync Frame</h5>
+                                        </div>
+                                        <p class="text-slate-600 text-xs leading-relaxed">
+                                            Chu kỳ được đồng bộ bằng các <strong>Sync Frames</strong> (các khung có bit <code>Sync Frame Indicator = 1</code>) được phát bởi các Sync Nodes theo lịch trình cố định. POC State Machine của node nhận sẽ lắng nghe, giám sát và điều khiển quá trình khóa đồng bộ này.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 2: Deep Comparison Table -->
+                            <div class="mb-6">
+                                <h4 class="text-base md:text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-600"></i>
+                                    2. Phân Tích So Sánh: Static Segment vs Dynamic Segment
+                                </h4>
+                                <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                                    <table class="w-full text-sm text-left border-collapse">
+                                        <thead class="bg-slate-100 text-slate-700 text-xs uppercase font-semibold">
+                                            <tr>
+                                                <th class="p-3.5 border-b border-slate-200 w-1/4">Đặc tính kiến trúc</th>
+                                                <th class="p-3.5 border-b border-slate-200 w-3/8 text-blue-700 bg-blue-50/50">Static Segment (TDMA)</th>
+                                                <th class="p-3.5 border-b border-slate-200 w-3/8 text-teal-700 bg-teal-50/50">Dynamic Segment (FTDMA)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 text-slate-600">
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-slate-800">Cơ chế truy cập bus</td>
+                                                <td class="p-3 bg-blue-50/20"><strong>TDMA</strong> (Time Division Multiple Access) - Chia thời gian thành các slot cố định bằng nhau.</td>
+                                                <td class="p-3 bg-teal-50/20"><strong>FTDMA</strong> (Flexible TDMA) - Phân chia theo các Mini-slots rất ngắn.</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-slate-800">Tính tiền định (Determinism)</td>
+                                                <td class="p-3 bg-blue-50/20"><span class="text-emerald-700 font-bold">Tiền định cứng 100%</span>. Jitter cực thấp, độ trễ và thời điểm phát được tính toán chính xác tuyệt đối.</td>
+                                                <td class="p-3 bg-teal-50/20"><strong>Ưu tiên linh hoạt</strong>. Trọng tài theo Frame ID: Node có Frame ID nhỏ hơn sẽ chiếm quyền phát trước.</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-slate-800">Độ dài Payload</td>
+                                                <td class="p-3 bg-blue-50/20">Bắt buộc <strong>cố định và bằng nhau</strong> cho mọi frame trong cùng cluster (<code>gPayloadLengthStatic</code>).</td>
+                                                <td class="p-3 bg-teal-50/20"><strong>Co giãn linh hoạt</strong> theo từng frame (0 đến 254 bytes), tùy theo nhu cầu truyền tải.</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-slate-800">Xử lý khi không có dữ liệu</td>
+                                                <td class="p-3 bg-blue-50/20">Tự phát <strong>Null Frame</strong> (Active-Low: bit = 0) để duy trì cấu trúc nhịp thời gian slot.</td>
+                                                <td class="p-3 bg-teal-50/20">Minislot tự động trôi qua (chỉ tốn vài micro-giây), giải phóng băng thông cho các node tiếp theo.</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-semibold text-slate-800">Ứng dụng tiêu biểu (Use Cases)</td>
+                                                <td class="p-3 bg-blue-50/20">Tín hiệu điều khiển an toàn cao (<strong>ASIL D</strong>): Phanh điện tử (Brake-by-Wire), Lái điện tử (Steer-by-Wire), Powertrain.</td>
+                                                <td class="p-3 bg-teal-50/20">Dữ liệu theo sự kiện (Event-triggered), Chẩn đoán <strong>UDS (ISO 14229)</strong>, Hiệu chỉnh phần mềm ECU (Calibration XCP).</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 3: Operating Modes -->
+                            <div class="mb-6">
+                                <h4 class="text-base md:text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                    <i data-lucide="gauge" class="w-5 h-5 text-purple-600"></i>
+                                    3. Chế Độ Vận Hành: Synchronous Mode vs Free-Running Mode
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Synchronous Mode -->
+                                    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-5 rounded-xl border border-emerald-200">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <h5 class="font-bold text-emerald-900 text-sm md:text-base">Synchronous Mode (Bình Thường)</h5>
+                                        </div>
+                                        <p class="text-xs text-emerald-800 leading-relaxed mb-3">
+                                            Trạng thái chuẩn của node trong mạng khi tham gia giao tiếp (POC ở trạng thái <code>NORMAL_ACTIVE</code>).
+                                        </p>
+                                        <ul class="text-xs text-emerald-900 space-y-2 list-disc list-inside">
+                                            <li><strong>Đo đạc:</strong> Node liên tục lắng nghe các Sync Frames từ các Sync Nodes khác trong cluster để đo độ lệch thời gian xuất hiện thực tế so với lịch trình.</li>
+                                            <li><strong>Thuật toán FTM:</strong> Trong khoảng thời gian NIT (Network Idle Time), node chạy thuật toán <em>Fault-Tolerant Midpoint</em> để lọc bỏ nhiễu và tính toán giá trị bù trừ.</li>
+                                            <li><strong>Hiệu chỉnh nhịp:</strong> Co/giãn các Microtick để Macrotick toàn mạng đồng bộ chính xác tới micro-giây.</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Free-Running Mode -->
+                                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-xl border border-amber-200">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                            <h5 class="font-bold text-amber-900 text-sm md:text-base">Free-Running Mode (Mất Đồng Bộ / Suy Giảm)</h5>
+                                        </div>
+                                        <p class="text-xs text-amber-800 leading-relaxed mb-3">
+                                            Trạng thái khi node bị cô lập hoặc mất kết nối với các Sync Nodes (xảy ra lỗi mạng hoặc chế độ test nội bộ).
+                                        </p>
+                                        <ul class="text-xs text-amber-900 space-y-2 list-disc list-inside">
+                                            <li><strong>Mất nguồn tham chiếu:</strong> Node không nhận đủ số lượng Sync Frames hợp lệ để tính toán hiệu chỉnh FTM.</li>
+                                            <li><strong>Chạy theo thạch anh nội bộ:</strong> Đồng hồ của node trôi tự do (drift) theo tần số bộ dao động thạch anh cục bộ (Local Oscillator).</li>
+                                            <li><strong>Xử lý lỗi POC:</strong> Nếu lỗi đồng bộ kéo dài liên tiếp qua nhiều chu kỳ (<code>pClockCorrectionFailed</code>), POC State Machine sẽ chuyển sang <code>NORMAL_PASSIVE</code> (chỉ nghe, ngừng phát) hoặc chuyển hẳn về <code>HALT</code> để không phá vỡ slot TDMA của các ECU khác.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 4: Recommended Answer Template for Interview -->
+                            <div class="p-5 bg-slate-900 rounded-xl text-slate-200 border border-slate-800">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                                    <h5 class="font-bold text-white text-sm md:text-base">Mẫu Câu Trả Lời Gợi Ý Khi Đi Phỏng Vấn (Senior/Architect Pitch)</h5>
+                                </div>
+                                <p class="text-xs text-slate-300 leading-relaxed italic bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                                    "Trước hết, theo đặc tả FlexRay v3.0.1 / ISO 17458, không có khái niệm <strong>'POC frame'</strong>, mà đồng bộ chu kỳ được thực hiện qua các <strong>Sync Frames</strong> do các Sync Nodes phát, được kiểm soát bởi <strong>POC State Machine</strong> của controller.<br/><br/>
+                                    Về phân bổ chu kỳ, <strong>Static Segment</strong> sử dụng TDMA với slot và payload cố định, đem lại tính tiền định tuyệt đối cho các luồng dữ liệu an toàn ASIL D. Ngược lại, <strong>Dynamic Segment</strong> sử dụng FTDMA minislotting, phân xử theo Frame ID để linh hoạt truyền các bản tin chẩn đoán UDS hoặc sự kiện.<br/><br/>
+                                    Ở <strong>Synchronous mode</strong>, node liên tục dùng thuật toán Fault-Tolerant Midpoint (FTM) trong khoảng NIT để bù trừ xung nhịp toàn mạng. Nếu node bị mất tín hiệu Sync, nó sẽ rơi vào <strong>Free-running mode</strong> (chạy bằng thạch anh nội bộ), và POC State Machine sẽ tự động hạ trạng thái xuống <em>NORMAL_PASSIVE</em> hoặc <em>HALT</em> để bảo vệ an toàn cho bus."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QUESTION 2: ACCORDION ITEM -->
+                    <div id="q-card-q2" class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all">
+                        <!-- Accordion Header Button -->
+                        <button onclick="toggleQuestion('q2')" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors text-left border-b border-slate-200">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-amber-600 text-white font-bold text-xs rounded-md shadow-sm">Q2</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base md:text-lg">
+                                        Đồng Bộ Xung Clock Khi Bị Lệch, Thuật Toán FTM & Bản Chất Sync Node
+                                    </h3>
+                                    <span class="text-xs text-slate-500 block mt-0.5">
+                                        Mô phỏng trực quan Clock Drift, bù lệch Offset/Rate tại NIT, thuật toán Fault-Tolerant Midpoint & vai trò Sync Node vs Node thông thường
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-amber-50 text-amber-800 font-medium px-2.5 py-1 rounded-full border border-amber-200 hidden md:inline-block">
+                                    Clock Sync & FTM Simulation
+                                </span>
+                                <div class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 shadow-sm">
+                                    <i id="q-icon-q2" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200 rotate-180"></i>
+                                </div>
+                            </div>
+                        </button>
+
+                        <!-- Accordion Content Body (Expanded by default) -->
+                        <div id="q-content-q2" class="p-4 md:p-6 bg-white animate-fadeIn">
+                            <!-- Question Quote Box -->
+                            <div class="mb-6 p-4 md:p-5 bg-gradient-to-r from-slate-900 to-amber-950 rounded-xl text-white shadow-md border border-slate-800">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2 bg-amber-500/20 rounded-lg text-amber-400 mt-0.5">
+                                        <i data-lucide="message-square-quote" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <span class="text-xs uppercase tracking-wider font-semibold text-amber-400 block mb-1">Đề bài câu hỏi phỏng vấn:</span>
+                                        <blockquote class="text-sm md:text-base font-medium text-slate-100 leading-relaxed italic">
+                                            "Trong mạng FlexRay, khi các node sử dụng thạch anh độc lập và bị lệch xung nhịp (clock drift), cơ chế đồng bộ frame trên nhiều node hoạt động như thế nào qua các chu kỳ? Sync Node đóng vai trò gì, cách hoạt động ra sao và nó có thực hiện truyền nhận dữ liệu ứng dụng như các node thông thường không?"
+                                        </blockquote>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 1: Comprehensive Sync Node Analysis -->
+                            <div class="mb-6 p-5 bg-indigo-50/70 rounded-xl border border-indigo-200">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="cpu" class="w-5 h-5 text-indigo-700"></i>
+                                    <h4 class="font-bold text-base md:text-lg text-indigo-950">1. Bản Chất & Vai Trò Của Sync Node: Có Gửi Data Như Node Thường Không?</h4>
+                                </div>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm mb-4">
+                                    <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+                                        <h5 class="font-bold text-slate-900 flex items-center gap-2 mb-2 text-sm">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                                            Sync Node là gì & Vai trò gì?
+                                        </h5>
+                                        <p class="text-xs text-slate-600 leading-relaxed mb-2">
+                                            Trong mỗi cluster FlexRay, các kỹ sư hệ thống cấu hình từ <strong>2 đến 15 node quan trọng</strong> (như Master Gateway, Phanh ESP, Trợ lực lái EPS) làm <strong>Sync Nodes</strong>:
+                                        </p>
+                                        <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+                                            <li><strong>Phát mốc chuẩn:</strong> Định kỳ phát <em>Sync Frame</em> (Header có bit <code>Sync Frame Indicator = 1</code>) trong Static Segment tại slot cố định.</li>
+                                            <li><strong>Global Time Base:</strong> Đóng vai trò làm mốc thời gian để toàn mạng đo đạc và căn chỉnh xung nhịp.</li>
+                                            <li><strong>Bắt buộc cho Coldstart:</strong> Chỉ các Sync Node mới được chỉ định làm <em>Coldstart Node</em> để đánh thức và khởi động mạng từ trạng thái nghỉ.</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+                                        <h5 class="font-bold text-slate-900 flex items-center gap-2 mb-2 text-sm">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                                            Sync Node có gửi dữ liệu ứng dụng như node thường không?
+                                        </h5>
+                                        <div class="p-2.5 bg-emerald-50 text-emerald-900 rounded-lg border border-emerald-200 text-xs font-semibold mb-2">
+                                            CÓ 100%! Sync Node vẫn là một ECU chức năng bình thường, truyền nhận Application Data trọn vẹn trong Payload Segment.
+                                        </div>
+                                        <p class="text-xs text-slate-600 leading-relaxed">
+                                            Rất nhiều người lầm tưởng Sync Node chỉ phát "xung vô nghĩa" để đồng bộ. Thực tế, Sync Frame mang trọn vẹn <strong>0 đến 254 bytes Payload</strong> chứa tín hiệu cảm biến (tốc độ xe, góc lái, mô-men xoắn...). Điểm khác biệt duy nhất của nó là bit cờ Header <code>Sync Indicator = 1</code> và nó không được phép gửi Null Frame trừ khi hỏng hóc.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Comparison Table: Sync Node vs Regular Node -->
+                                <div class="overflow-x-auto border border-indigo-200/80 rounded-xl bg-white shadow-sm">
+                                    <table class="w-full text-xs text-left border-collapse">
+                                        <thead class="bg-indigo-100/70 text-indigo-900 font-bold uppercase">
+                                            <tr>
+                                                <th class="p-3 border-b border-indigo-200 w-1/4">Đặc điểm kỹ thuật</th>
+                                                <th class="p-3 border-b border-indigo-200 w-3/8 text-blue-800 bg-blue-50/50">Sync Node (Node Đồng Bộ)</th>
+                                                <th class="p-3 border-b border-indigo-200 w-3/8 text-slate-800 bg-slate-50/50">Regular Node (Node Thường)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Bit Sync Frame Indicator</td>
+                                                <td class="p-2.5 bg-blue-50/20 font-bold text-blue-700">Luôn = 1 trong frame Static được gán</td>
+                                                <td class="p-2.5 bg-slate-50/20 font-mono text-slate-600">Luôn = 0</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Truyền Application Data</td>
+                                                <td class="p-2.5 bg-blue-50/20 text-emerald-700 font-semibold">CÓ (Payload Segment đầy đủ tới 254B)</td>
+                                                <td class="p-2.5 bg-slate-50/20 text-emerald-700 font-semibold">CÓ (Payload Segment đầy đủ tới 254B)</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Vai trò trong thuật toán FTM</td>
+                                                <td class="p-2.5 bg-blue-50/20">Là <strong>nguồn phát mốc chuẩn</strong> + đồng thời tự lắng nghe các Sync Node khác để tự sửa clock</td>
+                                                <td class="p-2.5 bg-slate-50/20"><strong>Chỉ là bên nhận</strong>: Lắng nghe các Sync Node để tự sửa clock mình, không phát mốc</td>
+                                            </tr>
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-2.5 font-semibold text-slate-900">Số lượng tối thiểu trong Cluster</td>
+                                                <td class="p-2.5 bg-blue-50/20 font-semibold text-amber-800">Tối thiểu &ge; 2 (mạng 2 kênh) hoặc &ge; 3 (mạng 1 kênh)</td>
+                                                <td class="p-2.5 bg-slate-50/20">Không bắt buộc (có thể gồm hàng chục node)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 2: Clock Drift Synchronization & FTM Mechanism -->
+                            <div class="mb-6">
+                                <h4 class="text-base md:text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                    <i data-lucide="git-merge" class="w-5 h-5 text-amber-600"></i>
+                                    2. Cơ Chế Xử Lý Khi Xung Clock Lệch (Clock Drift, Offset/Rate & Thuật Toán FTM)
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs mb-4">
+                                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                        <div class="flex items-center gap-2 mb-2 font-bold text-slate-800">
+                                            <span class="w-5 h-5 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px]">1</span>
+                                            Đo Đạc Lệch Pha (Measurement)
+                                        </div>
+                                        <p class="text-slate-600 leading-relaxed">
+                                            Mỗi ECU dùng dao động thạch anh nội bộ sinh ra <strong>Microtick (&mu;T)</strong>. Do nhiệt độ (-40&deg;C &sim; 125&deg;C) và sai số chế tạo, nhịp &mu;T của các ECU bị lệch nhau.<br/><br/>
+                                            Khi Sync Frame tới, Controller ghi nhận thời điểm cạnh xuống (Action Point) so với Macrotick dự kiến để tính độ lệch thời gian $\Delta t_i$.
+                                        </p>
+                                    </div>
+
+                                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+                                        <div class="flex items-center gap-2 mb-2 font-bold text-amber-900">
+                                            <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px]">2</span>
+                                            Thuật Toán FTM (Lọc Byzantine)
+                                        </div>
+                                        <p class="text-amber-800 leading-relaxed">
+                                            <strong>Fault-Tolerant Midpoint (FTM)</strong> giải quyết bài toán chống node hỏng (Byzantine Fault):<br/>
+                                            &bull; Sắp xếp tất cả giá trị lệch đo được tăng dần.<br/>
+                                            &bull; Loại bỏ $k$ giá trị cực tiểu và $k$ giá trị cực đại ($k$ tùy số node).<br/>
+                                            &bull; Lấy <em>trung bình cộng của cận giữa</em> làm giá trị bù trừ chuẩn $\Delta_{corr}$.
+                                        </p>
+                                    </div>
+
+                                    <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                                        <div class="flex items-center gap-2 mb-2 font-bold text-emerald-900">
+                                            <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">3</span>
+                                            Bù Trừ Tại NIT (Correction)
+                                        </div>
+                                        <p class="text-emerald-800 leading-relaxed">
+                                            Tại khoảng lặng <strong>NIT (Network Idle Time)</strong> cuối chu kỳ:<br/>
+                                            &bull; <strong>Offset Correction:</strong> Co/giãn số Microtick trong các Macrotick cuối để chu kỳ mới bắt đầu đúng micro-giây.<br/>
+                                            &bull; <strong>Rate Correction:</strong> Đo trên 2 chu kỳ chẵn/lẻ để bù đều tần số thạch anh cho toàn chu kỳ tiếp theo.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 3: INTERACTIVE CLOCK SYNC SIMULATOR -->
+                            <div class="mb-6 p-5 bg-slate-900 rounded-2xl text-slate-100 border border-slate-800 shadow-lg">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="play-circle" class="w-5 h-5 text-amber-400"></i>
+                                        <div>
+                                            <h4 class="font-bold text-white text-base">Bộ Mô Phỏng Tương Tác: Lệch Xung Clock & Thuật Toán FTM</h4>
+                                            <span class="text-xs text-slate-400">Trực quan hóa thời gian thực 4 Node trên bus FlexRay</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="sim-status-badge" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                            Trạng thái: Đã đồng bộ (Synchronized)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Simulation Control Toolbar -->
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+                                    <button id="btn-sim-drift" onclick="runSimClock(1)" class="p-2.5 bg-rose-600/90 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                        <i data-lucide="zap-off" class="w-3.5 h-3.5"></i>
+                                        <span>1. Giả lập lệch Clock</span>
+                                    </button>
+                                    <button id="btn-sim-ftm" onclick="runSimClock(2)" class="p-2.5 bg-amber-600/90 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                        <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+                                        <span>2. Chạy thuật toán FTM</span>
+                                    </button>
+                                    <button id="btn-sim-nit" onclick="runSimClock(3)" class="p-2.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                                        <span>3. Bù lệch tại NIT</span>
+                                    </button>
+                                    <button id="btn-sim-reset" onclick="runSimClock(0)" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 border border-slate-700 active:scale-95">
+                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                        <span>Reset ban đầu</span>
+                                    </button>
+                                </div>
+
+                                <!-- Multi-Node Timeline Visualizer -->
+                                <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800 mb-4 overflow-x-auto no-scrollbar">
+                                    <div class="min-w-[620px]">
+                                        <!-- Global Nominal Reference Line Header -->
+                                        <div class="flex items-center justify-between text-[11px] text-slate-400 mb-3 px-1 border-b border-slate-800 pb-2">
+                                            <span>Mốc Slot bắt đầu (Action Point chuẩn: 0.0 &mu;s)</span>
+                                            <span class="text-indigo-400 font-mono">Trục tham chiếu toàn cục (Cluster Global Time)</span>
+                                            <span>Kết thúc Slot TDMA</span>
+                                        </div>
+
+                                        <!-- Timeline Tracks for 4 Nodes -->
+                                        <div class="space-y-3 relative">
+                                            <!-- Nominal Target Vertical Reference Line -->
+                                            <div class="absolute top-0 bottom-0 left-[35%] w-[2px] bg-indigo-500/40 z-0 pointer-events-none dashed-line"></div>
+
+                                            <!-- Node 1: Master Sync Node -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-blue-600 text-[10px] font-bold rounded text-white">SYNC</span>
+                                                    <span class="font-semibold text-slate-200">Node A (Master)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-a" class="h-7 rounded-md bg-blue-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 1 [SYNC]</span>
+                                                        <span id="sim-drift-a" class="text-[10px] bg-blue-900/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Node 2: Steering Sync Node (Fast drift) -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-blue-600 text-[10px] font-bold rounded text-white">SYNC</span>
+                                                    <span class="font-semibold text-slate-200">Node B (Steering)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-b" class="h-7 rounded-md bg-blue-500/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 2 [SYNC]</span>
+                                                        <span id="sim-drift-b" class="text-[10px] bg-blue-900/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Node 3: Regular Brake Node (Slow drift) -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-slate-600 text-[10px] font-bold rounded text-slate-200">DATA</span>
+                                                    <span class="font-semibold text-slate-200">Node C (Braking)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-c" class="h-7 rounded-md bg-teal-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 3 [DATA]</span>
+                                                        <span id="sim-drift-c" class="text-[10px] bg-teal-900/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Node 4: Faulty/Sensor Node (Byzantine Anomaly) -->
+                                            <div class="flex items-center gap-3 relative z-10">
+                                                <div class="w-44 flex items-center gap-1.5 text-xs">
+                                                    <span class="px-1.5 py-0.5 bg-rose-700 text-[10px] font-bold rounded text-white">FAULTY</span>
+                                                    <span class="font-semibold text-slate-200">Node D (Lỗi thạch anh)</span>
+                                                </div>
+                                                <div class="flex-1 bg-slate-900 h-9 rounded-lg border border-slate-800 relative overflow-hidden flex items-center">
+                                                    <div id="sim-bar-d" class="h-7 rounded-md bg-rose-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm" style="width: 28%; margin-left: 35%;">
+                                                        <span class="truncate">Frame ID 4 [DATA]</span>
+                                                        <span id="sim-drift-d" class="text-[10px] bg-rose-950/60 px-1.5 py-0.5 rounded font-bold">0.0 &mu;s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Explanation & Calculation Box -->
+                                <div id="sim-explanation-box" class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 text-xs text-slate-300">
+                                    <div class="font-bold text-white mb-1 flex items-center gap-1.5">
+                                        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+                                        <span>Giai đoạn hiện tại: Bình Thường (Synchronized)</span>
+                                    </div>
+                                    <p class="leading-relaxed text-slate-300">
+                                        Tất cả các node đang căn chỉnh xung nhịp Action Point thẳng hàng với vạch thời gian danh định của cluster. Nhấn nút <strong>"1. Giả lập lệch Clock"</strong> để xem hiện tượng thạch anh trôi dạt do chênh lệch nhiệt độ.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Sub-Section 4: Senior Architect Interview Pitch Script -->
+                            <div class="p-5 bg-slate-900 rounded-xl text-slate-200 border border-slate-800">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+                                    <h5 class="font-bold text-white text-sm md:text-base">Mẫu Câu Trả Lời Gợi Ý Khi Phỏng Vấn (Senior/Architect Pitch)</h5>
+                                </div>
+                                <p class="text-xs text-slate-300 leading-relaxed italic bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                                    "Trong mạng FlexRay, mỗi node chạy bộ dao động thạch anh riêng nên sự trôi dạt tần số (drift) theo nhiệt độ là không thể tránh khỏi. Để duy trì tính tiền định TDMA, FlexRay cấu hình tối thiểu 2 đến 3 <strong>Sync Nodes</strong>. Sync Node là các ECU chức năng hoàn toàn bình thường, vừa truyền application payload (tốc độ, góc lái...) vừa bật cờ <code>Sync Frame Indicator = 1</code> trong Header để phát mốc thời gian.<br/><br/>
+                                    Khi lệch xung, các node đo đạc sai số thời điểm Action Point của Sync Frame. Trong khoảng <strong>NIT (Network Idle Time)</strong>, bộ điều khiển chạy thuật toán <strong>Fault-Tolerant Midpoint (FTM)</strong>: sắp xếp mảng sai số, gạch bỏ các giá trị cực trị lớn nhất và nhỏ nhất để triệt tiêu lỗi Byzantine do node hỏng gây ra, sau đó lấy trung bình khoảng giữa.<br/><br/>
+                                    Cuối cùng, phần cứng tự động bù trừ <strong>Offset Correction</strong> (co/giãn Microticks trong NIT) và <strong>Rate Correction</strong> (phân bổ đều Microtick trên chu kỳ sau), đảm bảo toàn mạng đồng bộ chính xác tới cấp độ micro-giây mà không hề bị va chạm slot."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QUESTION 3: PLACEHOLDER / EXTENSION SLOT (READY FOR Q3, Q4...) -->
+                    <div id="q-card-q3" class="border border-dashed border-slate-300 rounded-2xl overflow-hidden bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                        <div class="p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-slate-400 text-white font-bold text-xs rounded-md shadow-sm">Q3</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-700 text-base">
+                                        Cơ Chế Khởi Động Mạng: Coldstart, Wakeup Pattern (WUP) & Phân Xử Va Chạm CAS
+                                    </h3>
+                                    <span class="text-xs text-slate-400 block mt-0.5">
+                                        Sẵn sàng mở rộng thêm Q3, Q4... bằng cách nhân bản khối Accordion item
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-full border border-amber-200">
+                                Sắp cập nhật
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CONTROLLER LOGIC SCRIPT (Fault-Tolerant) -->
+    <script>
+        const frameData = {
+            header: {
+                id: 'header', name: 'Header Segment (Phần đầu)', size: '5 Bytes (40 bits)', color: 'bg-blue-600', hover: 'hover:bg-blue-500',
+                desc: 'Chứa các thông tin điều khiển, nhận dạng frame và kiểm tra lỗi cho phần Header.',
+                subFields: [
+                    { 
+                        name: 'Indicator Bits', 
+                        bits: '5 bits', 
+                        desc: 'Gồm 5 cờ trạng thái theo thứ tự truyền:<br/>' +
+                              '• <strong>Reserved bit (1b):</strong> Luôn bằng 0 (dành cho tương thích tương lai).<br/>' +
+                              '• <strong>Payload Preamble (1b):</strong> Ở Static = có NM Vector; ở Dynamic = 2 byte đầu là Message ID.<br/>' +
+                              '• <strong>Null Frame Indicator (1b):</strong> <span class="text-rose-600 font-semibold">Active-Low</span> (0 = Frame rỗng/không nạp data mới, 1 = Chứa data hợp lệ).<br/>' +
+                              '• <strong>Sync Frame Indicator (1b):</strong> 1 = Khung dùng để đồng bộ xung nhịp toàn mạng.<br/>' +
+                              '• <strong>Startup Frame Indicator (1b):</strong> 1 = Khung từ Coldstart Node (luôn đi kèm Sync bit = 1).'
+                    },
+                    { 
+                        name: 'Frame ID', 
+                        bits: '11 bits', 
+                        desc: 'Định danh duy nhất từ 1 đến 2047 (0 không hợp lệ):<br/>' +
+                              '• <strong>Static Segment:</strong> Xác định chính xác Slot số k mà frame được gửi cố định.<br/>' +
+                              '• <strong>Dynamic Segment:</strong> Xác định độ ưu tiên phân xử Mini-slot (FTDMA) - ID nhỏ hơn có quyền phát trước.'
+                    },
+                    { 
+                        name: 'Payload Length', 
+                        bits: '7 bits', 
+                        desc: 'Chỉ định số Word (1 Word = 2 Bytes), tối đa 127 Words = 254 Bytes.<br/>' +
+                              '• <strong>Quy tắc Static:</strong> Tất cả frame trong Static Segment của cùng cluster bắt buộc có <em>cùng độ dài tĩnh</em> (gPayloadLengthStatic).<br/>' +
+                              '• <strong>Dynamic:</strong> Độ dài có thể thay đổi linh hoạt theo từng frame.'
+                    },
+                    { 
+                        name: 'Header CRC', 
+                        bits: '11 bits', 
+                        desc: 'Mã CRC-11 (đa thức 0x385) bảo vệ <strong class="text-blue-700">đúng 20 bits quan trọng</strong>:<br/>' +
+                              'Sync bit (1) + Startup bit (1) + Frame ID (11) + Payload Length (7).<br/>' +
+                              '<em>Lưu ý:</em> Không tính trên Reserved, Payload Preamble, Null bit (do thay đổi runtime), và không tính Cycle Count. Được tính offline bởi công cụ cấu hình.'
+                    },
+                    { 
+                        name: 'Cycle Count', 
+                        bits: '6 bits', 
+                        desc: 'Đếm chu kỳ giao tiếp từ 0 đến 63 (gCycleCountMax = 63), tuần hoàn tăng dần sau mỗi Communication Cycle.'
+                    }
+                ]
+            },
+            payload: {
+                id: 'payload', name: 'Payload Segment (Dữ liệu)', size: '0 đến 254 Bytes', color: 'bg-green-600', hover: 'hover:bg-green-500',
+                desc: 'Phần chứa dữ liệu ứng dụng thực tế giữa các ECU (độ dài luôn là số chẵn do tính theo Word 16-bit).',
+                subFields: [
+                    { 
+                        name: 'Data Bytes', 
+                        bits: '0 - 254 Bytes', 
+                        desc: 'Dữ liệu ứng dụng thực tế. Cố định theo cluster trong Static Segment, có thể thay đổi trong Dynamic Segment.' 
+                    },
+                    { 
+                        name: 'Message ID (Tùy chọn)', 
+                        bits: '16 bits', 
+                        desc: 'Chiếm 2 byte đầu tiên của Payload trong Dynamic Segment khi bit Payload Preamble = 1, hỗ trợ lọc thông điệp linh hoạt tại bên nhận.' 
+                    },
+                    { 
+                        name: 'NM Vector (Tùy chọn)', 
+                        bits: '0 - 12 Bytes', 
+                        desc: 'Network Management Vector nằm ở đầu Payload của Static Frame khi bit Payload Preamble = 1, phục vụ quản lý trạng thái thức/ngủ cụm mạng.' 
+                    }
+                ]
+            },
+            trailer: {
+                id: 'trailer', name: 'Trailer Segment (Phần đuôi)', size: '3 Bytes (24 bits)', color: 'bg-red-600', hover: 'hover:bg-red-500',
+                desc: 'Phần kết thúc frame, đảm bảo tính toàn vẹn của dữ liệu bằng mã kiểm tra lỗi CRC 24-bit.',
+                subFields: [
+                    { 
+                        name: 'Frame CRC', 
+                        bits: '24 bits', 
+                        desc: 'Mã CRC-24 tính toán trên toàn bộ 40 bits Header và Payload.<br/>' +
+                              '• <strong>Vector khởi tạo riêng biệt theo kênh:</strong> Kênh A dùng <code>0xFECABC</code>, Kênh B dùng <code>0xABCDEF</code> để loại trừ hoàn toàn nguy cơ nhận nhầm khung chéo kênh.' 
+                    }
+                ]
+            }
+        };
+
+        function switchTab(tabId) {
+            document.getElementById('tab-frame').classList.add('hidden');
+            document.getElementById('tab-node').classList.add('hidden');
+            document.getElementById('tab-network').classList.add('hidden');
+            document.getElementById('tab-interview').classList.add('hidden');
+            
+            const inactiveClass = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-1.5";
+            document.getElementById('btn-tab-frame').className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
+            document.getElementById('btn-tab-node').className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
+            document.getElementById('btn-tab-network').className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100";
+            document.getElementById('btn-tab-interview').className = inactiveClass;
+
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            if (tabId === 'interview') {
+                activeBtn.className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md flex items-center gap-1.5";
+            } else {
+                activeBtn.className = "px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white shadow-md";
+            }
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            try {
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (error) {
+                console.warn("Lucide icons failed to load:", error);
+            }
+        }
+
+        function toggleQuestion(qId) {
+            const content = document.getElementById(`q-content-${qId}`);
+            const icon = document.getElementById(`q-icon-${qId}`);
+            if (!content || !icon) return;
+            
+            const isHidden = content.classList.contains('hidden');
+            if (isHidden) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (error) {
+                console.warn("Lucide render failed on toggle:", error);
+            }
+        }
+
+        // CLOCK SYNC & FTM SIMULATION LOGIC (FOR QUESTION 2)
+        let currentSimClockStep = 0;
+
+        function runSimClock(step) {
+            currentSimClockStep = step;
+            const barA = document.getElementById('sim-bar-a');
+            const barB = document.getElementById('sim-bar-b');
+            const barC = document.getElementById('sim-bar-c');
+            const barD = document.getElementById('sim-bar-d');
+
+            const driftA = document.getElementById('sim-drift-a');
+            const driftB = document.getElementById('sim-drift-b');
+            const driftC = document.getElementById('sim-drift-c');
+            const driftD = document.getElementById('sim-drift-d');
+
+            const badge = document.getElementById('sim-status-badge');
+            const explain = document.getElementById('sim-explanation-box');
+
+            if (!barA || !barB || !barC || !barD) return;
+
+            if (step === 0) {
+                // RESET TO NOMINAL
+                barA.style.marginLeft = '35%';
+                barB.style.marginLeft = '35%';
+                barC.style.marginLeft = '35%';
+                barD.style.marginLeft = '35%';
+
+                barA.className = 'h-7 rounded-md bg-blue-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+                barB.className = 'h-7 rounded-md bg-blue-500/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+                barC.className = 'h-7 rounded-md bg-teal-600/90 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+                barD.className = 'h-7 rounded-md bg-slate-700 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 shadow-sm';
+
+                driftA.innerText = '0.0 µs';
+                driftB.innerText = '0.0 µs';
+                driftC.innerText = '0.0 µs';
+                driftD.innerText = '0.0 µs';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                badge.innerText = 'Trạng thái: Đã đồng bộ (Synchronized)';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-white mb-1 flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+                        <span>Giai đoạn hiện tại: Bình Thường (Synchronized)</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        Tất cả các node đang căn chỉnh xung nhịp Action Point thẳng hàng với vạch thời gian danh định của cluster (35% timeline). Nhấn nút <strong>"1. Giả lập lệch Clock"</strong> để quan sát hiện tượng trôi dạt xung nhịp do thạch anh.
+                    </p>
+                `;
+            } else if (step === 1) {
+                // STEP 1: DRIFT SIMULATION
+                barA.style.marginLeft = '35%';     // Reference Node A (0.0 us)
+                barB.style.marginLeft = '43%';     // Node B fast drift (+1.6 us) -> shifted right
+                barC.style.marginLeft = '28%';     // Node C slow drift (-1.4 us) -> shifted left
+                barD.style.marginLeft = '52%';     // Node D faulty Byzantine (+3.4 us) -> heavy shift
+
+                barA.className = 'h-7 rounded-md bg-blue-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-blue-400';
+                barB.className = 'h-7 rounded-md bg-amber-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-amber-400';
+                barC.className = 'h-7 rounded-md bg-orange-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-orange-400';
+                barD.className = 'h-7 rounded-md bg-rose-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-rose-400 animate-pulse';
+
+                driftA.innerText = '0.0 µs (Mốc)';
+                driftB.innerText = '+1.6 µs (Nhanh)';
+                driftC.innerText = '-1.4 µs (Chậm)';
+                driftD.innerText = '+3.4 µs (Byzantine Lỗi)';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                badge.innerText = 'Cảnh báo: Lệch Clock (Clock Drift Detected)';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-rose-300 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+                        <span>Bước 1: Hiện tượng trôi xung nhịp (Clock Drift do nhiệt độ/linh kiện)</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        &bull; <strong>Node A (Sync Node 1):</strong> Hoạt động danh định ở mốc chuẩn (0.0 &mu;s).<br/>
+                        &bull; <strong>Node B (Sync Node 2):</strong> Thạch anh chạy nhanh &rarr; lệch pha <strong>+1.6 &mu;s</strong>.<br/>
+                        &bull; <strong>Node C (Regular Node):</strong> Thạch anh chạy chậm &rarr; lệch pha <strong>-1.4 &mu;s</strong>.<br/>
+                        &bull; <strong>Node D (Lỗi Byzantine):</strong> Cảm biến bị xung nhiễu cực đoan &rarr; lệch tới <strong>+3.4 &mu;s</strong> có nguy cơ đè slot!<br/>
+                        <em>Nhấn nút <strong>"2. Chạy thuật toán FTM"</strong> để xem cách bộ vi điều khiển lọc lỗi và tính toán bù trừ.</em>
+                    </p>
+                `;
+            } else if (step === 2) {
+                // STEP 2: FTM ALGORITHM RUNNING
+                barA.className = 'h-7 rounded-md bg-blue-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500';
+                barB.className = 'h-7 rounded-md bg-amber-500 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500';
+                barC.className = 'h-7 rounded-md bg-slate-600 text-slate-400 line-through text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 opacity-60';
+                barD.className = 'h-7 rounded-md bg-rose-900 text-rose-400 line-through text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 opacity-40 border border-rose-500';
+
+                driftC.innerText = '-1.4 µs (Bỏ Min)';
+                driftD.innerText = '+3.4 µs (Loại Byzantine)';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                badge.innerText = 'Đang xử lý: Thuật toán FTM (Fault-Tolerant Midpoint)';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-amber-300 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="calculator" class="w-4 h-4 text-amber-400"></i>
+                        <span>Bước 2: Xử lý mảng sai số bằng thuật toán FTM (ISO 17458)</span>
+                    </div>
+                    <div class="p-2.5 bg-slate-900/90 rounded-lg border border-slate-700 font-mono text-[11px] text-slate-200 mb-2 leading-relaxed">
+                        1. Mảng sai số đo đạc: [-1.4&mu;s, 0.0&mu;s, +1.6&mu;s, +3.4&mu;s]<br/>
+                        2. Lọc cực trị (k = 1): <span class="line-through text-red-400">[-1.4&mu;s]</span> và <span class="line-through text-red-400">[+3.4&mu;s (Byzantine)]</span> bị gạch bỏ hoàn toàn!<br/>
+                        3. Cặp giá trị an toàn ở giữa: [0.0&mu;s, +1.6&mu;s]<br/>
+                        4. <strong>Giá trị hiệu chỉnh trung bình Midpoint:</strong> (0.0 + 1.6) / 2 = <span class="text-emerald-400 font-bold">+0.8 &mu;s</span>.
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        Nhờ loại bỏ giá trị cực đại +3.4 &mu;s, mạng FlexRay không hề bị đánh lừa bởi node D bị hỏng! Nhấn <strong>"3. Bù lệch tại NIT"</strong> để xem controller điều chỉnh vi xung Microtick.
+                    </p>
+                `;
+            } else if (step === 3) {
+                // STEP 3: CORRECTION APPLIED AT NIT
+                barA.style.marginLeft = '35%';
+                barB.style.marginLeft = '35%';
+                barC.style.marginLeft = '35%';
+                barD.style.marginLeft = '35%';
+
+                barA.className = 'h-7 rounded-md bg-emerald-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-emerald-400';
+                barB.className = 'h-7 rounded-md bg-emerald-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-emerald-400';
+                barC.className = 'h-7 rounded-md bg-emerald-600 text-white text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500 ring-2 ring-emerald-400';
+                barD.className = 'h-7 rounded-md bg-slate-600 text-slate-300 text-[11px] font-mono flex items-center justify-between px-3 transition-all duration-500';
+
+                driftA.innerText = '0.0 µs (Khóa pha)';
+                driftB.innerText = '0.0 µs (Đã bù -0.8µs)';
+                driftC.innerText = '0.0 µs (Đã bù +1.4µs)';
+                driftD.innerText = 'Đã cô lập / Passive';
+
+                badge.className = 'px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                badge.innerText = 'Đồng bộ hoàn tất: Chu kỳ mới căn lề 100%';
+
+                explain.innerHTML = `
+                    <div class="font-bold text-emerald-300 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                        <span>Bước 3: Hiệu chỉnh hoàn tất trong khoảng NIT (Network Idle Time)</span>
+                    </div>
+                    <p class="leading-relaxed text-slate-300">
+                        &bull; <strong>Offset Correction:</strong> Bộ điều khiển co/giãn các vi xung (&mu;T) ngay trong khoảng lặng NIT &rarr; đưa Action Point của chu kỳ tiếp theo về thẳng tắp đúng 0.0 &mu;s.<br/>
+                        &bull; <strong>Rate Correction:</strong> Đo đạc chênh lệch giữa chu kỳ chẵn và lẻ để phân bổ vi xung đều đặn suốt 64 chu kỳ.<br/>
+                        &bull; <strong>Node D:</strong> Bị phát hiện lệch clock liên tiếp (<code>pClockCorrectionFailed</code>) &rarr; POC hạ trạng thái về <code>NORMAL_PASSIVE</code> để ngăn chặn nguy cơ làm hỏng bus TDMA của xe!
+                    </p>
+                `;
+            }
+
+            try {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide render failed on sim update:", e);
+            }
+        }
+
+        function selectSegment(segId) {
+            const seg = frameData[segId];
+            
+            ['header', 'payload', 'trailer'].forEach(key => {
+                const btn = document.getElementById(`btn-seg-${key}`);
+                const data = frameData[key];
+                if(key === segId) {
+                    btn.className = `flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform ring-4 ring-offset-2 ring-blue-300 scale-[1.02] ${data.color} ${data.hover}`;
+                } else {
+                    btn.className = `flex-1 flex flex-col justify-center items-center p-4 rounded-xl text-white transition-all transform opacity-90 hover:scale-105 ${data.color} ${data.hover}`;
+                }
+            });
+
+            document.getElementById('seg-color').className = `w-4 h-4 rounded-full ${seg.color}`;
+            document.getElementById('seg-name').innerText = seg.name;
+            document.getElementById('seg-size').innerText = seg.size;
+            document.getElementById('seg-desc').innerText = seg.desc;
+            
+            const subfieldsContainer = document.getElementById('seg-subfields');
+            subfieldsContainer.innerHTML = '';
+            seg.subFields.forEach(field => {
+                subfieldsContainer.innerHTML += `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-slate-900">${field.name}</h4>
+                            <span class="text-xs font-mono bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${field.bits}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">${field.desc}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // ISOLATE CORE UI LOGIC FROM EXTERNAL LIBRARIES
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Attach core UI event listeners (always executable)
+            document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
+            document.getElementById('btn-tab-node').addEventListener('click', () => switchTab('node'));
+            document.getElementById('btn-tab-network').addEventListener('click', () => switchTab('network'));
+            document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
+            
+            document.getElementById('btn-seg-header').addEventListener('click', () => selectSegment('header'));
+            document.getElementById('btn-seg-payload').addEventListener('click', () => selectSegment('payload'));
+            document.getElementById('btn-seg-trailer').addEventListener('click', () => selectSegment('trailer'));
+
+            // Default initialization
+            selectSegment('header');
+
+            // 2. Load icons with safe fallback
+            try {
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (error) {
+                console.warn("Lucide icons failed to load, but UI will still work.");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -3,20 +3,23 @@
  * Automated Verification, Documentation Synchronization & Invariant Enforcement Script.
  *
  * Capabilities:
- * 1. DYNAMIC AUTO-DISCOVERY: Scans repository root for all `widget_*.html` files.
- * 2. ATOMIC UNIT INVARIANT: Enforces that every widget has corresponding `docs/<topic>/CURRENT_INFO.md`
+ * 1. AUTOMATED BUILD: Runs buildWidgets() to compile modular src/ + src/data/ into dist/ and root.
+ * 2. DYNAMIC AUTO-DISCOVERY: Scans src/ and root for all `widget_*.html` files.
+ * 3. ATOMIC UNIT INVARIANT: Enforces that every widget has corresponding `docs/<topic>/CURRENT_INFO.md`
  *    and `docs/<topic>/BACKLOG.md`. Fails hard (Exit 1) if missing.
- * 3. SHOWCASE INVARIANT: Enforces that every widget is listed in `README.md` and `README.vi.md` showcase tables.
- * 4. JAVASCRIPT SYNTAX VERIFICATION: Validates syntax of all internal script blocks using Node.js VM/Function parser.
- * 5. METRICS AUTO-SYNC: Updates exact line counts and current date into each `CURRENT_INFO.md`.
- * 6. GIT AUTO-STAGE: Automatically stages modified documentation files if `--git-add` flag is provided.
+ * 4. SHOWCASE INVARIANT: Enforces that every widget is listed in `README.md` and `README.vi.md` showcase tables.
+ * 5. JAVASCRIPT SYNTAX VERIFICATION: Validates syntax of all internal script blocks using Node.js Function parser.
+ * 6. METRICS AUTO-SYNC: Updates exact line counts and current date into each `CURRENT_INFO.md`.
+ * 7. GIT AUTO-STAGE: Automatically stages modified documentation & source files if `--git-add` flag is provided.
  */
 
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { buildWidgets } = require('./build');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
+const SRC_DIR = path.join(ROOT_DIR, 'src');
 const shouldGitAdd = process.argv.includes('--git-add');
 
 // Format a number with commas (e.g., 2929 -> "2,929")
@@ -71,67 +74,46 @@ function getTopicName(widgetFileName) {
 function processWidget(widgetFileName, readmeContent, readmeViContent) {
     let hasError = false;
     const topic = getTopicName(widgetFileName);
-    const htmlPath = path.join(ROOT_DIR, widgetFileName);
+    const rootHtmlPath = path.join(ROOT_DIR, widgetFileName);
+    const srcHtmlPath = path.join(SRC_DIR, widgetFileName);
     const docsDir = path.join(ROOT_DIR, 'docs', topic);
     const currentInfoPath = path.join(docsDir, 'CURRENT_INFO.md');
     const backlogPath = path.join(docsDir, 'BACKLOG.md');
 
-    // 1. Check HTML exists
-    if (!fs.existsSync(htmlPath)) {
-        console.error(`❌ [FILE NOT FOUND] Widget HTML missing: ${widgetFileName}`);
+    // 1. Check Root & Src HTML exists
+    if (!fs.existsSync(rootHtmlPath)) {
+        console.error(`❌ [FILE NOT FOUND] Root widget HTML missing: ${widgetFileName}`);
         return false;
     }
 
-    let html = fs.readFileSync(htmlPath, 'utf8');
-
-    // 1.1 Compile Q&A Data from src/data/<topic>/questions.json if present
-    const qaDataJsonPath = path.join(ROOT_DIR, 'src', 'data', topic, 'questions.json');
-    if (fs.existsSync(qaDataJsonPath)) {
-        try {
-            const rawJson = fs.readFileSync(qaDataJsonPath, 'utf8');
-            const parsedQuestions = JSON.parse(rawJson);
-            if (!Array.isArray(parsedQuestions)) {
-                console.error(`❌ [DATA ERROR] ${qaDataJsonPath} must contain a JSON array.`);
-                hasError = true;
-            } else {
-                const syncRegex = /(\/\*\s*QA_DATA_AUTO_SYNC_START\s*\*\/)[\s\S]*?(\/\*\s*QA_DATA_AUTO_SYNC_END\s*\*\/)/;
-                if (syncRegex.test(html)) {
-                    const formattedJs = `/* QA_DATA_AUTO_SYNC_START */\n        const qaData = ${JSON.stringify(parsedQuestions, null, 4)};\n        /* QA_DATA_AUTO_SYNC_END */`;
-                    const newHtml = html.replace(syncRegex, formattedJs);
-                    if (newHtml !== html) {
-                        fs.writeFileSync(htmlPath, newHtml, 'utf8');
-                        html = newHtml;
-                        console.log(`📦 [DATA COMPILED] Synced ${parsedQuestions.length} questions from ${path.relative(ROOT_DIR, qaDataJsonPath)} -> ${widgetFileName}`);
-                    }
-                    if (shouldGitAdd) {
-                        try {
-                            execSync(`git add "${qaDataJsonPath}"`, { cwd: ROOT_DIR });
-                        } catch (e) {}
-                    }
-                }
-            }
-        } catch (jsonErr) {
-            console.error(`❌ [JSON SYNTAX ERROR] In ${qaDataJsonPath}: ${jsonErr.message}`);
-            hasError = true;
-        }
+    if (!fs.existsSync(srcHtmlPath)) {
+        console.error(`❌ [FILE NOT FOUND] Source widget HTML missing: src/${widgetFileName}`);
+        return false;
     }
 
-    const lineCount = html.split('\n').length;
-    const formattedLines = formatNumber(lineCount);
+    const rootHtml = fs.readFileSync(rootHtmlPath, 'utf8');
+    const srcHtml = fs.readFileSync(srcHtmlPath, 'utf8');
 
-    // 2. Validate JS Syntax
-    const isSyntaxValid = validateJsSyntax(html, widgetFileName);
-    if (!isSyntaxValid) {
+    const lineCount = rootHtml.split('\n').length;
+    const formattedLines = formatNumber(lineCount);
+    const srcLineCount = srcHtml.split('\n').length;
+    const formattedSrcLines = formatNumber(srcLineCount);
+
+    // 2. Validate JS Syntax on both Source and Compiled bundle
+    const isSrcSyntaxValid = validateJsSyntax(srcHtml, `src/${widgetFileName}`);
+    const isRootSyntaxValid = validateJsSyntax(rootHtml, widgetFileName);
+
+    if (!isSrcSyntaxValid || !isRootSyntaxValid) {
         hasError = true;
     }
 
     // Extract Q&A count if available
-    const qaMatch = html.match(/id:\s*["']q_[a-zA-Z0-9_]+["']/g);
+    const qaMatch = rootHtml.match(/id:\s*["']q_[a-zA-Z0-9_]+["']/g);
     const qaCount = qaMatch ? qaMatch.length : 0;
     const qaInfo = qaCount > 0 ? ` | Q&A Items: ${qaCount}` : '';
 
-    if (isSyntaxValid) {
-        console.log(`✅ [${widgetFileName}] Syntax OK | Lines: ${formattedLines}${qaInfo}`);
+    if (isSrcSyntaxValid && isRootSyntaxValid) {
+        console.log(`✅ [${widgetFileName}] Syntax OK | Src Lines: ${formattedSrcLines} | Dist Lines: ${formattedLines}${qaInfo}`);
     }
 
     // 3. Invariant: Check Atomic Unit Documents
@@ -206,6 +188,16 @@ function processWidget(widgetFileName, readmeContent, readmeViContent) {
 // Main execution flow
 function main() {
     console.log('====================================================');
+    console.log('🏗️ RUNNING COMPILATION (src/ -> dist/ & root)');
+    console.log('====================================================');
+
+    const buildOk = buildWidgets();
+    if (!buildOk) {
+        console.error('❌ Build failed!');
+        process.exit(1);
+    }
+
+    console.log('\n====================================================');
     console.log('🔍 RUNNING PRE-COMMIT VERIFICATION & DOCS AUTO-SYNC');
     console.log('====================================================');
 
@@ -238,6 +230,13 @@ function main() {
         if (!isOk) {
             overallSuccess = false;
         }
+    }
+
+    // Auto-stage all generated / updated files if --git-add
+    if (shouldGitAdd) {
+        try {
+            execSync('git add dist/ src/ widget_*.html package.json', { cwd: ROOT_DIR });
+        } catch (e) {}
     }
 
     console.log('\n----------------------------------------------------');
