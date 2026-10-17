@@ -1,8 +1,8 @@
 # Đặc Tả Kỹ Thuật Hiện Trạng: FlexRay Protocol Explorer (Current Info)
 
 * **Tên file nguồn**: [`widget_flexray.html`](../../widget_flexray.html)
-* **Phiên bản hiện tại**: `v1.1.0` (Cập nhật chuẩn hóa FlexRay 3.0.1 & ISO 17458:2013)
-* **Ngày cập nhật**: `2026-10-07`
+* **Phiên bản hiện tại**: `v1.3.0` (Tích hợp Tab 4 Q&A Vault với Q1 POC/Time-Triggered và Q2 FTM Clock Drift 4-Node Simulator chuẩn FlexRay 3.0.1 & ISO 17458)
+* **Ngày cập nhật**: `2026-10-17`
 * **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức truyền thông mạng trên ô tô FlexRay phục vụ nhúng vào bài viết Google Blogger (Blogspot) hoặc xem độc lập.
 
 ---

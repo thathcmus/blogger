@@ -32,13 +32,26 @@ The optimal way to guarantee 100% pixel-perfect rendering without theme CSS or f
 2. In your Blogger post editor, switch to **HTML View** and paste the snippet below:
 
 ```html
-<!-- FlexRay Explorer Embed Widget -->
+<!-- 1. FlexRay Explorer Embed Widget -->
 <div style="width: 100%; margin: 24px auto; text-align: center;">
     <iframe src="https://thathcmus.github.io/blogger/widget_flexray.html" 
             width="100%" 
             height="850px" 
             style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;" 
             title="FlexRay Protocol Explorer"
+            loading="lazy">
+    </iframe>
+</div>
+
+<!-- 2. CAN FD Explorer Embed Widget (Full-Width Breakout: Expands up to 1200px across Blogger post margins) -->
+<div style="position: relative; left: 50%; transform: translateX(-50%); width: min(96vw, 1200px); margin: 32px 0; text-align: center;">
+    <iframe src="https://thathcmus.github.io/blogger/widget_can_fd.html" 
+            width="100%" 
+            height="1100px" 
+            style="border: none; border-radius: 16px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); background-color: #f8fafc; overflow: hidden; display: block;" 
+            title="CAN FD Protocol Explorer"
+            allow="fullscreen"
+            allowfullscreen="true"
             loading="lazy">
     </iframe>
 </div>

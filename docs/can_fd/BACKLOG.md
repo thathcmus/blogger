@@ -40,7 +40,7 @@ Khi cần đề xuất tính năng mới hoặc cập nhật nội dung Q&A, vui
   - [ ] **Item 17:** Công cụ tính toán Frame Duration & Bus Load% (CAN FD Calculator).
   - [ ] **Item 18:** Trace View giải mã Hex dump thành Physical Signals.
   - [ ] **Item 19:** Interactive Animation mô phỏng luồng bit & cơ chế chuyển đổi Baudrate của cờ BRS.
-- [ ] **Phase 5 (Ngày 58–60):** Kiểm thử Responsive đa nền tảng, hoàn thiện tài liệu và phát hành chính thức bản `v1.2.0`.
+- [ ] **Phase 5 (Ngày 58–60):** Kiểm thử Responsive đa nền tảng, hoàn thiện tài liệu và phát hành chính thức bản `v2.0.0`.
 
 ---
 

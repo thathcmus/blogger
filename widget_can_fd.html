@@ -97,60 +97,18 @@
             </div>
         </div>
 
-        <!-- Smart Top Navigation & Filter Container (Sticky Top with Smart Scroll Auto-Hide/Show) -->
-        <div id="smart-nav-container" class="sticky top-2 z-40 w-full mb-6 transition-transform duration-300 ease-out">
-            <!-- 3 Main Navigation Tabs -->
-            <div id="main-nav-tabs" class="flex flex-wrap justify-center gap-2 mb-3 bg-white/95 backdrop-blur-md p-2 rounded-xl shadow-md border border-slate-200 w-fit mx-auto transition-colors">
-                <button id="btn-tab-frame" class="px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2">
+        <!-- Main Navigation Tabs (Clean Floating Sticky Top Bar) -->
+        <div id="smart-nav-container" class="sticky top-2 z-30 w-full mb-6 pointer-events-none">
+            <div id="main-nav-tabs" class="flex flex-wrap justify-center gap-2 p-1.5 sm:p-2 bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200/90 w-fit mx-auto transition-colors pointer-events-auto">
+                <button id="btn-tab-frame" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2 text-xs sm:text-sm">
                     <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
                 </button>
-                <button id="btn-tab-compare" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
+                <button id="btn-tab-compare" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2 text-xs sm:text-sm">
                     <i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="tab2">2. So Sánh Các Thế Hệ</span>
                 </button>
-                <button id="btn-tab-interview" class="px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2">
+                <button id="btn-tab-interview" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 hover:bg-slate-100 flex items-center gap-2 text-xs sm:text-sm">
                     <i data-lucide="help-circle" class="w-4 h-4"></i> <span data-i18n="tab3">3. Q&A Phỏng Vấn</span>
                 </button>
-            </div>
-
-            <!-- Tab 3 Header & Filter Group (Visible only in Tab 3 Interview Q&A) -->
-            <div id="qa-filter-header-group" class="hidden bg-white/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-200/90 shadow-md">
-                <div class="flex items-center justify-between border-b pb-2 mb-2.5 border-slate-100">
-                    <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="message-square-text" class="text-amber-600 w-5 h-5"></i>
-                        <span data-i18n="tab3_title">Ngân Hàng Câu Hỏi Phỏng Vấn</span>
-                    </h2>
-                    <button onclick="resetFilters()" class="text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors underline hidden" id="reset-filter-btn">
-                        <span data-i18n="clear_filter">Xóa bộ lọc</span>
-                    </button>
-                </div>
-                
-                <!-- Filters Box -->
-                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
-                    <div class="flex flex-wrap gap-2.5 items-center">
-                        <div class="font-semibold text-xs text-slate-700 shrink-0" data-i18n="difficulty">Độ khó:</div>
-                        <div class="flex flex-wrap gap-1.5" id="difficulty-filters">
-                            <button onclick="filterByDifficulty('All')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn" data-level="All"><span data-i18n="all">Tất cả</span></button>
-                            <button onclick="filterByDifficulty('Basic')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Basic">Basic</button>
-                            <button onclick="filterByDifficulty('Intermediate')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Intermediate">Intermediate</button>
-                            <button onclick="filterByDifficulty('Advanced')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Advanced">Advanced</button>
-                            <button onclick="filterByDifficulty('Senior')" class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Senior">Senior</button>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2.5 items-center mt-2 pt-2 border-t border-slate-200/60">
-                        <div class="font-semibold text-xs text-slate-700 shrink-0" data-i18n="topic">Chủ đề:</div>
-                        <div class="flex flex-wrap gap-1.5" id="tag-filters">
-                            <button onclick="filterByTag('#Frame')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Frame">#Frame</button>
-                            <button onclick="filterByTag('#Stuffing')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Stuffing">#Stuffing</button>
-                            <button onclick="filterByTag('#BitTiming')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#BitTiming">#BitTiming</button>
-                            <button onclick="filterByTag('#Error')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Error">#Error</button>
-                            <button onclick="filterByTag('#AUTOSAR')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#AUTOSAR">#AUTOSAR</button>
-                            <button onclick="filterByTag('#Physical')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Physical">#Physical</button>
-                            <button onclick="filterByTag('#Diagnostics')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Diagnostics">#Diagnostics</button>
-                            <button onclick="filterByTag('#SecOC')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#SecOC">#SecOC</button>
-                            <button onclick="filterByTag('#Strategic')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Strategic">#Strategic</button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -304,6 +262,47 @@
 
         <!-- Tab 3 Container: Interview Q&A -->
         <div id="tab-interview" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 animate-fadeIn">
+            <!-- Tab 3 Header & Filter Group (Natural In-Flow) -->
+            <div id="qa-filter-header-group" class="mb-6">
+                <div class="flex items-center justify-between border-b pb-3 mb-4 border-slate-100">
+                    <h2 class="text-base sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="message-square-text" class="text-amber-600 w-5 h-5 sm:w-6 sm:h-6"></i>
+                        <span data-i18n="tab3_title">Ngân Hàng Câu Hỏi Phỏng Vấn</span>
+                    </h2>
+                    <button onclick="resetFilters()" class="text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors underline hidden" id="reset-filter-btn">
+                        <span data-i18n="clear_filter">Xóa bộ lọc</span>
+                    </button>
+                </div>
+                
+                <!-- Filters Box -->
+                <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200/80">
+                    <div class="flex flex-wrap gap-2.5 items-center">
+                        <div class="font-semibold text-xs text-slate-700 shrink-0" data-i18n="difficulty">Độ khó:</div>
+                        <div class="flex flex-wrap gap-1.5" id="difficulty-filters">
+                            <button onclick="filterByDifficulty('All')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-800 text-white transition-colors difficulty-btn" data-level="All"><span data-i18n="all">Tất cả</span></button>
+                            <button onclick="filterByDifficulty('Basic')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Basic">Basic</button>
+                            <button onclick="filterByDifficulty('Intermediate')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Intermediate">Intermediate</button>
+                            <button onclick="filterByDifficulty('Advanced')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Advanced">Advanced</button>
+                            <button onclick="filterByDifficulty('Senior')" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors difficulty-btn" data-level="Senior">Senior</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2.5 items-center mt-3 pt-3 border-t border-slate-200/60">
+                        <div class="font-semibold text-xs text-slate-700 shrink-0" data-i18n="topic">Chủ đề:</div>
+                        <div class="flex flex-wrap gap-1.5" id="tag-filters">
+                            <button onclick="filterByTag('#Frame')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Frame">#Frame</button>
+                            <button onclick="filterByTag('#Stuffing')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Stuffing">#Stuffing</button>
+                            <button onclick="filterByTag('#BitTiming')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#BitTiming">#BitTiming</button>
+                            <button onclick="filterByTag('#Error')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Error">#Error</button>
+                            <button onclick="filterByTag('#AUTOSAR')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#AUTOSAR">#AUTOSAR</button>
+                            <button onclick="filterByTag('#Physical')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Physical">#Physical</button>
+                            <button onclick="filterByTag('#Diagnostics')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Diagnostics">#Diagnostics</button>
+                            <button onclick="filterByTag('#SecOC')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#SecOC">#SecOC</button>
+                            <button onclick="filterByTag('#Strategic')" class="px-2 py-0.5 text-[11px] font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors tag-btn" data-tag="#Strategic">#Strategic</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Q&A List Container -->
             <div id="qa-container" class="space-y-4">
                 <!-- Data-driven Q&A cards will be injected here -->
@@ -1624,7 +1623,7 @@
                 const iconClasses = state.expanded ? 'text-amber-600 bg-amber-100' : 'text-slate-400 bg-slate-50';
                 const iconStyle = state.expanded ? 'style="transform: rotate(180deg);"' : '';
                 
-                const activeBtnClass = "px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-700 bg-white rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
+                const activeBtnClass = "px-4 py-2 text-sm font-medium border-b-2 border-amber-600 text-amber-700 bg-white rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
                 const inactiveBtnClass = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-t-lg transition-colors flex items-center gap-2 whitespace-nowrap";
                 
                 const theoryBtn = state.tab === 'theory' ? activeBtnClass : inactiveBtnClass;
@@ -1642,73 +1641,67 @@
                     ? 'bg-amber-50 text-amber-700 border-amber-200' 
                     : 'bg-slate-100 text-slate-500 border-slate-200';
 
-                const initialStickyTop = isSmartNavHidden ? '8px' : ((getSmartNavHeight() + 12) + 'px');
-
                 const cardHtml = `
                     <div id="qa-card-${item.id}" class="border border-slate-200 rounded-xl bg-white shadow-sm transition-all hover:border-amber-300">
-                        <!-- COMPREHENSIVE STICKY BLOCK: RETAIN [QUESTION + 4 TABS + ANSWER CONTENT] TOGETHER ON SCROLL -->
-                        <div id="qa-sticky-block-${item.id}" class="qa-card-sticky-block sticky z-20 bg-white rounded-xl transition-all duration-300 ${state.expanded ? 'rounded-t-xl border-b border-slate-200 shadow-xs' : ''}" style="top: ${initialStickyTop};">
-                            
-                            <!-- Question Header -->
-                            <div class="qa-card-header p-4 cursor-pointer flex justify-between items-start gap-4 select-none ${state.expanded ? 'border-b border-slate-100' : ''}" onclick="toggleAnswer('${item.id}')">
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-2 mb-2 flex-wrap">
-                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase border ${diffClass}">${item.difficulty}</span>
-                                        <div class="flex gap-1 flex-wrap">${tagsHtml}</div>
-                                        <span id="card-comment-badge-${item.id}" class="px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${cardCommentBadgeClass}" title="Số lượt ghi chú & thảo luận">
-                                            <i data-lucide="message-square" class="w-3 h-3 text-amber-600"></i>
-                                            <span>${commentCount}</span>
-                                        </span>
-                                    </div>
-                                    <h3 class="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors flex items-start gap-2">
-                                        <span class="text-amber-600 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
-                                        <span>${content.question}</span>
-                                    </h3>
+                        <!-- Question Header -->
+                        <div class="qa-card-header p-4 sm:p-5 cursor-pointer flex justify-between items-start gap-4 select-none ${state.expanded ? 'border-b border-slate-200 bg-slate-50/50' : 'hover:bg-slate-50/50'} transition-colors rounded-t-xl" onclick="toggleAnswer('${item.id}')">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded uppercase border ${diffClass}">${item.difficulty}</span>
+                                    <div class="flex gap-1 flex-wrap">${tagsHtml}</div>
+                                    <span id="card-comment-badge-${item.id}" class="px-2 py-0.5 text-[10px] font-semibold rounded-full border flex items-center gap-1 ${cardCommentBadgeClass}" title="Số lượt ghi chú & thảo luận">
+                                        <i data-lucide="message-square" class="w-3 h-3 text-amber-600"></i>
+                                        <span>${commentCount}</span>
+                                    </span>
                                 </div>
-                                <div class="p-2 rounded-lg ${iconClasses}" id="icon-${item.id}">
-                                    <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" ${iconStyle}></i>
-                                </div>
+                                <h3 class="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors flex items-start gap-2">
+                                    <span class="text-amber-600 font-mono text-sm mt-0.5 shrink-0">#Q${absoluteIndex}</span>
+                                    <span>${content.question}</span>
+                                </h3>
                             </div>
+                            <div class="p-2 rounded-lg ${iconClasses}" id="icon-${item.id}">
+                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300" ${iconStyle}></i>
+                            </div>
+                        </div>
 
-                            <!-- 4-Tab Bar & Answer Content: Retained adjacent to question header when scrolling down -->
-                            <div id="qa-expanded-body-${item.id}" class="${answerHidden}">
-                                <!-- Answer Tabs Navigation: 4 core knowledge tabs -->
-                                <div class="flex border-b border-slate-200 bg-slate-100/90 px-4 pt-2.5 gap-2 overflow-x-auto no-scrollbar">
-                                    <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
-                                        ${labels.qa_theory}
-                                    </button>
-                                    <button onclick="switchQATab('${item.id}', 'modeling')" id="btn-${item.id}-modeling" class="${modelingBtn}">
-                                        ${labels.qa_modeling}
-                                    </button>
-                                    <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="${practiceBtn}">
-                                        ${labels.qa_practice}
-                                    </button>
-                                    <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="${trapBtn}">
-                                        ${labels.qa_trap}
-                                    </button>
+                        <!-- 4-Tab Bar & Answer Content -->
+                        <div id="qa-expanded-body-${item.id}" class="${answerHidden}">
+                            <!-- Answer Tabs Navigation: 4 core knowledge tabs -->
+                            <div class="flex border-b border-slate-200 bg-slate-100/90 px-4 pt-2.5 gap-2 overflow-x-auto no-scrollbar">
+                                <button onclick="switchQATab('${item.id}', 'theory')" id="btn-${item.id}-theory" class="${theoryBtn}">
+                                    ${labels.qa_theory}
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'modeling')" id="btn-${item.id}-modeling" class="${modelingBtn}">
+                                    ${labels.qa_modeling}
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'practice')" id="btn-${item.id}-practice" class="${practiceBtn}">
+                                    ${labels.qa_practice}
+                                </button>
+                                <button onclick="switchQATab('${item.id}', 'trap')" id="btn-${item.id}-trap" class="${trapBtn}">
+                                    ${labels.qa_trap}
+                                </button>
+                            </div>
+                            
+                            <!-- Answer Content Box: Full natural height, beautiful typography, no nested scrollbar -->
+                            <div class="p-4 sm:p-6 text-xs sm:text-sm text-slate-700 leading-relaxed bg-white border-b border-slate-200">
+                                <div id="content-${item.id}-theory" class="${theoryContent}">
+                                    ${content.answer.theory}
                                 </div>
-                                
-                                <!-- Answer Content Box: Smooth scrolling with max-height to conserve screen space -->
-                                <div class="p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed bg-white max-h-[220px] overflow-y-auto">
-                                    <div id="content-${item.id}-theory" class="${theoryContent}">
-                                        ${content.answer.theory}
-                                    </div>
-                                    <div id="content-${item.id}-modeling" class="${modelingContent}">
-                                        ${content.answer.modeling || ''}
-                                    </div>
-                                    <div id="content-${item.id}-practice" class="${practiceContent}">
-                                        ${content.answer.practice}
-                                    </div>
-                                    <div id="content-${item.id}-trap" class="${trapContent}">
-                                        ${content.answer.trap}
-                                    </div>
+                                <div id="content-${item.id}-modeling" class="${modelingContent}">
+                                    ${content.answer.modeling || ''}
+                                </div>
+                                <div id="content-${item.id}-practice" class="${practiceContent}">
+                                    ${content.answer.practice}
+                                </div>
+                                <div id="content-${item.id}-trap" class="${trapContent}">
+                                    ${content.answer.trap}
                                 </div>
                             </div>
                         </div>
 
-                        <!-- DISCUSSION & TECHNICAL NOTES BLOCK: Freely scrollable below sticky block -->
+                        <!-- DISCUSSION & TECHNICAL NOTES BLOCK: Flow naturally below answer -->
                         <div id="answer-discussion-${item.id}" class="${answerHidden}">
-                            <div id="discussion-wrapper-${item.id}" class="bg-slate-50/90 p-4 sm:p-5 rounded-b-xl border-t border-slate-200">
+                            <div id="discussion-wrapper-${item.id}" class="bg-slate-50/90 p-4 sm:p-5 rounded-b-xl">
                                 <div id="content-${item.id}-comments"></div>
                             </div>
                         </div>
@@ -1727,84 +1720,13 @@
             }
         }
 
-        // --- SMART STICKY NAV & ADJACENT QUESTION CONTROLLER (Zero overlap) ---
-        let lastScrollY = window.pageYOffset || document.documentElement.scrollTop;
-        let isSmartNavHidden = false;
-        let isScrollTicking = false;
-
-        function getSmartNavHeight() {
-            const navContainer = document.getElementById('smart-nav-container');
-            if (!navContainer) return 0;
-            return navContainer.offsetHeight || 0;
-        }
-
-        function updateStickyBlockOffsets() {
-            const navHeight = getSmartNavHeight();
-            const targetTop = isSmartNavHidden ? '8px' : ((navHeight + 12) + 'px');
-            document.querySelectorAll('.qa-card-sticky-block').forEach(b => {
-                b.style.top = targetTop;
-            });
-        }
-
-        function setSmartNavVisibility(visible) {
-            const navContainer = document.getElementById('smart-nav-container');
-
-            if (visible) {
-                isSmartNavHidden = false;
-                if (navContainer) {
-                    navContainer.classList.remove('-translate-y-[130%]', 'opacity-0', 'pointer-events-none');
-                    navContainer.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
-                }
-            } else {
-                isSmartNavHidden = true;
-                if (navContainer) {
-                    navContainer.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
-                    navContainer.classList.add('-translate-y-[130%]', 'opacity-0', 'pointer-events-none');
-                }
-            }
-            updateStickyBlockOffsets();
-        }
-
-        function handleSmartScroll() {
-            const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
-            
-            // 1. Near page top (< 80px) -> Always reveal full navigation bar
-            if (currentScrollY <= 80) {
-                if (isSmartNavHidden) setSmartNavVisibility(true);
-                lastScrollY = currentScrollY;
-                return;
-            }
-
-            // 2. Tính độ dịch chuyển cuộn
-            const deltaY = currentScrollY - lastScrollY;
-            
-            // Minimum threshold (8px) to prevent jitter
-            if (Math.abs(deltaY) < 8) {
-                return;
-            }
-
-            if (deltaY > 0) {
-                // Scroll DOWN: Hide navigation, keep question + 4 tabs + answer and comments visible
-                if (!isSmartNavHidden) {
-                    setSmartNavVisibility(false);
-                }
-            } else {
-                // Scroll UP slightly: Reveal navigation bar
-                if (isSmartNavHidden) {
-                    setSmartNavVisibility(true);
-                }
-            }
-
-            lastScrollY = currentScrollY;
-        }
-
         function toggleAnswer(id) {
             if (!qaState[id]) qaState[id] = { expanded: false, tab: 'theory' };
             const expandedBody = document.getElementById(`qa-expanded-body-${id}`);
             const discussionSection = document.getElementById(`answer-discussion-${id}`);
             const iconDiv = document.getElementById(`icon-${id}`);
             const cardEl = document.getElementById(`qa-card-${id}`);
-            const stickyBlock = document.getElementById(`qa-sticky-block-${id}`);
+            const headerEl = cardEl ? cardEl.querySelector('.qa-card-header') : null;
             const willExpand = expandedBody ? expandedBody.classList.contains('hidden') : false;
             
             if (willExpand) {
@@ -1814,8 +1736,8 @@
                         const otherExp = document.getElementById(`qa-expanded-body-${item.id}`);
                         const otherDisc = document.getElementById(`answer-discussion-${item.id}`);
                         const otherIcon = document.getElementById(`icon-${item.id}`);
-                        const otherSticky = document.getElementById(`qa-sticky-block-${item.id}`);
-                        const otherHeader = otherSticky ? otherSticky.querySelector('.qa-card-header') : null;
+                        const otherCard = document.getElementById(`qa-card-${item.id}`);
+                        const otherHeader = otherCard ? otherCard.querySelector('.qa-card-header') : null;
 
                         if (otherExp && !otherExp.classList.contains('hidden')) {
                             otherExp.classList.add('hidden');
@@ -1828,12 +1750,12 @@
                             const otherIconEl = otherIcon.querySelector('i') || otherIcon.querySelector('svg');
                             if (otherIconEl) otherIconEl.style.transform = 'rotate(0deg)';
                         }
-                        if (otherSticky) {
-                            otherSticky.classList.remove('rounded-t-xl', 'border-b', 'border-slate-200', 'shadow-xs');
-                            otherSticky.classList.add('rounded-xl');
-                        }
                         if (otherHeader) {
-                            otherHeader.classList.remove('border-b', 'border-slate-100');
+                            otherHeader.classList.remove('border-b', 'border-slate-200', 'bg-slate-50/50');
+                            otherHeader.classList.add('hover:bg-slate-50/50');
+                        }
+                        if (otherCard) {
+                            otherCard.classList.remove('ring-1', 'ring-amber-300', 'shadow-md');
                         }
                         if (!qaState[item.id]) qaState[item.id] = { expanded: false, tab: 'theory' };
                         qaState[item.id].expanded = false;
@@ -1846,26 +1768,28 @@
                 if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-amber-600 bg-amber-100';
                 const iconElement = iconDiv ? (iconDiv.querySelector('i') || iconDiv.querySelector('svg')) : null;
                 if (iconElement) iconElement.style.transform = 'rotate(180deg)';
-                
-                if (stickyBlock) {
-                    stickyBlock.classList.remove('rounded-xl');
-                    stickyBlock.classList.add('rounded-t-xl', 'border-b', 'border-slate-200', 'shadow-xs');
-                    const headerEl = stickyBlock.querySelector('.qa-card-header');
-                    if (headerEl) headerEl.classList.add('border-b', 'border-slate-100');
+                if (headerEl) {
+                    headerEl.classList.add('border-b', 'border-slate-200', 'bg-slate-50/50');
+                    headerEl.classList.remove('hover:bg-slate-50/50');
+                }
+                if (cardEl) {
+                    cardEl.classList.add('ring-1', 'ring-amber-300', 'shadow-md');
                 }
                 qaState[id].expanded = true;
 
-                // Smooth scroll focus: Align question comfortably in viewport
+                // Smooth scroll focus: Gently bring question header into clear view if obscured
                 if (cardEl) {
                     requestAnimationFrame(() => {
-                        const navOffset = isSmartNavHidden ? 12 : (getSmartNavHeight() + 16);
-                        const cardTopInDoc = cardEl.getBoundingClientRect().top + window.pageYOffset;
-                        const targetScrollY = Math.max(0, cardTopInDoc - navOffset);
-                        
-                        window.scrollTo({
-                            top: targetScrollY,
-                            behavior: 'smooth'
-                        });
+                        const rect = cardEl.getBoundingClientRect();
+                        const topNav = document.getElementById('main-nav-tabs');
+                        const navHeight = topNav ? (topNav.offsetHeight + 24) : 60;
+                        if (rect.top < navHeight || rect.top > window.innerHeight - 80) {
+                            const targetScrollY = window.pageYOffset + rect.top - navHeight;
+                            window.scrollTo({
+                                top: Math.max(0, targetScrollY),
+                                behavior: 'smooth'
+                            });
+                        }
                     });
                 }
             } else {
@@ -1875,23 +1799,24 @@
                 if (iconDiv) iconDiv.className = 'p-2 rounded-lg text-slate-400 bg-slate-50';
                 const iconElement = iconDiv ? (iconDiv.querySelector('i') || iconDiv.querySelector('svg')) : null;
                 if (iconElement) iconElement.style.transform = 'rotate(0deg)';
-                
-                if (stickyBlock) {
-                    stickyBlock.classList.remove('rounded-t-xl', 'border-b', 'border-slate-200', 'shadow-xs');
-                    stickyBlock.classList.add('rounded-xl');
-                    const headerEl = stickyBlock.querySelector('.qa-card-header');
-                    if (headerEl) headerEl.classList.remove('border-b', 'border-slate-100');
+                if (headerEl) {
+                    headerEl.classList.remove('border-b', 'border-slate-200', 'bg-slate-50/50');
+                    headerEl.classList.add('hover:bg-slate-50/50');
+                }
+                if (cardEl) {
+                    cardEl.classList.remove('ring-1', 'ring-amber-300', 'shadow-md');
                 }
                 qaState[id].expanded = false;
 
                 // If scrolled deep into comments upon collapsing, smoothly realign view back to card header
                 if (cardEl) {
                     const rect = cardEl.getBoundingClientRect();
-                    if (rect.top < 65) {
-                        const navOffset = isSmartNavHidden ? 12 : (getSmartNavHeight() + 16);
-                        const cardTopInDoc = cardEl.getBoundingClientRect().top + window.pageYOffset;
+                    const topNav = document.getElementById('main-nav-tabs');
+                    const navHeight = topNav ? (topNav.offsetHeight + 24) : 60;
+                    if (rect.top < 0) {
+                        const targetScrollY = window.pageYOffset + rect.top - navHeight;
                         window.scrollTo({
-                            top: Math.max(0, cardTopInDoc - navOffset),
+                            top: Math.max(0, targetScrollY),
                             behavior: 'smooth'
                         });
                     }
@@ -1945,7 +1870,6 @@
             
             renderQACards(filtered);
             updateFilterUI();
-            updateStickyBlockOffsets();
         }
 
         function filterByDifficulty(level) {
@@ -2124,19 +2048,6 @@
             document.getElementById(`tab-${targetId}`).classList.remove('hidden');
             document.getElementById(`btn-tab-${targetId}`).className = "px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2";
 
-            // Toggle Tab 3 filter group inside smart-nav-container
-            const filterGroup = document.getElementById('qa-filter-header-group');
-            if (filterGroup) {
-                if (targetId === 'interview') {
-                    filterGroup.classList.remove('hidden');
-                } else {
-                    filterGroup.classList.add('hidden');
-                }
-            }
-
-            // Ensure navigation is visible on tab switch and sync sticky offset
-            setSmartNavVisibility(true);
-
             // Safe icon reload
             try {
                 if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -2182,22 +2093,6 @@
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-compare').addEventListener('click', () => switchTab('compare'));
             document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
-
-            // Attach Smart Scroll event listener
-            window.addEventListener('scroll', () => {
-                if (!isScrollTicking) {
-                    requestAnimationFrame(() => {
-                        handleSmartScroll();
-                        isScrollTicking = false;
-                    });
-                    isScrollTicking = true;
-                }
-            }, { passive: true });
-
-            // Update sticky position on window resize
-            window.addEventListener('resize', () => {
-                updateStickyBlockOffsets();
-            });
 
             // Init Language
             applyI18n();

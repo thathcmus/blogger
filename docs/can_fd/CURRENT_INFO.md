@@ -1,8 +1,8 @@
 # Đặc Tả Kỹ Thuật Hiện Trạng: CAN FD Protocol Explorer (Current Info)
 
 * **Tên file nguồn**: [`widget_can_fd.html`](../../widget_can_fd.html)
-* **Phiên bản hiện tại**: `v1.3.0` (Tích hợp Firebase Live Auth & Cloud Firestore Database: Lưu trữ thảo luận thời gian thực, đăng nhập Google popup thật, hỗ trợ fallback offline/local)
-* **Ngày cập nhật**: `2026-10-10`
+* **Phiên bản hiện tại**: `v1.3.1` (Tối ưu hóa giao diện cuộn siêu mượt 60fps: Triệt tiêu hoàn toàn hiện tượng khất/khựng giật, gỡ bỏ sticky block trong card gây che khuất comment, loại bỏ thanh cuộn lồng `max-h-[220px]`, đưa bộ lọc về luồng tự nhiên của Tab 3, thanh điều hướng nổi nhẹ nhàng không reflow)
+* **Ngày cập nhật**: `2026-10-17`
 * **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức mạng ô tô CAN FD, phân tích cấu trúc Frame ở cấp độ Bit, cơ chế BRS (Bit Rate Switch), bảng so sánh Classic CAN / CAN FD / CAN XL, hệ thống ngân hàng câu hỏi ôn luyện phỏng vấn ECU/AUTOSAR chuyên sâu, và hệ sinh thái Thảo luận cộng đồng kết nối Cloud Firestore (hỗ trợ Google Auth thật, trả lời lồng nhau, ghi chú tác giả, đồng bộ đa thiết bị). Phục vụ nhúng vào bài viết Google Blogger hoặc học tập độc lập.
 
 ---
@@ -84,27 +84,27 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
 ## 4. Bản Đồ Mã Nguồn (Source Code Architecture)
 
 * **Dòng 1 – 29**: HTML Head, CDN scripts (Tailwind, Lucide, Firebase App/Auth/Firestore Compat v10.14.1), CSS keyframes (`fadeIn`, `no-scrollbar`).
-* **Dòng 30 – 53**: Root container `#canfd-explorer-root`, Header, User Auth bar (`#auth-header-container`) và nút chuyển ngữ (`#lang-indicator`).
+* **Dòng 30 – 53**: Root container `#canfd-explorer-root`, Header, User Auth bar (`#auth-header-container`) và nút chuyển ngữ (`#lang-indicator`), nút toàn màn hình (`#btn-fullscreen`).
 * **Dòng 54 – 99**: Modal Google Sign-In & Firebase Auth (`#google-auth-modal`), nút đăng nhập thật qua Firebase popup Google và hướng dẫn xử lý tên miền ủy quyền.
-* **Dòng 100 – 160**: **Smart Top Navigation & Filter Container** (`#smart-nav-container` - `sticky top-2 z-40`): Gom 3 Tab điều hướng chính (`#main-nav-tabs`) và cụm Tiêu đề Ngân hàng câu hỏi + Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`) vào chung một container trượt thông minh.
-* **Dòng 161 – 280**: Cụm giao diện Tab 1 (Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`).
-* **Dòng 281 – 305**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
-* **Dòng 306 – 335**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi Q&A) chứa `div#qa-container`, empty state và WIP banner.
-* **Dòng 336 – 460**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn và Google Sign-In.
-* **Dòng 461 – 600**: Data Layer `qaData`: Mảng Object song ngữ chứa 4 tầng kiến thức chuẩn ISO 11898-1 và bẫy kép.
-* **Dòng 601 – 625**: Cấu hình Firebase (`firebaseConfig`), khởi tạo SDK.
-* **Dòng 626 – 830**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
-* **Dòng 831 – 1320**: Controller render UI thảo luận (`renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes.
-* **Dòng 1321 – 1575**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
-* **Dòng 1576 – 1730**: Controller Q&A Accordion & Sticky Block (`renderQACards()`, `toggleAnswer()`):
-  - **Khối Sticky Toàn Diện (`.qa-card-sticky-block`)**: Tích hợp chặt chẽ [Tiêu đề câu hỏi] + [Thanh 4 Tab] + [Nội dung câu trả lời `max-h-[220px] overflow-y-auto`] vào 1 container sticky duy nhất, luôn giữ lại liền kề sau câu hỏi khi người đọc cuộn xuống xem bình luận.
-  - **Single-Open Accordion**: Tự động thu gọn các câu hỏi khác khi mở 1 câu hỏi mới, tránh chồng chéo nội dung.
-* **Dòng 1731 – 1910**: **Smart Scroll Navigation Controller** (`getSmartNavHeight()`, `updateStickyBlockOffsets()`, `setSmartNavVisibility()`, `handleSmartScroll()`):
-  - **Tính toán chiều cao thực tế động (`getSmartNavHeight()`)**: Tự động đo đạc kích thước thực tế của `#smart-nav-container`, gán tọa độ `top: (navHeight + 12)px` khi nav hiện, triệt tiêu 100% tình trạng đè lên câu hỏi khi cuộn lên hoặc kéo xuống cuối.
-  - **Tua xuống (Scroll Down)**: Ẩn mượt mà `#smart-nav-container`, khối sticky câu hỏi tự động dời lên sát đỉnh (`top: 8px`), bình luận cuộn mượt mà phía dưới.
-  - **Tua lên 1 xíu (Scroll Up)**: Trượt hiện lại 6 mục điều hướng trên đầu trang. Khi cuộn xuống (kể cả khi chạm đáy trang), thanh điều hướng giữ nguyên trạng thái ẩn để độc giả tập trung 100% vào nội dung câu hỏi và bình luận mà không bị tự động bật lên.
-* **Dòng 1901 – 2112**: Data & Handlers cho Segment Frame và So sánh thế hệ.
-* **Dòng 2113 – 2222**: `switchTab()`, sự kiện `DOMContentLoaded`, lắng nghe cuộn `window.scroll`, resize cửa sổ, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons. (Toàn bộ code comments và HTML comments trong file đã được chuẩn hóa 100% Tiếng Anh).
+* **Dòng 100 – 115**: **Floating Sticky Navigation Bar** (`#smart-nav-container`, `#main-nav-tabs` - `sticky top-2 z-30`): Thanh điều hướng 3 tab chính nhỏ gọn (height ~48px) nổi nhẹ nhàng trên đầu trang với hiệu ứng kính mờ (glassmorphism), `pointer-events-none` ở container cha để không cản trở tương tác.
+* **Dòng 116 – 235**: Cụm giao diện Tab 1 (Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`).
+* **Dòng 236 – 260**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
+* **Dòng 261 – 350**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi Q&A): Cụm Tiêu đề và Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`) được đặt ngay đầu Tab 3 theo luồng tự nhiên của tài liệu; danh sách câu hỏi `div#qa-container`, empty state và WIP banner.
+* **Dòng 351 – 475**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn và Google Sign-In.
+* **Dòng 476 – 615**: Data Layer `qaData`: Mảng Object song ngữ chứa 4 tầng kiến thức chuẩn ISO 11898-1 và bẫy kép.
+* **Dòng 616 – 640**: Cấu hình Firebase (`firebaseConfig`), khởi tạo SDK.
+* **Dòng 641 – 845**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
+* **Dòng 846 – 1335**: Controller render UI thảo luận (`renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes.
+* **Dòng 1336 – 1590**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
+* **Dòng 1591 – 1735**: Controller Q&A Cards (`renderQACards()`):
+  - Hiển thị đầy đủ chiều cao nội dung câu trả lời tự nhiên (bỏ giới hạn `max-h-[220px] overflow-y-auto`), không còn scrollbar lồng gây kẹt cuộn.
+  - Thẻ card cấu trúc mượt mà, gỡ bỏ `sticky` bên trong thẻ card để triệt tiêu hoàn toàn hiện tượng che khuất bình luận hoặc đè nhau khi cuộn.
+* **Dòng 1736 – 1830**: Controller Accordion (`toggleAnswer()`):
+  - **Single-Open Accordion**: Mở 1 câu hỏi, tự động thu gọn các câu hỏi khác.
+  - **Scroll Focus Tinh Tế**: Chỉ cuộn nhẹ nhàng khi phần đầu câu hỏi bị che khuất sau thanh nav nổi hoặc vượt ngoài tầm mắt; loại bỏ hoàn toàn các event listener cuộn làm thrash layout.
+* **Dòng 1831 – 2015**: Handlers lọc câu hỏi (`applyFilters()`, `filterByDifficulty()`, `filterByTag()`, `resetFilters()`, `updateFilterUI()`).
+* **Dòng 2016 – 2085**: Data & Handlers cho Segment Frame (`selectSegment()`, `segmentData`).
+* **Dòng 2086 – 2116**: `switchTab()`, sự kiện `DOMContentLoaded`, khởi tạo đa ngôn ngữ, Firebase Auth listener, Firestore sync và Lucide icons. (File tổng cộng 2116 dòng, 100% comment Tiếng Anh, đạt kiểm tra Verification Protocol).
 
 ---
 

@@ -32,13 +32,26 @@ Kho lưu trữ các công cụ trực quan hóa và mô phỏng tương tác (**
 2. Mở bài đăng Blogger của bạn, chuyển sang chế độ **HTML View** (Soạn thảo HTML) và dán đoạn mã sau:
 
 ```html
-<!-- FlexRay Explorer Embed Widget -->
+<!-- 1. FlexRay Explorer Embed Widget -->
 <div style="width: 100%; margin: 24px auto; text-align: center;">
     <iframe src="https://thathcmus.github.io/blogger/widget_flexray.html" 
             width="100%" 
             height="850px" 
             style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden;" 
             title="FlexRay Protocol Explorer"
+            loading="lazy">
+    </iframe>
+</div>
+
+<!-- 2. CAN FD Explorer Embed Widget (Khối Full-Width Breakout: Tự động bung rộng 1200px ra 2 bên lề Blogger) -->
+<div style="position: relative; left: 50%; transform: translateX(-50%); width: min(96vw, 1200px); margin: 32px 0; text-align: center;">
+    <iframe src="https://thathcmus.github.io/blogger/widget_can_fd.html" 
+            width="100%" 
+            height="1100px" 
+            style="border: none; border-radius: 16px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); background-color: #f8fafc; overflow: hidden; display: block;" 
+            title="CAN FD Protocol Explorer"
+            allow="fullscreen"
+            allowfullscreen="true"
             loading="lazy">
     </iframe>
 </div>

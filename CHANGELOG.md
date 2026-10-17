@@ -24,22 +24,21 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
   - Loại bỏ hoàn toàn tình trạng comment tiếng Việt trong mã nguồn, giảm tải dung lượng file HTML và tối ưu hóa context window cho AI Agent.
 
 ### Fixed
+- **Tối ưu hóa toàn diện giao diện cuộn siêu mượt 60fps & triệt tiêu 100% hiện tượng đè component/khất giật (`widget_can_fd.html`)**:
+  - **Triệt tiêu hiện tượng đè component khi cuộn**: Gỡ bỏ hoàn toàn thuộc tính `position: sticky` trên từng khối thẻ câu hỏi `.qa-card-sticky-block`. Trước đó việc biến cả tiêu đề + 4 tab + câu trả lời thành khối sticky đã chiếm hơn 350px viewport, nổi đè lên trên che khuất các bình luận và va chạm với các thẻ câu hỏi tiếp theo. Thẻ câu hỏi nay mở rộng và trượt tự nhiên theo chiều dọc, các phần tử hiển thị mạch lạc, không còn bất kỳ sự che khuất nào.
+  - **Triệt tiêu hiện tượng khất/khựng cuộn (Scroll Trap)**: Gỡ bỏ giới hạn `max-h-[220px] overflow-y-auto` trên khối nội dung câu trả lời. Trước đó, thanh cuộn lồng bên trong câu trả lời khiến thao tác cuộn chuột bị "mắc kẹt" khi con trỏ di chuyển qua khối nội dung. Nay toàn bộ 4 tab (`📖 Lý Thuyết`, `🖥️ C++ Modeling`, `🔧 ECU / AUTOSAR`, `⚠️ Bẫy Phỏng Vấn`) hiển thị tự nhiên với độ cao thật, tạo trải nghiệm đọc thông suốt và thoáng đãng.
+  - **Tái cấu trúc cụm điều hướng & bộ lọc (Natural In-Flow vs Compact Floating Sticky)**:
+    - Di chuyển cụm Tiêu đề Ngân Hàng Câu Hỏi + Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`) vào đúng đầu mục của Tab 3 (`#tab-interview`) theo luồng tự nhiên của tài liệu.
+    - Giữ lại thanh điều hướng 3 tab chính (`#main-nav-tabs`) thành thanh nổi cố định siêu nhẹ (`sticky top-2 z-30`, chiều cao ~48px, hiệu ứng glassmorphism).
+    - Loại bỏ hoàn toàn controller cuộn JavaScript (`handleSmartScroll`, `setSmartNavVisibility`, `updateStickyBlockOffsets`) và các event listener cuộn làm thrash layout reflow trên mỗi tick. Thanh điều hướng neo tĩnh 100% bằng CSS mượt mà, không bao giờ nhảy vị trí hay biến mất chớp nháy.
+  - **Tinh chỉnh Focus Accordion Thông Minh**: Trong hàm `toggleAnswer()`, thay thế việc ép cuộn trang thô bạo bằng cơ chế kiểm tra tọa độ bounding rect tinh tế: chỉ cuộn nhẹ khi đỉnh câu hỏi bị khuất sau thanh nav nổi hoặc chìm ngoài màn hình; giữ nguyên góc nhìn nếu câu hỏi đã nằm trong vùng nhìn thấy thoải mái của người đọc.
 - **Khắc phục lỗi cú pháp Firestore Security Rules**: Sửa lỗi parse path variable do ghép chuỗi ký tự wildcard không hợp lệ bằng cách khai báo tường minh từng collection; bổ sung từ khóa `if` còn thiếu trong default deny rule (`allow read, write: if false;`).
-- **Khắc phục triệt để 2 lỗi điều hướng & hiển thị Q&A (`widget_can_fd.html`)**:
-  - **Điểm 1 (Triệt tiêu 100% hiện tượng đè lên nhau)**: Gom 3 Tab điều hướng chính và cụm Tiêu đề Ngân Hàng Câu Hỏi + Bộ lọc độ khó & chủ đề vào container duy nhất `#smart-nav-container` (`sticky top-2 z-40`). Áp dụng cơ chế đo đạc chiều cao thực tế tự động `getSmartNavHeight()` và cập nhật khoảng cách `updateStickyBlockOffsets()`. Khi người dùng cuộn ngược lên hoặc cuộn xuống cuối trang, toàn bộ cụm điều hướng hiển thị liền kề phía trên câu hỏi mà tuyệt đối không bị đè lên câu hỏi.
-  - **Điểm 2 (Giữ lại Tiêu đề + 4 Tab + Nội dung câu trả lời liền kề khi cuộn)**: Tái cấu trúc thẻ card thành khối sticky thống nhất `.qa-card-sticky-block` bao gồm: [Tiêu đề câu hỏi] + [Thanh 4 Tab: Lý Thuyết, C++ Modeling, ECU/AUTOSAR, Bẫy Phỏng Vấn] + [Nội dung câu trả lời của tab đang xem với `max-h-[220px] overflow-y-auto`]. Khi người đọc cuộn xuống để đọc danh sách bình luận, toàn bộ khối này được ghim giữ lại nguyên vẹn ngay trên đầu (`top: 8px` khi nav ẩn, hoặc ngay sau nav khi nav hiện), đảm bảo 4 tab và câu trả lời luôn liền kề sau câu hỏi như lúc chưa tua xuống.
-  - **Tắt tự động bật thanh điều hướng khi xuống cuối trang**: Loại bỏ kiểm tra đáy trang `isAtBottom` trong `handleSmartScroll()`. Khi cuộn xuống (kể cả khi xuống cuối trang), thanh điều hướng 6 mục giữ nguyên trạng thái ẩn, chỉ hiển thị lại khi người dùng chủ động cuộn ngược lên một khoảng nhỏ.
 
 ### Added
 - **Nâng cấp Trải Nghiệm Điều Hướng & Đọc Q&A (`widget_can_fd.html`)**:
-  - **Smart Scroll Navigation (Tua xuống ẩn, tua lên hiện 1 xíu, cuối trang hiện lại)**:
-    - Khi cuộn chuột hoặc kéo thanh cuộn xuống: Tự động trượt ẩn mượt mà cả 6 mục điều hướng & bộ lọc (`1. Cấu Trúc Khung`, `2. So Sánh Các Thế Hệ`, `3. Q&A Phỏng Vấn`, `Ngân Hàng Câu Hỏi Phỏng Vấn`, `Độ khó:`, `Chủ đề:`). Tiêu đề câu hỏi tự động dời lên sát đỉnh màn hình (`top: 8px`), tối ưu 100% diện tích để độc giả đọc 4 tab câu trả lời và trao đổi thảo luận.
-    - Khi cuộn chuột hoặc kéo thanh cuộn ngược lên một khoảng nhỏ (ngưỡng 8px): Cả 6 mục điều hướng và bộ lọc lập tức trượt xuống hiển thị lại ngay đầu trang để người dùng đổi tab hoặc lọc lại câu hỏi tức thì.
-    - Khi cuộn đến cuối trang (cuối danh sách bình luận/câu hỏi): Tự động hiển thị lại cả 6 mục điều hướng trên đầu trang, trong khi phần câu hỏi, 4 tab câu trả lời và các bình luận đã mở vẫn giữ nguyên trạng thái hiển thị đầy đủ.
   - **Cơ chế Single-Open Accordion**: Khi bấm mở bất kỳ câu hỏi nào, tất cả các câu hỏi khác đang mở sẽ tự động thu gọn lại, giúp giao diện gọn gàng và độc giả tập trung 100% vào nội dung câu hỏi hiện tại.
-  - **Dynamic Sticky Question Header & Neo Cuộn Chuẩn Tầm Mắt (Scroll Focus)**:
-    - Loại bỏ triệt để xung đột `transform: translateY` và `overflow-hidden` trên các container cha, đảm bảo Tiêu đề câu hỏi luôn ghim vững chắc theo ngữ cảnh (`top: 8px` khi nav ẩn, `top: 174px` khi nav hiện), không bao giờ bị trôi mất.
-    - Cải tiến cơ chế tính toán tọa độ tuyệt đối `cardTopInDoc - navOffset` kết hợp `requestAnimationFrame` và `window.scrollTo({ behavior: 'smooth' })`, định vị ngay ngắn cả tiêu đề câu hỏi và 4 tab câu trả lời trước tầm mắt người đọc.
+  - **Thanh Điều Hướng Nổi Glassmorphism Siêu Nhẹ (`sticky top-2 z-30`)**: Neo tĩnh thanh điều hướng 3 tab chính nhỏ gọn (~48px) trên đầu trang với hiệu ứng kính mờ, không reflow, không che khuất nội dung bên dưới.
+  - **Smart Scroll Focus**: Căn chỉnh cuộn nhẹ nhàng đến câu hỏi đang mở khi phần đỉnh bị khuất ngoài tầm nhìn mà không làm giật khung hình.
 - **Tích hợp Firebase Live Auth & Cloud Firestore Database (`widget_can_fd.html`)**:
   - Tích hợp bộ thư viện Firebase Compat SDKs (v10.14.1: App, Auth, Firestore) bảo toàn kiến trúc Single-File Zero-Build khi nhúng Blogger hoặc host trên GitHub Pages.
   - Kết nối Firebase Project `tech-blogger-widgets` theo cấu hình chính thức từ tác giả.

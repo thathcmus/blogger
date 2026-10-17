@@ -61,3 +61,7 @@ Khi cần yêu cầu thêm tính năng mới hoặc sửa đổi nội dung, vui
   - Thêm phần kiến trúc Kênh đôi Dual-Channel (Kênh A & B) cho Redundancy vs High Bandwidth.
   - Bổ sung cơ chế Shadow Buffers (Double Buffering) và Receive FIFO Buffers.
   - Gắn nhãn `SW` (Symbol Window) rõ ràng cho khối màu vàng trong sơ đồ chu kỳ.
+* [x] **[FR-005] Tab 4: Ngân hàng câu hỏi phỏng vấn Q&A Accordion (Q1 & Q2)** *(Hoàn thành: 2026-10-07)*
+  - **Q1**: Đồng bộ thời gian Time-Triggered, POC State Machine (không tồn tại "POC Frame"), đối chiếu 5 chiều Static Segment (ASIL D) vs Dynamic Segment (FTDMA), Synchronous Mode vs Free-Running Mode.
+  - **Q2**: Cơ chế đồng bộ xung Clock khi bị lệch, thuật toán Fault-Tolerant Midpoint (FTM) lọc bỏ lỗi cực trị Byzantine, bù lệch pha và tần số tại NIT, phân biệt Sync Node vs Regular Node (khẳng định Sync Node truyền Application Payload bình thường), và tích hợp Bộ mô phỏng tương tác 4-Node Clock Drift thời gian thực.
+  - Thiết kế sẵn slot mở rộng Q3, Q4... cho các chuyên đề tiếp theo.

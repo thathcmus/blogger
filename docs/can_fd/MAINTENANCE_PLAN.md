@@ -1,4 +1,4 @@
-# Kế Hoạch Maintenance 2 Tháng: CAN FD Widget (v1.1.x → v1.2.x)
+# Kế Hoạch Maintenance 2 Tháng: CAN FD Widget (v1.1.x → v2.0.0)
 
 > **Mục tiêu chiến lược:** Biến widget thành công cụ ôn phỏng vấn Embedded/ECU Software automotive toàn diện — bao phủ ~80-85% kiến thức cốt lõi CAN/CAN FD từ Protocol Core đến Physical Layer, Diagnostics, Security và AUTOSAR stack đầy đủ.
 >
@@ -18,7 +18,7 @@
 | **Phase 2** | 4 – 30 | Items 2–10 | 9 Q&A Clusters chuyên sâu | Layer 1–4 (Core + AUTOSAR) |
 | **Phase 3** | 31 – 48 | Items 11–16 | 6 Q&A Clusters mở rộng | Layer 2,5,6,7 (Physical, Diag, SecOC) |
 | **Phase 4** | 49 – 57 | Items 17–19 | Interactive Tools (Calculator, Trace, Animation) | Feature |
-| **Phase 5** | 58 – 60 | Item 20 | Testing, Responsive, Docs & Release v1.2.0 | Finalize |
+| **Phase 5** | 58 – 60 | Item 20 | Testing, Responsive, Docs & Release v2.0.0 | Finalize |
 
 ---
 
@@ -49,7 +49,7 @@
 | 17 | ⬜ | Calculator: Frame Duration + Bus Load% | 4 | 49–51 |
 | 18 | ⬜ | Trace View: Hex Dump to Physical Value | 4 | 52–54 |
 | 19 | ⬜ | Interactive Animation: BRS & Clock Switch | 4 | 55–57 |
-| 20 | ⬜ | Responsive QA & Release v1.2.0 | 5 | 58–60 |
+| 20 | ⬜ | Responsive QA & Release v2.0.0 | 5 | 58–60 |
 
 ---
 ## ═══════════════════════════════════════
