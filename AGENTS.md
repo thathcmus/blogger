@@ -51,8 +51,10 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │
 ├── firebase.json                           # Cấu hình triển khai Firebase (Firestore Rules)
 ├── firestore.rules                         # Bộ quy tắc bảo mật Cloud Firestore (Zero-Trust)
+├── repomix.config.json                     # Cấu hình chuẩn đóng gói ngữ cảnh cho AI (Repomix)
 │
 ├── scripts/                                # Công cụ tự động hóa & Kiểm soát chất lượng
+│   ├── pack-context.js                     # Đóng gói ngữ cảnh repo cho AI (LLM Context Packer)
 │   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
 │
 ├── widget_can_fd.html                      # Widget: Trực quan hóa giao thức CAN FD

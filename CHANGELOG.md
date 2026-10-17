@@ -22,6 +22,10 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
   - Bổ sung quy trình 4 bước chẩn đoán lỗi chuyên sâu (CDN Error fallback, Blogger Theme layout break, mobile viewport 375px break, JS Runtime error).
 - **Tạo Kỹ Năng Mới Cho AI Agent: Review & Soạn Thảo Q&A (`.agents/skills/review-qa-content/SKILL.md`)**:
   - Hướng dẫn chi tiết checklist 4 tầng (Theory, SystemC/C++ Modeling, ECU/AUTOSAR Practice, Interview Trap) kết hợp khung 5W-1H cho câu hỏi khái niệm (Type A) và Micro-STAR cho câu hỏi tình huống (Type B).
+- **Tích Hợp Bộ Công Cụ Đóng Gói Ngữ Cảnh Cho AI (`scripts/pack-context.js`, `repomix.config.json`)**:
+  - Hỗ trợ đóng gói repository thành một file context duy nhất (`repomix-output.xml`) để tải lên các mô hình AI Web (Argon, Claude, Gemini, ChatGPT) lập Master Plan.
+  - Mặc định chạy ở chế độ Lightweight (~59k tokens, lọc bỏ các file HTML UI lớn để tiết kiệm 60–90% quota của Web AI).
+  - Hỗ trợ cờ `--full` khi cần xuất toàn bộ mã nguồn bao gồm cả 3 widget HTML (~145k tokens).
 - **Đồng Bộ Bộ Mặt Dự Án & Sơ Đồ Cấu Trúc Kho Lưu Trữ (`AGENTS.md`, `README.md`, `README.vi.md`)**:
   - Cập nhật liên kết tài liệu `docs/cpp_oop/` trong bảng Showcase của cả 2 bản `README.md` và `README.vi.md`.
   - Cập nhật sơ đồ cây thư mục (Repository Architecture) đầy đủ các thư mục và kỹ năng mới.

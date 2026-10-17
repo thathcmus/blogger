@@ -111,7 +111,9 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 ├── LICENSE                                 # MIT Open Source License
 ├── firebase.json                           # Firebase deployment configuration
 ├── firestore.rules                         # Cloud Firestore Zero-Trust Security Rules
+├── repomix.config.json                     # AI Context Packer configuration (Repomix)
 ├── scripts/                                # Automation & Quality Control
+│   ├── pack-context.js                     # LLM Context Packer script
 │   └── sync-docs.js                        # Auto-verification & documentation sync script
 ├── widget_can_fd.html                      # CAN FD Protocol Explorer widget
 ├── widget_flexray.html                     # FlexRay Protocol Explorer widget

@@ -111,7 +111,9 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 ├── LICENSE                                 # Giấy phép mã nguồn mở MIT
 ├── firebase.json                           # Cấu hình triển khai Firebase
 ├── firestore.rules                         # Quy tắc bảo mật Cloud Firestore (Zero-Trust Rules)
+├── repomix.config.json                     # Cấu hình đóng gói ngữ cảnh cho AI (Repomix)
 ├── scripts/                                # Công cụ tự động hóa & Kiểm soát chất lượng
+│   ├── pack-context.js                     # Script đóng gói ngữ cảnh repo cho AI (LLM Context Packer)
 │   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
 ├── widget_can_fd.html                      # Widget CAN FD Protocol Explorer
 ├── widget_flexray.html                     # Widget FlexRay Protocol Explorer
