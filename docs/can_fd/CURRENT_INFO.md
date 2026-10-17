@@ -1,9 +1,9 @@
 # Đặc Tả Kỹ Thuật Hiện Trạng: CAN FD Protocol Explorer (Current Info)
 
 * **Tên file nguồn**: [`widget_can_fd.html`](../../widget_can_fd.html)
-* **Phiên bản hiện tại**: `v1.4.0` (Bổ sung Dark Mode toàn diện: Nút chuyển Sáng / Tối thông minh `#btn-theme`, tự động nhận diện `prefers-color-scheme`, lưu `localStorage`, đồng bộ màu Dark Palette cao cấp cho cả 3 Tab, khung so sánh, Q&A 4 tầng và hệ thống thảo luận Firebase; tổng cộng 2,233 dòng code).
+* **Phiên bản hiện tại**: `v1.5.0` (Bổ sung Cổng Khám Phá Landing Portal Hub tương tác 3D Tilt theo chuột, vệt sáng phản xạ Glare, đồ họa mô phỏng xung sóng bitstream & BRS laser delimiter, thước đo băng thông benchmark, vi mạch ECU kiến trúc 4 tầng, nút điều hướng mượt vào từng tab và nút "Tổng Quan" quay lại portal; tổng cộng 2,673 dòng code).
 * **Ngày cập nhật**: `2026-10-17`
-* **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức mạng ô tô CAN FD, phân tích cấu trúc Frame ở cấp độ Bit, cơ chế BRS (Bit Rate Switch), bảng so sánh Classic CAN / CAN FD / CAN XL, hệ thống ngân hàng câu hỏi ôn luyện phỏng vấn ECU/AUTOSAR chuyên sâu, và hệ sinh thái Thảo luận cộng đồng kết nối Cloud Firestore (hỗ trợ Google Auth thật, trả lời lồng nhau, ghi chú tác giả, đồng bộ đa thiết bị, hỗ trợ Dark Mode). Phục vụ nhúng vào bài viết Google Blogger hoặc học tập độc lập.
+* **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức mạng ô tô CAN FD, tích hợp Cổng mở màn Landing Portal Hub 3D theo chuột, phân tích cấu trúc Frame ở cấp độ Bit, cơ chế BRS (Bit Rate Switch), bảng so sánh Classic CAN / CAN FD / CAN XL, hệ thống ngân hàng câu hỏi ôn luyện phỏng vấn ECU/AUTOSAR chuyên sâu, và hệ sinh thái Thảo luận cộng đồng kết nối Cloud Firestore (hỗ trợ Google Auth thật, trả lời lồng nhau, ghi chú tác giả, đồng bộ đa thiết bị, hỗ trợ Dark Mode). Phục vụ nhúng vào bài viết Google Blogger hoặc học tập độc lập.
 
 ---
 
@@ -50,6 +50,14 @@
   - 🛡️ **Tự động nhận diện quyền Tác Giả**: Khi email đăng nhập là `thathcmus@gmail.com`, hệ thống tự cấp role `Author` và huy hiệu `⭐ Tác Giả Blog`, mở khóa tính năng Ghim Note (`📌 Ghim Note`) và xóa bình luận.
 - **Cloud Firestore Realtime Sync**: Kết nối collection `canfd_comments` tại Firebase project `tech-blogger-widgets`. Lắng nghe thay đổi thời gian thực qua `onSnapshot`, kết hợp cache offline `localStorage`.
 
+### Cổng Khám Phá: Landing Portal Hub (3D Tilt Mouse-Tracking & Interactive Entry)
+Trang mở màn tương tác công nghệ cao đóng vai trò là "Visual Hook" đầu tiên khi độc giả truy cập widget:
+- **Interactive 3D Tilt & Dynamic Glare**: 3 thẻ chuyên đề xếp dọc tự động xoay nghiêng theo góc chuột (`perspective(1000px) rotateX(...) rotateY(...) translateY(-4px)`) và vệt sáng phản chiếu (Radial Spotlight Glare) bám theo tọa độ con trỏ `(x, y)`.
+- **Card 01 - Cấu Trúc Khung (Frame Architecture)**: Trực quan hóa dao động ký Oscilloscope với xung sóng vi sai CAN FD chuyển đổi nhịp nhàng giữa Arbitration Phase (1 Mbps) và Data Phase (8 Mbps) qua vạch laser BRS; nút bấm cam vàng với hiệu ứng xung nhịp hào quang (`animate-cta-pulse`).
+- **Card 02 - So Sánh Các Thế Hệ (Generations Benchmark Matrix)**: Thước đo băng thông và thanh Payload đối chiếu trực quan Classic CAN, CAN FD (8 Mbps / 64B), và CAN XL (20+ Mbps / 2048B).
+- **Card 03 - Q&A Phỏng Vấn (ECU & AUTOSAR Question Bank)**: Sơ đồ vi mạch ECU kết nối 4 mạch phát sáng đại diện cho 4 tầng kiến thức chuyên sâu.
+- **Chuyển Cảnh & Điều Hướng Mượt**: Click vào nút bấm tại bất kỳ thẻ nào sẽ kích hoạt `enterExplorer(tabId)` chuyển cảnh fade/slide mượt mà vào giao diện tương tác chi tiết; nút `Tổng Quan` (`#btn-tab-portal`) trên thanh nav cho phép quay lại Portal Hub tức thì.
+
 ### Tab 1: Cấu Trúc Khung Truyền CAN FD (Base Frame Format)
 Cung cấp bản đồ tương tác bit-level của frame CAN FD:
 - **Arbitration Phase (Nominal Bit Rate)**: SOF, 11-bit ID, RRS (thay thế RTR), IDE. Truyền ở tốc độ nền (chậm) để phân xử an toàn.
@@ -72,7 +80,7 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
    - 🚗 **Góc độ Automotive / Protocol:** Bẫy về starvation, bus load, timing, hardware constraints.
    - 💻 **Góc độ C++ / Modeling Follow-up:** Bẫy vặn lại khi ứng viên đề cập đến C++/SystemC (race condition, delta cycle, bitfield endianness, cache locality, lock contention).
 
-#### Khung Thảo Luận & Ghi Chú Kỹ Thuật (Nằm Cố Định Phía Dưới Cả 4 Tab):
+#### Khung Thảo Luận & Ghi Chú Kỹ Thuật (Nằm Cố Định Phía Dưới CẢ 4 Tab):
 - **Luôn hiển thị trực tiếp bên dưới câu trả lời**: Độc giả hoặc tác giả đang xem bất kỳ tab nào đều có ngay khung thảo luận bên dưới để note hoặc nêu concern mà không làm mất ngữ cảnh.
 - **Tự động đồng bộ Scope (Phần liên quan)**: Ô nhập bình luận tự động chọn phạm vi theo tab đang xem (ví dụ đang xem tab ECU thì dropdown tự động chọn `🔧 ECU/AUTOSAR`), giúp gắn tag chính xác cho từng note.
 - **Bộ lọc thảo luận nhanh (Filter Pills)**: Hỗ trợ lọc danh sách bình luận theo từng tab: `Tất cả`, `📖 Lý Thuyết`, `🖥️ C++ Modeling`, `🔧 ECU / AUTOSAR`, `⚠️ Bẫy Phỏng Vấn`.
@@ -85,28 +93,30 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
 
 ## 4. Bản Đồ Mã Nguồn (Source Code Architecture)
 
-* **Dòng 1 – 40**: HTML Head, cấu hình Tailwind CDN (`darkMode: 'class'`, custom colors `slate-850`, `slate-750`), CDN scripts (Tailwind, Lucide, Firebase App/Auth/Firestore Compat v10.14.1), CSS keyframes (`fadeIn`, `no-scrollbar`, inline code theme styles).
-* **Dòng 41 – 65**: Root container `#canfd-explorer-root`, Header, User Auth bar (`#auth-header-container`), nút chuyển đổi Theme Sun/Moon (`#btn-theme`), nút chuyển ngữ (`#lang-indicator`), nút toàn màn hình (`#btn-fullscreen`).
-* **Dòng 66 – 110**: Modal Google Sign-In & Firebase Auth (`#google-auth-modal`), nút đăng nhập thật qua Firebase popup Google và hướng dẫn xử lý tên miền ủy quyền.
-* **Dòng 111 – 130**: **Floating Sticky Navigation Bar** (`#smart-nav-container`, `#main-nav-tabs` - `sticky top-2 z-30`): Thanh điều hướng 3 tab chính nhỏ gọn nổi nhẹ nhàng trên đầu trang với hiệu ứng kính mờ (glassmorphism), hỗ trợ đầy đủ Dark Theme.
-* **Dòng 131 – 250**: Cụm giao diện Tab 1 (Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`).
-* **Dòng 251 – 275**: Cụm giao diện Tab 2 (Bảng So Sánh Thế Hệ Giao Thức).
-* **Dòng 276 – 370**: Cụm giao diện Tab 3 (Ngân hàng câu hỏi Q&A): Cụm Tiêu đề và Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`) được đặt ngay đầu Tab 3 theo luồng tự nhiên của tài liệu; danh sách câu hỏi `div#qa-container`, empty state và WIP banner.
-* **Dòng 371 – 510**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn, Google Sign-In và tooltip Theme Toggle.
-* **Dòng 511 – 650**: Data Layer `qaData`: Mảng Object song ngữ chứa 4 tầng kiến thức chuẩn ISO 11898-1 và bẫy kép.
-* **Dòng 651 – 675**: Cấu hình Firebase (`firebaseConfig`), khởi tạo SDK.
-* **Dòng 676 – 955**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
-* **Dòng 956 – 1358**: Controller render UI Header & Thảo luận (`renderAuthHeader()`, `renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes với dark palette chuẩn.
-* **Dòng 1359 – 1640**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
-* **Dòng 1641 – 1775**: Controller Q&A Cards (`renderQACards()`):
-  - Hiển thị đầy đủ chiều cao nội dung câu trả lời tự nhiên, không còn scrollbar lồng gây kẹt cuộn.
-  - Hỗ trợ Dark Mode trên toàn bộ sub-tabs, tags, diff-colors và khung discussion.
-* **Dòng 1776 – 1875**: Controller Accordion (`toggleAnswer()`): Single-Open Accordion với Scroll Focus mượt mà và tương thích Dark Mode.
-* **Dòng 1876 – 1905**: Sub-tab switcher (`switchQATab()`): Chuyển đổi 4 tầng kiến thức và đồng bộ scope selector.
-* **Dòng 1906 – 1964**: Handlers lọc câu hỏi (`applyFilters()`, `filterByDifficulty()`, `filterByTag()`, `resetFilters()`, `updateFilterUI()`).
-* **Dòng 1965 – 2081**: Data cho Segment Frame (`segmentData`).
-* **Dòng 2082 – 2145**: `switchTab()`, `selectSegment()`.
-* **Dòng 2213 – 2233**: Sự kiện `DOMContentLoaded`: Khởi tạo Theme, gán listeners tab, áp dụng i18n, kết nối Firebase Auth/Firestore, render Q&A Cards và Lucide icons. (File tổng cộng 2,233 dòng, 100% comment Tiếng Anh, đạt chuẩn Verification Protocol `Syntax OK`).
+* **Dòng 1 – 115**: HTML Head, cấu hình Tailwind CDN (`darkMode: 'class'`, custom colors `slate-850`, `slate-750`), CDN scripts (Tailwind, Lucide, Firebase App/Auth/Firestore Compat v10.14.1), CSS keyframes (`fadeIn`, `no-scrollbar`, `portal-tilt-card`, `portal-cyber-grid`, `waveScan`, `ctaPulseRing`, `signalDash`).
+* **Dòng 116 – 150**: Root container `#canfd-explorer-root`, Header, User Auth bar (`#auth-header-container`), nút chuyển đổi Theme Sun/Moon (`#btn-theme`), nút chuyển ngữ (`#lang-indicator`), nút toàn màn hình (`#btn-fullscreen`).
+* **Dòng 151 – 195**: Modal Google Sign-In & Firebase Auth (`#google-auth-modal`), nút đăng nhập thật qua Firebase popup Google và hướng dẫn xử lý tên miền ủy quyền.
+* **Dòng 196 – 442**: **Cổng Khám Phá Mở Màn Landing Portal Hub** (`#portal-hub-view`): Banner chào mừng, 3 thẻ xếp dọc tương tác 3D tilt theo chuột (Oscilloscope waveform, Benchmark speedometer, Microchip ECU) và các nút điều hướng chuyển cảnh.
+* **Dòng 443 – 672**: **Khung Nội Dung Chính** (`#main-content-view`):
+  - **Floating Sticky Navigation Bar** (`#smart-nav-container`, `#main-nav-tabs`): Nút `Tổng Quan` (`#btn-tab-portal`) và 3 nút chuyển Tab (`#btn-tab-frame`, `#btn-tab-compare`, `#btn-tab-interview`).
+  - **Tab 1** (`#tab-frame`): Bản đồ bit CAN FD tương tác và khung chi tiết `#field-details`.
+  - **Tab 2** (`#tab-compare`): Bảng So Sánh Thế Hệ Giao Thức (Classic CAN vs CAN FD vs CAN XL).
+  - **Tab 3** (`#tab-interview`): Tiêu đề và Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`), danh sách thẻ Q&A Accordion (`div#qa-container`), empty state và WIP banner.
+* **Dòng 673 – 860**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn, Google Sign-In, Landing Portal Hub và tooltip Theme Toggle.
+* **Dòng 861 – 1070**: Data Layer `qaData`: Mảng Object song ngữ chứa 4 tầng kiến thức chuẩn ISO 11898-1 và bẫy kép.
+* **Dòng 1071 – 1100**: Cấu hình Firebase (`firebaseConfig`), khởi tạo SDK.
+* **Dòng 1101 – 1380**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
+* **Dòng 1381 – 1780**: Controller render UI Header & Thảo luận (`renderAuthHeader()`, `renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes với dark palette chuẩn.
+* **Dòng 1781 – 2060**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
+* **Dòng 2061 – 2195**: Controller Q&A Cards (`renderQACards()`): Hiển thị chiều cao tự nhiên không scrollbar lồng, Dark Mode toàn diện.
+* **Dòng 2196 – 2295**: Controller Accordion (`toggleAnswer()`): Single-Open Accordion với Scroll Focus mượt mà.
+* **Dòng 2296 – 2325**: Sub-tab switcher (`switchQATab()`): Chuyển đổi 4 tầng kiến thức và đồng bộ scope selector.
+* **Dòng 2326 – 2380**: Handlers lọc câu hỏi (`applyFilters()`, `filterByDifficulty()`, `filterByTag()`, `resetFilters()`, `updateFilterUI()`).
+* **Dòng 2381 – 2500**: Data cho Segment Frame (`segmentData`).
+* **Dòng 2501 – 2580**: Controllers 3D Tilt Cards & Portal Hub (`initTiltCards()`, `enterExplorer()`, `backToPortal()`).
+* **Dòng 2581 – 2640**: Navigation & View Switcher (`switchTab()`, `selectSegment()`).
+* **Dòng 2641 – 2690**: Theme Engine (`getPreferredTheme()`, `applyTheme()`, `toggleTheme()`, `initTheme()`).
+* **Dòng 2691 – 2720**: Sự kiện `DOMContentLoaded`: Khởi tạo Theme, khởi tạo 3D Tilt, gán listeners tab/portal, áp dụng i18n, kết nối Firebase Auth/Firestore, render Q&A Cards và Lucide icons. (File tổng cộng 2,673 dòng, 100% comment Tiếng Anh, đạt chuẩn Verification Protocol `Syntax OK`).
 
 ---
 

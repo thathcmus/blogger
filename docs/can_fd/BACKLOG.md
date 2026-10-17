@@ -47,4 +47,5 @@ Khi cần đề xuất tính năng mới hoặc cập nhật nội dung Q&A, vui
 ## 3. Các Đề Xuất Chờ Phê Duyệt (Backlog Pool)
 
 - [x] **[CANFD-001] Chế độ tối (Dark Mode Theme):** Tự động nhận diện theme hệ thống (`prefers-color-scheme`) kết hợp toggle nút bấm Sun/Moon, lưu `localStorage` (`canfd_theme`), hỗ trợ chuẩn màu Dark Palette cho toàn bộ 3 tab, modal và thảo luận Firestore *(Hoàn thành ở v1.4.0)*.
+- [x] **[CANFD-003] Cổng Khám Phá Mở Màn (Landing Portal Hub with 3D Tilt Cards):** Xây dựng trang mở màn Landing Portal Hub với 3 thẻ xếp dọc tương tác 3D Tilt theo con trỏ chuột, vệt sáng Glare, visual đồ họa trực quan (Oscilloscope waveform, Benchmark speedometer, Microchip ECU) và điều hướng mượt vào từng tab *(Hoàn thành ở v1.5.0)*.
 - [ ] **[CANFD-002] Tích hợp bộ giả lập Oscilloscope (Signal Waveform):** Vẽ dạng sóng điện áp vi sai CAN_H / CAN_L khi chuyển đổi giữa Arbitration Phase và Data Phase để trực quan hóa hiệu ứng dội tín hiệu (Ringing).

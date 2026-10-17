@@ -35,6 +35,19 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 - **Khắc phục lỗi cú pháp Firestore Security Rules**: Sửa lỗi parse path variable do ghép chuỗi ký tự wildcard không hợp lệ bằng cách khai báo tường minh từng collection; bổ sung từ khóa `if` còn thiếu trong default deny rule (`allow read, write: if false;`).
 
 ### Added
+- **Cổng Khám Phá Mở Màn Landing Portal Hub Tương Tác 3D Tilt (v1.5.0) (`widget_can_fd.html`)**:
+  - **Trải Nghiệm Mở Màn Đẳng Cấp (Interactive Cover Experience)**: Khi vừa tải widget, giao diện mở đầu bằng Cổng Khám Phá (Landing Portal Hub) với Banner công nghệ ô tô và 3 cửa sổ/thẻ chuyên đề xếp dọc tương tác trực quan, ẩn bớt lượng thông tin dày đặc ban đầu để tạo hứng thú và định hướng cho độc giả trước khi bước vào chi tiết.
+  - **Hiệu Ứng 3D Perspective Tilt & Phản Quang Glare Theo Con Trỏ Chuột**:
+    - Khi rê chuột qua từng thẻ, thẻ sẽ tự động nghiêng 3D chân thực (`perspective(1000px) rotateX(...) rotateY(...) translateY(-4px)`), đàn hồi vật lý mượt mà khi rời chuột.
+    - Lớp phản quang đa hướng (Radial Glare Spotlight) bám theo chính xác tọa độ con trỏ `(x, y)` tạo hiệu ứng tráng gương kim loại cao cấp trên bề mặt kính.
+  - **Đồ Họa & Nút Bấm Animation Chuyên Biệt Cho Từng Cửa Sổ**:
+    - **Cửa Sổ 01 (Cấu Trúc Khung)**: Mini oscilloscope waveform với xung sóng điện áp số vi sai, vạch laser kích hoạt bước nhảy tốc độ BRS (`1 Mbps` &rarr; `8 Mbps`), chuỗi bit quét động và nút bấm *"Khám Phá Cấu Trúc Frame"* có hiệu ứng hào quang phát sáng xung nhịp (`animate-cta-pulse`).
+    - **Cửa Sổ 02 (So Sánh Thế Hệ)**: Thước đo băng thông và thanh so sánh Payload trực quan đối chiếu Classic CAN (`1M / 8B`), CAN FD (`8M / 64B`), và CAN XL (`20M+ / 2048B`), kèm nút *"Xem Bảng So Sánh Thế Hệ"*.
+    - **Cửa Sổ 03 (Q&A Phỏng Vấn)**: Sơ đồ vi mạch xử lý ECU với các xung tín hiệu phát sáng kết nối 4 tầng kiến thức (`📖 Lý Thuyết`, `🖥️ C++ Modeling`, `🔧 AUTOSAR`, `⚠️ Double-Angle Trap`), kèm nút *"Luyện Phỏng Vấn Ngay"*.
+  - **Cơ Chế Chuyển Cảnh Mượt Mà & Nút "Tổng Quan" Tiện Lợi**:
+    - Bấm nút tại bất kỳ cửa sổ nào sẽ thực hiện chuyển cảnh fade & slide mượt mà vào giao diện tương tác chi tiết của tab tương ứng.
+    - Bổ sung nút bấm *"Tổng Quan"* trên thanh điều hướng nổi để độc giả có thể quay trở lại Cổng Khám Phá bất kỳ lúc nào với 1 click.
+  - **Hỗ Trợ Song Ngữ Toàn Diện (vi/en) & Tương Thích Hoàn Hảo Dark Mode**.
 - **Chế độ Tối Toàn Diện (Comprehensive Dark Mode Theme - v1.4.0) (`widget_can_fd.html`)**:
   - **Nút chuyển đổi chế độ Sáng / Tối trực quan (`#btn-theme`)**: Đặt trên thanh Header (cạnh nút đổi ngôn ngữ và nút đăng nhập Google Auth), sử dụng icon Lucide Sun / Moon động kèm tooltip song ngữ.
   - **Tự động nhận diện & Ghi nhớ tùy chọn người dùng**: Tự động nhận diện thiết lập giao diện hệ điều hành qua `window.matchMedia('(prefers-color-scheme: dark)')`, lưu vết trạng thái người dùng vào `localStorage` (`canfd_theme`), tự động cập nhật mượt mà khi người dùng đổi theme OS.

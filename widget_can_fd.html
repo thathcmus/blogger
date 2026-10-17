@@ -51,6 +51,67 @@
             color: #f8fafc;
             border: 1px solid #334155;
         }
+
+        /* 3D Portal Tilt & Glare Effects */
+        .portal-tilt-card {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.15s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease;
+            will-change: transform;
+        }
+        .portal-tilt-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle 320px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.25), transparent 80%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 25;
+        }
+        .dark .portal-tilt-card::before {
+            background: radial-gradient(circle 320px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08), transparent 80%);
+        }
+        .portal-tilt-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Ambient Cyber Grid Background for Portal */
+        .portal-cyber-grid {
+            background-image: radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .dark .portal-cyber-grid {
+            background-image: radial-gradient(rgba(51, 65, 85, 0.35) 1px, transparent 1px);
+        }
+
+        /* Oscilloscope Wave Scan Animation */
+        @keyframes waveScan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(600%); }
+        }
+        .animate-wave-scan {
+            animation: waveScan 3.5s linear infinite;
+        }
+
+        /* Pulsing Glow Ring for Frame CTA Button */
+        @keyframes ctaPulseRing {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+            50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+        .animate-cta-pulse {
+            animation: ctaPulseRing 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Signal Dash Stream Animation */
+        @keyframes signalDash {
+            to { stroke-dashoffset: -32; }
+        }
+        .animate-signal-dash {
+            stroke-dasharray: 6 4;
+            animation: signalDash 1.2s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 antialiased p-4 md:p-8 transition-colors duration-300">
@@ -88,7 +149,7 @@
         </div>
 
         <!-- Google Sign-In & Firebase Auth Modal -->
-        <div id="google-auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm p-4 animate-fadeIn">
+        <div id="google-auth-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm p-4 animate-fadeIn">
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full overflow-hidden transform transition-all">
                 <!-- Modal Header -->
                 <div class="p-6 border-b border-slate-100 dark:border-slate-800 text-center relative bg-gradient-to-b from-slate-50 to-white dark:from-slate-850 dark:to-slate-900">
@@ -133,20 +194,268 @@
             </div>
         </div>
 
-        <!-- Main Navigation Tabs (Clean Floating Sticky Top Bar) -->
-        <div id="smart-nav-container" class="sticky top-2 z-30 w-full mb-6 pointer-events-none">
-            <div id="main-nav-tabs" class="flex flex-wrap justify-center gap-2 p-1.5 sm:p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200/90 dark:border-slate-800/90 w-fit mx-auto transition-colors pointer-events-auto">
-                <button id="btn-tab-frame" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2 text-xs sm:text-sm">
-                    <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
-                </button>
-                <button id="btn-tab-compare" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm">
-                    <i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="tab2">2. So Sánh Các Thế Hệ</span>
-                </button>
-                <button id="btn-tab-interview" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm">
-                    <i data-lucide="help-circle" class="w-4 h-4"></i> <span data-i18n="tab3">3. Q&A Phỏng Vấn</span>
-                </button>
+        <!-- LANDING PORTAL HUB (3D Tilt Mouse-Tracking Showcase Cards) -->
+        <div id="portal-hub-view" class="space-y-6 mb-8 animate-fadeIn">
+            <!-- Portal Welcome Banner -->
+            <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-850 p-6 sm:p-8 text-center shadow-lg">
+                <div class="absolute inset-0 portal-cyber-grid opacity-30 pointer-events-none"></div>
+                <div class="relative z-10 max-w-2xl mx-auto">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100/80 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/80 shadow-xs mb-3">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span data-i18n="portal_welcome_badge">CỔNG TƯƠNG TÁC KỸ THUẬT Ô TÔ</span>
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-2.5 tracking-tight" data-i18n="portal_welcome_title">
+                        Khám Phá Giao Thức Mạng CAN FD
+                    </h2>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_welcome_desc">
+                        Lựa chọn chuyên đề bên dưới để bắt đầu mô phỏng trực quan hóa ở cấp độ bit, đối chiếu thế hệ và ôn luyện phỏng vấn kỹ sư ECU.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Vertical Interactive Showcase Cards Stack -->
+            <div class="space-y-6">
+                <!-- ================= CARD 1: CẤU TRÚC KHUNG ================= -->
+                <div onclick="enterExplorer('frame')" class="portal-tilt-card rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl hover:border-amber-500/60 dark:hover:border-amber-500/60 cursor-pointer group transition-all">
+                    <!-- Top Category & Badges -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-amber-600 dark:text-amber-400" data-i18n="portal_card1_tag">01 • PHÂN TÍCH BITSTREAM</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">⚡ DUAL BITRATE (1M &rarr; 8Mbps)</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">DATA 64 BYTES</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Signal Waveform Visual -->
+                    <div class="relative w-full h-28 sm:h-32 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center p-2 sm:p-3 mb-5 select-none shadow-inner">
+                        <div class="absolute inset-0 portal-cyber-grid opacity-35"></div>
+                        <div class="absolute top-0 bottom-0 w-24 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent animate-wave-scan pointer-events-none"></div>
+                        
+                        <svg class="w-full h-full relative z-10" viewBox="0 0 600 100" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="gradArbitration" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#f59e0b" />
+                                    <stop offset="100%" stop-color="#d97706" />
+                                </linearGradient>
+                                <linearGradient id="gradData" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#10b981" />
+                                    <stop offset="100%" stop-color="#059669" />
+                                </linearGradient>
+                                <linearGradient id="gradCrc" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#3b82f6" />
+                                    <stop offset="100%" stop-color="#2563eb" />
+                                </linearGradient>
+                            </defs>
+                            <line x1="0" y1="50" x2="600" y2="50" stroke="#334155" stroke-dasharray="4 4" stroke-width="1" />
+                            
+                            <!-- Arbitration (Nominal 1Mbps) -->
+                            <path d="M 0 50 L 20 50 L 20 20 L 60 20 L 60 50 L 100 50 L 100 20 L 150 20 L 150 50 L 180 50 L 180 20 L 210 20" 
+                                  fill="none" stroke="url(#gradArbitration)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="animate-signal-dash" />
+                            
+                            <!-- BRS Switch Marker -->
+                            <line x1="210" y1="10" x2="210" y2="90" stroke="#ef4444" stroke-width="2" stroke-dasharray="2 2" />
+                            <circle cx="210" cy="20" r="4" fill="#ef4444" class="animate-ping" />
+                            <circle cx="210" cy="20" r="4" fill="#ef4444" />
+                            
+                            <!-- Data Phase (High-Speed 8Mbps) -->
+                            <path d="M 210 20 L 225 20 L 225 50 L 240 50 L 240 20 L 255 20 L 255 50 L 270 50 L 270 20 L 285 20 L 285 50 L 300 50 L 300 20 L 315 20 L 315 50 L 330 50 L 330 20 L 345 20 L 345 50 L 360 50 L 360 20 L 375 20 L 375 50 L 390 50 L 390 20 L 405 20 L 405 50 L 420 50" 
+                                  fill="none" stroke="url(#gradData)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="animate-signal-dash" />
+                            
+                            <!-- CRC & ACK -->
+                            <path d="M 420 50 L 450 50 L 450 20 L 490 20 L 490 50 L 530 50 L 530 20 L 560 20 L 560 50 L 600 50" 
+                                  fill="none" stroke="url(#gradCrc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                            
+                            <text x="60" y="85" fill="#f59e0b" font-size="10" font-weight="bold" font-family="monospace">ARBITRATION (1 Mbps)</text>
+                            <text x="215" y="15" fill="#ef4444" font-size="9" font-weight="bold" font-family="monospace">⚡ BRS SWITCH</text>
+                            <text x="270" y="85" fill="#10b981" font-size="10" font-weight="bold" font-family="monospace">DATA PHASE (8 Mbps)</text>
+                            <text x="490" y="85" fill="#3b82f6" font-size="10" font-weight="bold" font-family="monospace">CRC &amp; ACK</text>
+                        </svg>
+                    </div>
+
+                    <!-- Content & CTA Button -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                <i data-lucide="layout-template" class="w-5 h-5 text-amber-500"></i>
+                                <span data-i18n="portal_card1_title">Cấu Trúc Khung & Cơ Chế Bit Rate Switch (BRS)</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_card1_desc">
+                                Giải phẫu chi tiết 10 trường bit từ SOF đến EOF. Trực quan hóa bước nhảy tốc độ BRS từ 1 Mbps lên 8 Mbps, quy tắc nhồi bit Stuff-bit động và mã kiểm tra CRC 17/21 bit.
+                            </p>
+                        </div>
+                        <div class="shrink-0 pt-2 md:pt-0">
+                            <button onclick="enterExplorer('frame'); event.stopPropagation();" class="w-full md:w-auto relative overflow-hidden px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 animate-cta-pulse group/btn">
+                                <i data-lucide="play-circle" class="w-5 h-5 text-amber-200 animate-pulse"></i>
+                                <span data-i18n="portal_btn_frame">Khám Phá Cấu Trúc Frame</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <span class="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= CARD 2: SO SÁNH CÁC THẾ HỆ ================= -->
+                <div onclick="enterExplorer('compare')" class="portal-tilt-card rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl hover:border-blue-500/60 dark:hover:border-blue-500/60 cursor-pointer group transition-all">
+                    <!-- Top Category & Badges -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-blue-600 dark:text-blue-400" data-i18n="portal_card2_tag">02 • MA TRẬN ĐỐI CHIẾU</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">ISO 11898-1:2015</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">BUS LOAD 80%↓</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Benchmark Gauge Visual -->
+                    <div class="relative w-full h-28 sm:h-32 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden p-3.5 flex flex-col justify-between mb-5 select-none shadow-inner">
+                        <div class="absolute inset-0 portal-cyber-grid opacity-30"></div>
+                        <!-- Row 1: Classic CAN -->
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center text-[11px] font-mono mb-1">
+                                <span class="text-slate-400 font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span> Classic CAN 2.0</span>
+                                <span class="text-slate-400">1 Mbps • 8 Bytes max</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                                <div class="h-full bg-slate-500 rounded-full" style="width: 12%;"></div>
+                            </div>
+                        </div>
+                        <!-- Row 2: CAN FD -->
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center text-[11px] font-mono mb-1">
+                                <span class="text-amber-400 font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> CAN FD (ISO 11898-1)</span>
+                                <span class="text-emerald-400 font-bold">8 Mbps (8x) • 64 Bytes (8x)</span>
+                            </div>
+                            <div class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden p-0.5 border border-amber-500/30">
+                                <div class="h-full bg-gradient-to-r from-amber-500 to-emerald-400 rounded-full shadow-sm shadow-emerald-500/50" style="width: 50%;"></div>
+                            </div>
+                        </div>
+                        <!-- Row 3: CAN XL -->
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center text-[11px] font-mono mb-1">
+                                <span class="text-cyan-400 font-semibold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> CAN XL (Next-Gen)</span>
+                                <span class="text-cyan-300">20+ Mbps (20x) • 2048 Bytes</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full" style="width: 95%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content & CTA Button -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                <i data-lucide="scale" class="w-5 h-5 text-blue-500"></i>
+                                <span data-i18n="portal_card2_title">So Sánh Băng Thông & Các Thế Hệ CAN</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_card2_desc">
+                                Phân tích đối chiếu toàn diện giữa Classic CAN, CAN FD và CAN XL về hiệu suất truyền dẫn, tối ưu Bus Load, kích thước gói tin đến 64 Bytes và chuẩn an toàn ISO 11898-1.
+                            </p>
+                        </div>
+                        <div class="shrink-0 pt-2 md:pt-0">
+                            <button onclick="enterExplorer('compare'); event.stopPropagation();" class="w-full md:w-auto relative overflow-hidden px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 group/btn">
+                                <i data-lucide="scale" class="w-5 h-5 text-blue-200"></i>
+                                <span data-i18n="portal_btn_compare">Xem Bảng So Sánh Thế Hệ</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <span class="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= CARD 3: Q&A PHỎNG VẤN ================= -->
+                <div onclick="enterExplorer('interview')" class="portal-tilt-card rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-xl hover:border-purple-500/60 dark:hover:border-purple-500/60 cursor-pointer group transition-all">
+                    <!-- Top Category & Badges -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-purple-600 dark:text-purple-400" data-i18n="portal_card3_tag">03 • NGÂN HÀNG CÂU HỎI</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">4 TẦNG CHUYÊN SÂU</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">BẪY PHỎNG VẤN KÉP</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Microchip & Tiers Visual -->
+                    <div class="relative w-full h-28 sm:h-32 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden p-3 flex items-center justify-center mb-5 select-none shadow-inner">
+                        <div class="absolute inset-0 portal-cyber-grid opacity-30"></div>
+                        <div class="relative z-10 flex items-center justify-between w-full max-w-lg px-2">
+                            <div class="flex flex-col items-center gap-1">
+                                <div class="px-2.5 py-1 rounded-lg bg-blue-950/80 border border-blue-500/40 text-blue-300 text-[11px] font-bold shadow-sm shadow-blue-500/20">
+                                    📖 Lý Thuyết
+                                </div>
+                                <span class="text-[9px] text-slate-400 font-mono">ISO 11898-1</span>
+                            </div>
+                            <div class="flex-1 h-0.5 bg-gradient-to-r from-blue-500/50 to-purple-500/50 relative">
+                                <span class="absolute w-1.5 h-1.5 rounded-full bg-blue-400 -top-0.5 animate-ping"></span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 border-2 border-purple-500/60 shadow-lg shadow-purple-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i data-lucide="cpu" class="w-6 h-6 text-purple-400 animate-pulse"></i>
+                                </div>
+                                <span class="text-[10px] text-purple-300 font-mono font-bold mt-1">ECU AUTOSAR</span>
+                            </div>
+                            <div class="flex-1 h-0.5 bg-gradient-to-r from-purple-500/50 to-rose-500/50 relative">
+                                <span class="absolute w-1.5 h-1.5 rounded-full bg-purple-400 -top-0.5 right-1 animate-ping"></span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1">
+                                <div class="px-2.5 py-1 rounded-lg bg-rose-950/80 border border-rose-500/40 text-rose-300 text-[11px] font-bold shadow-sm shadow-rose-500/20">
+                                    ⚠️ Bẫy Phỏng Vấn
+                                </div>
+                                <span class="text-[9px] text-slate-400 font-mono">Double-Angle</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content & CTA Button -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                <i data-lucide="help-circle" class="w-5 h-5 text-purple-500"></i>
+                                <span data-i18n="portal_card3_title">Ngân Hàng Q&A Phỏng Vấn Kỹ Sư ECU & AUTOSAR</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed" data-i18n="portal_card3_desc">
+                                Bộ câu hỏi kỹ thuật ô tô chuyên sâu 4 tầng: Lý thuyết, Mô phỏng C++, Thực hành AUTOSAR BSW và Bẫy phỏng vấn phản biện kép kèm hệ sinh thái thảo luận Cloud.
+                            </p>
+                        </div>
+                        <div class="shrink-0 pt-2 md:pt-0">
+                            <button onclick="enterExplorer('interview'); event.stopPropagation();" class="w-full md:w-auto relative overflow-hidden px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 group/btn">
+                                <i data-lucide="help-circle" class="w-5 h-5 text-purple-200"></i>
+                                <span data-i18n="portal_btn_interview">Luyện Phỏng Vấn Ngay</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <span class="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Main Content View (Initially Hidden when viewing Portal Hub) -->
+        <div id="main-content-view" class="hidden">
+            <!-- Main Navigation Tabs (Clean Floating Sticky Top Bar) -->
+            <div id="smart-nav-container" class="sticky top-2 z-30 w-full mb-6 pointer-events-none">
+                <div id="main-nav-tabs" class="flex flex-wrap justify-center gap-2 p-1.5 sm:p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200/90 dark:border-slate-800/90 w-fit mx-auto transition-colors pointer-events-auto">
+                    <button id="btn-tab-portal" onclick="backToPortal()" class="px-3.5 sm:px-4 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 text-xs sm:text-sm" title="Quay lại Cổng Khám Phá">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> <span data-i18n="nav_portal">Tổng Quan</span>
+                    </button>
+                    <button id="btn-tab-frame" onclick="switchTab('frame')" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2 text-xs sm:text-sm">
+                        <i data-lucide="layout-template" class="w-4 h-4"></i> <span data-i18n="tab1">1. Cấu Trúc Khung (Frame)</span>
+                    </button>
+                    <button id="btn-tab-compare" onclick="switchTab('compare')" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm">
+                        <i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="tab2">2. So Sánh Các Thế Hệ</span>
+                    </button>
+                    <button id="btn-tab-interview" onclick="switchTab('interview')" class="px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i> <span data-i18n="tab3">3. Q&A Phỏng Vấn</span>
+                    </button>
+                </div>
+            </div>
 
         <!-- Tab 1 Container: Frame Format -->
         <div id="tab-frame" class="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6 animate-fadeIn">
@@ -361,6 +670,8 @@
             </div>
         </div>
 
+        </div> <!-- End of #main-content-view -->
+
     </div>
 
     <!-- CONTROLLER SCRIPT (FAULT-TOLERANT VANILLA JS) -->
@@ -434,9 +745,24 @@
                 unpin_note: "Bỏ ghim",
                 pinned_badge: "📌 Note của Tác Giả",
                 pin_note_checkbox: "Ghim làm Note quan trọng",
-                author_placeholder: "Chia sẻ note kinh nghiệm, giải đáp hoặc đính chính cho câu hỏi này...",
                 theme_light: "Chuyển sang giao diện Sáng",
-                theme_dark: "Chuyển sang giao diện Tối"
+                theme_dark: "Chuyển sang giao diện Tối",
+                portal_welcome_badge: "CỔNG TƯƠNG TÁC KỸ THUẬT Ô TÔ",
+                portal_welcome_title: "Khám Phá Giao Thức Mạng CAN FD",
+                portal_welcome_desc: "Lựa chọn chuyên đề bên dưới để bắt đầu mô phỏng trực quan hóa ở cấp độ bit, đối chiếu thế hệ và ôn luyện phỏng vấn kỹ sư ECU.",
+                portal_card1_tag: "01 • PHÂN TÍCH BITSTREAM",
+                portal_card1_title: "Cấu Trúc Khung & Cơ Chế Bit Rate Switch (BRS)",
+                portal_card1_desc: "Giải phẫu chi tiết 10 trường bit từ SOF đến EOF. Trực quan hóa bước nhảy tốc độ BRS từ 1 Mbps lên 8 Mbps, quy tắc nhồi bit Stuff-bit động và mã kiểm tra CRC 17/21 bit.",
+                portal_btn_frame: "Khám Phá Cấu Trúc Frame",
+                portal_card2_tag: "02 • MA TRẬN ĐỐI CHIẾU",
+                portal_card2_title: "So Sánh Băng Thông & Các Thế Hệ CAN",
+                portal_card2_desc: "Phân tích đối chiếu toàn diện giữa Classic CAN, CAN FD và CAN XL về hiệu suất truyền dẫn, tối ưu Bus Load, kích thước gói tin đến 64 Bytes và chuẩn an toàn ISO 11898-1.",
+                portal_btn_compare: "Xem Bảng So Sánh Thế Hệ",
+                portal_card3_tag: "03 • NGÂN HÀNG CÂU HỎI",
+                portal_card3_title: "Ngân Hàng Q&A Phỏng Vấn Kỹ Sư ECU & AUTOSAR",
+                portal_card3_desc: "Bộ câu hỏi kỹ thuật ô tô chuyên sâu 4 tầng: Lý thuyết, Mô phỏng C++, Thực hành AUTOSAR BSW và Bẫy phỏng vấn phản biện kép kèm hệ sinh thái thảo luận Cloud.",
+                portal_btn_interview: "Luyện Phỏng Vấn Ngay",
+                nav_portal: "Tổng Quan"
             },
             en: {
                 main_title: "CAN FD Protocol Explorer",
@@ -504,9 +830,24 @@
                 unpin_note: "Unpin",
                 pinned_badge: "📌 Author's Note",
                 pin_note_checkbox: "Pin as Author Note",
-                author_placeholder: "Share author insights, corrections or tips for this question...",
                 theme_light: "Switch to Light Theme",
-                theme_dark: "Switch to Dark Theme"
+                theme_dark: "Switch to Dark Theme",
+                portal_welcome_badge: "AUTOMOTIVE INTERACTIVE PORTAL",
+                portal_welcome_title: "Explore CAN FD Protocol Architecture",
+                portal_welcome_desc: "Select a module below to start bit-level visual simulation, generation benchmarks, and ECU engineer interview practice.",
+                portal_card1_tag: "01 • BITSTREAM ANALYSIS",
+                portal_card1_title: "Frame Architecture & Bit Rate Switch (BRS)",
+                portal_card1_desc: "Detailed bit-level anatomy from SOF to EOF. Visualize the BRS speed jump from 1 Mbps to 8 Mbps, dynamic stuff-bit rules, and 17/21-bit CRC verification.",
+                portal_btn_frame: "Explore Frame Structure",
+                portal_card2_tag: "02 • BENCHMARK MATRIX",
+                portal_card2_title: "Generations Comparison (Classic vs FD vs XL)",
+                portal_card2_desc: "Comprehensive benchmark comparing Classic CAN, CAN FD, and CAN XL across data throughput, bus load reduction, 64-byte payload, and ISO 11898-1 standards.",
+                portal_btn_compare: "View Generation Matrix",
+                portal_card3_tag: "03 • QUESTION BANK",
+                portal_card3_title: "ECU & AUTOSAR Interview Q&A Bank",
+                portal_card3_desc: "Exclusive 4-tier automotive questions: Protocol Theory, C++ Modeling, AUTOSAR BSW, and Double-Angle Interview Traps with live cloud discussions.",
+                portal_btn_interview: "Practice Interview Q&A",
+                nav_portal: "Overview"
             }
         };
 
@@ -808,13 +1149,17 @@
                 const noticeEl = document.getElementById('auth-environment-notice');
                 if (noticeEl) noticeEl.classList.add('hidden');
                 modal.classList.remove('hidden');
+                modal.classList.add('flex');
                 try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
             }
         }
 
         function closeAuthModal() {
             const modal = document.getElementById('google-auth-modal');
-            if (modal) modal.classList.add('hidden');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
         }
 
         function toggleFullscreen() {
@@ -2079,6 +2424,95 @@
             }
         };
 
+        // ==========================================
+        // 3D TILT CARDS & PORTAL HUB CONTROLLERS
+        // ==========================================
+        function initTiltCards() {
+            const cards = document.querySelectorAll('.portal-tilt-card');
+            cards.forEach(card => {
+                card.onmousemove = (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = -((y - centerY) / centerY) * 6;
+                    const rotateY = ((x - centerX) / centerX) * 6;
+
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+                };
+
+                card.onmouseleave = () => {
+                    card.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+                    setTimeout(() => {
+                        card.style.transition = 'transform 0.15s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease';
+                    }, 400);
+                };
+            });
+        }
+
+        function enterExplorer(targetTabId) {
+            const portal = document.getElementById('portal-hub-view');
+            const mainContent = document.getElementById('main-content-view');
+            if (!portal || !mainContent) return;
+
+            portal.classList.add('transition-all', 'duration-300', 'opacity-0', '-translate-y-4');
+
+            setTimeout(() => {
+                portal.classList.add('hidden');
+                portal.classList.remove('opacity-0', '-translate-y-4');
+
+                mainContent.classList.remove('hidden');
+                mainContent.classList.add('transition-all', 'duration-300', 'opacity-0', 'translate-y-4');
+
+                switchTab(targetTabId);
+
+                requestAnimationFrame(() => {
+                    mainContent.classList.remove('opacity-0', 'translate-y-4');
+                    mainContent.classList.add('opacity-100', 'translate-y-0');
+
+                    const nav = document.getElementById('smart-nav-container');
+                    if (nav) {
+                        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            }, 250);
+        }
+
+        function backToPortal() {
+            const portal = document.getElementById('portal-hub-view');
+            const mainContent = document.getElementById('main-content-view');
+            if (!portal || !mainContent) return;
+
+            mainContent.classList.add('transition-all', 'duration-250', 'opacity-0', 'translate-y-4');
+
+            setTimeout(() => {
+                mainContent.classList.add('hidden');
+                mainContent.classList.remove('opacity-0', 'translate-y-4');
+
+                portal.classList.remove('hidden');
+                portal.classList.add('transition-all', 'duration-300', 'opacity-0', '-translate-y-4');
+
+                requestAnimationFrame(() => {
+                    portal.classList.remove('opacity-0', '-translate-y-4');
+                    portal.classList.add('opacity-100', 'translate-y-0');
+
+                    const root = document.getElementById('canfd-explorer-root');
+                    if (root) {
+                        root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    try {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    } catch (e) {}
+                    initTiltCards();
+                });
+            }, 250);
+        }
+
         function switchTab(targetId) {
             // Hide all tabs
             document.getElementById('tab-frame').classList.add('hidden');
@@ -2086,14 +2520,14 @@
             document.getElementById('tab-interview').classList.add('hidden');
             
             // Reset all buttons
-            const inactiveClass = "px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2";
+            const inactiveClass = "px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-xs sm:text-sm";
             document.getElementById('btn-tab-frame').className = inactiveClass;
             document.getElementById('btn-tab-compare').className = inactiveClass;
             document.getElementById('btn-tab-interview').className = inactiveClass;
 
             // Show active tab
             document.getElementById(`tab-${targetId}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${targetId}`).className = "px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2";
+            document.getElementById(`btn-tab-${targetId}`).className = "px-4 sm:px-5 py-2 rounded-lg font-medium transition-colors bg-amber-600 text-white shadow-md flex items-center gap-2 text-xs sm:text-sm";
 
             // Safe icon reload
             try {
@@ -2206,22 +2640,27 @@
             // 1. Initialize Theme (Dark Mode)
             initTheme();
 
-            // 2. Attach tab event listeners
+            // 2. Initialize 3D Tilt Cards & Portal Navigation
+            initTiltCards();
+            const btnPortal = document.getElementById('btn-tab-portal');
+            if (btnPortal) btnPortal.addEventListener('click', backToPortal);
+
+            // 3. Attach tab event listeners
             document.getElementById('btn-tab-frame').addEventListener('click', () => switchTab('frame'));
             document.getElementById('btn-tab-compare').addEventListener('click', () => switchTab('compare'));
             document.getElementById('btn-tab-interview').addEventListener('click', () => switchTab('interview'));
 
-            // 3. Init Language
+            // 4. Init Language
             applyI18n();
 
-            // 4. Init Firebase Auth Listener & Cloud Firestore Sync
+            // 5. Init Firebase Auth Listener & Cloud Firestore Sync
             initFirebaseAuthListener();
             initFirestoreSync();
 
-            // 5. Init Q&A Cards
+            // 6. Init Q&A Cards
             renderQACards(qaData);
 
-            // 6. Safe icon init
+            // 7. Safe icon init
             try {
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             } catch (e) {
