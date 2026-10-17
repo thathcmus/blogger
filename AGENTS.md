@@ -26,6 +26,8 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │       │   └── SKILL.md                    # Hướng dẫn 5 bước và template tạo widget mới
 │       ├── git-commit-push/
 │       │   └── SKILL.md                    # Xử lý lệnh tắt /commit, /push, /commit-push tự động
+│       ├── pack-context/
+│       │   └── SKILL.md                    # Xử lý lệnh tắt /pack, /pack-full tự động đóng gói ngữ cảnh
 │       └── review-qa-content/
 │           └── SKILL.md                    # Hướng dẫn review & thêm Q&A 4 tầng chuẩn hóa
 │
@@ -108,6 +110,18 @@ Khi widget bị báo lỗi trên Blogger hoặc GitHub Pages:
    - **JS Runtime Error**: Logic crash → kiểm tra Console stack trace, đối chiếu Source Code Architecture trong `CURRENT_INFO.md`.
 3. **Bước 3 (Fix & Verify)**: Sửa lỗi → Chạy `node scripts/sync-docs.js` → Kiểm tra trên mobile viewport (375px).
 4. **Bước 4 (Sync)**: Thực hiện SOP-1 Bước 4 (Auto Info-Sync) đầy đủ.
+
+### SOP-5: Giao Thức Lệnh Tắt `/pack` & `/pack-full` (AI Context Packaging Protocol)
+Khi người dùng gõ lệnh tắt `/pack` hoặc `/pack-full` (hoặc `/pack --full`):
+1. **Lệnh `/pack` (Chế độ nhẹ - Khuyên dùng)**:
+   - Tự động chạy `node scripts/pack-context.js`.
+   - Đóng gói kiến trúc & tài liệu (`~60k tokens`), bỏ qua HTML lớn để tiết kiệm 60–90% quota của Web AI.
+   - Xuất ra file `repomix-output.xml`.
+2. **Lệnh `/pack-full` (hoặc `/pack --full`) (Chế độ toàn diện)**:
+   - Tự động chạy `node scripts/pack-context.js --full`.
+   - Đóng gói 100% mã nguồn bao gồm cả 3 widget HTML (`~146k tokens`).
+   - Xuất ra file riêng biệt `repomix-output-full.xml`.
+3. Báo cáo số token, kích thước file và hướng dẫn kéo thả lên 4.1 Argon Web / Claude.
 
 ### 🎯 Tiêu Chuẩn Hoàn Thành Bắt Buộc (Definition of Done - DoD)
 Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** nếu chưa kiểm tra đủ 4 điểm chốt (4-Point Checkpoint):

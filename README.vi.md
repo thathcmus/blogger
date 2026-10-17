@@ -79,6 +79,7 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 - [`.agents/rules/blogger-embed-rules.md`](.agents/rules/blogger-embed-rules.md): Bộ quy tắc kỹ thuật nghiêm ngặt khi code widget nhúng Blogger.
 - [`.agents/skills/blogger-widget-creator/SKILL.md`](.agents/skills/blogger-widget-creator/SKILL.md): Kỹ năng và template mẫu 5 bước để tạo thêm widget mới.
 - [`.agents/skills/git-commit-push/SKILL.md`](.agents/skills/git-commit-push/SKILL.md): Kỹ năng xử lý tự động lệnh tắt `/commit`, `/push`, `/commit-push`.
+- [`.agents/skills/pack-context/SKILL.md`](.agents/skills/pack-context/SKILL.md): Kỹ năng xử lý tự động lệnh tắt `/pack` và `/pack-full` đóng gói ngữ cảnh cho AI.
 - [`.agents/skills/review-qa-content/SKILL.md`](.agents/skills/review-qa-content/SKILL.md): Kỹ năng review & soạn thảo ngân hàng câu hỏi Q&A 4 tầng kỹ thuật.
 
 ---
@@ -91,6 +92,7 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 │   └── skills/
 │       ├── blogger-widget-creator/         # Kỹ năng và template tạo widget mới
 │       ├── git-commit-push/                # Kỹ năng xử lý tự động lệnh tắt /commit và /push
+│       ├── pack-context/                   # Kỹ năng tự động đóng gói ngữ cảnh /pack và /pack-full
 │       └── review-qa-content/              # Kỹ năng review & soạn thảo Q&A 4 tầng chuẩn hóa
 ├── docs/                                   # Tài liệu hiện trạng, backlog & maintenance plan
 │   ├── can_fd/                             # Tài liệu CAN FD Protocol

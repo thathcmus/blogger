@@ -28,10 +28,12 @@ let tempConfigFile = null;
 try {
     let command = 'npx -y repomix';
 
+    const outputFile = isFullMode ? 'repomix-output-full.xml' : 'repomix-output.xml';
+
     if (isFullMode) {
         tempConfigFile = path.join(ROOT_DIR, '.repomix.full.json');
         fs.writeFileSync(tempConfigFile, JSON.stringify({
-            output: { filePath: 'repomix-output.xml', style: 'xml' },
+            output: { filePath: outputFile, style: 'xml' },
             ignore: {
                 useGitignore: true,
                 useDefaultPatterns: true,
@@ -47,9 +49,9 @@ try {
     });
 
     console.log('\n----------------------------------------------------');
-    console.log('✅ Context packed successfully: repomix-output.xml');
+    console.log(`✅ Context packed successfully: ${outputFile}`);
     console.log('💡 Hướng dẫn sử dụng:');
-    console.log('   1. Kéo thả file `repomix-output.xml` lên 4.1 Argon Web / Claude / AI Studio.');
+    console.log(`   1. Kéo thả file \`${outputFile}\` lên 4.1 Argon Web / Claude / AI Studio.`);
     console.log('   2. Yêu cầu AI Web đóng vai Tech Lead lập Master Plan.');
     console.log('   3. Đưa Master Plan về Antigravity IDE cho Gemini 3.8 Flash thực thi!');
     console.log('====================================================\n');

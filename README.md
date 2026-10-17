@@ -79,6 +79,7 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 - [`.agents/rules/blogger-embed-rules.md`](.agents/rules/blogger-embed-rules.md): Technical invariants for Blogger embedding.
 - [`.agents/skills/blogger-widget-creator/SKILL.md`](.agents/skills/blogger-widget-creator/SKILL.md): 5-step workflow and starter boilerplate for new widgets.
 - [`.agents/skills/git-commit-push/SKILL.md`](.agents/skills/git-commit-push/SKILL.md): Automated `/commit`, `/push`, `/commit-push` workflow skill.
+- [`.agents/skills/pack-context/SKILL.md`](.agents/skills/pack-context/SKILL.md): Automated `/pack` and `/pack-full` AI context packaging skill.
 - [`.agents/skills/review-qa-content/SKILL.md`](.agents/skills/review-qa-content/SKILL.md): Standardized 4-tier Q&A review & creation skill (5W-1H & Micro-STAR).
 
 ---
@@ -91,6 +92,7 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 │   └── skills/
 │       ├── blogger-widget-creator/         # 5-step workflow & boilerplate generator
 │       ├── git-commit-push/                # Automated /commit and /push shortcut workflow
+│       ├── pack-context/                   # Automated /pack and /pack-full context packaging
 │       └── review-qa-content/              # Standardized 4-tier Q&A review & creation skill
 ├── docs/                                   # Specifications, backlogs & maintenance plans
 │   ├── can_fd/                             # CAN FD Protocol documentation
