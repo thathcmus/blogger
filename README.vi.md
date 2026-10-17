@@ -98,7 +98,8 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 │   ├── can_fd/                             # Tài liệu CAN FD Protocol
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật
 │   │   ├── BACKLOG.md                      # Backlog tính năng tổng thể
-│   │   └── MAINTENANCE_PLAN.md             # Kế hoạch bảo trì 60 ngày & Ground Truth Q&A
+│   │   ├── MAINTENANCE_PLAN.md             # Kế hoạch bảo trì 60 ngày & Ground Truth Q&A
+│   │   └── ARGON_REVIEW.md                 # Báo cáo đánh giá chiến lược & kiến trúc từ Argon 4
 │   ├── cpp_oop/                            # Tài liệu C++ OOP Simulator
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật C++ OOP
 │   │   └── BACKLOG.md                      # Kế hoạch nâng cấp và mẫu yêu cầu thay đổi

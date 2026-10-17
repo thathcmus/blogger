@@ -35,7 +35,8 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │   ├── can_fd/                             # Widget CAN FD
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật CAN FD
 │   │   ├── BACKLOG.md                      # Backlog tính năng tổng thể
-│   │   └── MAINTENANCE_PLAN.md             # Kế hoạch bảo trì 60 ngày & Ground Truth Q&A
+│   │   ├── MAINTENANCE_PLAN.md             # Kế hoạch bảo trì 60 ngày & Ground Truth Q&A
+│   │   └── ARGON_REVIEW.md                 # Báo cáo đánh giá chiến lược & kiến trúc từ Argon 4
 │   ├── cpp_oop/                            # Widget C++ OOP
 │   │   ├── CURRENT_INFO.md                 # Đặc tả hiện trạng kỹ thuật C++ OOP
 │   │   └── BACKLOG.md                      # Kế hoạch nâng cấp và mẫu yêu cầu thay đổi

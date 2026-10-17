@@ -7,7 +7,26 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
+### Added
+- **Triển Khai Hoàn Thành Item 4 Trong Kế Hoạch 60 Ngày CAN FD (`widget_can_fd.html`, `docs/can_fd/MAINTENANCE_PLAN.md`)**:
+  - Bổ sung 2 cụm câu hỏi Q&A chuẩn 4 tầng (Theory 5W-1H, SystemC/C++ Modeling, ECU/AUTOSAR Practice, Double-Angle Trap Micro-STAR):
+    - `q_stuffing_4_1` (*Intermediate*): Tại sao CAN FD phải kết hợp cả Dynamic Bit Stuffing và Fixed Bit Stuffing? Đính chính chuẩn Fixed Stuff Bit là bit đảo dấu của bit đứng trước ($\text{FSB} = \overline{\text{bit}_{\text{prev}}}$) thay vì bit parity; phân tích giải pháp khắc phục Frame Jitter $35\mu s$ bằng cách chuyển padding byte từ `0x00` sang `0xAA`.
+    - `q_sbc_crc_4_2` (*Senior*): Trường SBC (Stuff Bit Count mã Gray 3-bit + Even Parity modulo 8) và đa thức CRC-17 ($0\text{x}1685\text{B}$) / CRC-21 ($0\text{x}102899$). Phân tích sự khác biệt cốt lõi giữa ISO 11898-1:2015 và Non-ISO Bosch 2012 (`CCCR.NISO = 0`), đưa luồng bit đã nhồi vào bộ LFSR để đạt khoảng cách Hamming $HD = 6$.
+  - Nâng tổng số lượng câu hỏi chuyên sâu trên widget từ 5 lên 7 câu hỏi song ngữ đầy đủ (VN/EN).
+
+### Changed
+- **Tối Ưu Hóa & Thanh Lọc Backlog Pool Theo Blueprint Argon 4 (`docs/can_fd/BACKLOG.md`)**:
+  - Gộp đề xuất Oscilloscope (`CANFD-002`) và Glitch Hunter (`CANFD-007`) thành **Interactive Fault Diagnosis Lab**, cắt bỏ gamification điểm số/huy hiệu để tiết kiệm ~600 dòng code.
+  - Tối ưu hóa hiển thị Mobile cho `CANFD-006` (Live DBC Signal Decoder) dạng Windowed 64-bit / Word-grouped để không làm vỡ màn hình 375px.
+  - Bổ sung `[CANFD-010]` (Bộ mô phỏng Transceiver SIC dập sóng dội 5–8 Mbps) và `[CANFD-011]` (Bộ mô phỏng phân mảnh ISO-TP & SecOC Payload Packer).
+  - Đánh dấu loại bỏ (Drop) `CANFD-009` (Web Audio FX) tránh bloatware và xung đột autoplay browser.
+
 ### Agent Workflow & Documentation Architecture
+- **Đồng Bộ Tài Liệu Chiến Lược CAN FD Từ Gemini 4.1 Argon Web (`docs/can_fd/ARGON_REVIEW.md`)**:
+  - Lưu trữ toàn văn bản đánh giá chuyên sâu của Principal Automotive Embedded Software Architect từ Gemini 4.1 Argon.
+  - Phân tích Signal-to-Bloat tỷ lệ cho Backlog pool (`CANFD-002` → `CANFD-009`), đề xuất 2 tính năng tương tác mới (`CANFD-010` SIC Transceiver, `CANFD-011` ISO-TP / SecOC Packer).
+  - Bổ sung 6 lỗ hổng kiến thức nghiêm trọng (ESI Bit, CanSM Bus Off L1/L2, Mixed CAN 2.0/FD Shielding, Inner-Priority Inversion, SecOC Freshness Value HSM, E2E Profiles 5/7/22).
+  - Đóng gói Ground Truth Q&A Item 4 (Dynamic/Fixed Stuffing & SBC Gray-code CRC-17/21) chuẩn 5W-1H và Micro-STAR.
 - **Chuẩn Hóa & Hoàn Thiện Hệ Thống Tài Liệu Kỹ Thuật Toàn Bộ Widget (`docs/cpp_oop/`, `docs/flexray/`)**:
   - **Khởi tạo tài liệu C++ OOP Simulator (`docs/cpp_oop/CURRENT_INFO.md`, `docs/cpp_oop/BACKLOG.md`)**: Đặc tả hiện trạng kỹ thuật 4 trụ cột OOP (Encapsulation, Inheritance, Polymorphism, Abstraction), phân tích cấu trúc bộ nhớ & VTABLE resolution, bản đồ mã nguồn 513 dòng chính xác, và lộ trình backlog tính năng (`[CPP-001]` đến `[CPP-004]`).
   - **Khởi tạo Ground Truth Q&A FlexRay (`docs/flexray/MAINTENANCE_PLAN.md`)**: Trích xuất nguyên văn toàn bộ nội dung Q1 (Time-Triggered Protocol) và Q2 (FTM Clock Drift Synchronization) từ mã nguồn làm Single Source of Truth cho quá trình bảo trì và mở rộng.

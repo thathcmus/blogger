@@ -33,7 +33,7 @@
 | 1 | ✅ | Accordion Q&A UI Component | 1 | 1–3 |
 | 2 | ✅ | Q&A: CAN Classic Foundation (Prerequisite) | 2 | 4–6 |
 | 3 | ✅ | Q&A: Frame Structure + BRS + DLC | 2 | 7–9 |
-| 4 | ⬜ | Q&A: Bit Stuffing (Dynamic/Fixed) + SBC + CRC | 2 | 10–12 |
+| 4 | ✅ | Q&A: Bit Stuffing (Dynamic/Fixed) + SBC + CRC | 2 | 10–12 |
 | 5 | ⬜ | Q&A: Bit Timing + TDCO (Senior-level) ⚡ *[+ Tool: Sample Point Playground]* | 2 | 13–15 |
 | 6 | ⬜ | Q&A: Error Handling + Bus Off Debug ⚡ *[+ Tool: Bus Off FSM Simulator]* | 2 | 16–18 |
 | 7 | ⬜ | Q&A: AUTOSAR Tx Path (COM→PduR→CanIf→Driver) ⚡ *[+ Tool: Packet Journey]* | 2 | 19–21 |
@@ -256,25 +256,79 @@
       - 💻 *C++ / Modeling:* Implement explicit C++ buffer unpacking interfaces: `void unpack_pdu(const uint8_t* wire_data, size_t valid_len, size_t wire_len);` to clearly isolate wire buffers from application payloads.
     - 📊 **R (Result):** Achieved 100% SecOC verification success, maintained cryptographic latency budgets, and eradicated message drops.
 
-#### Q&A 4.1: Dynamic vs Fixed Bit Stuffing
-- 🇻🇳 **Tiếng Việt:**
-  - 📖 **Theory:** CAN 2.0 dùng Dynamic Stuffing (cứ 5 bit giống nhau thì nhồi 1 bit ngược dấu) để tạo sườn xung cho các node đồng bộ clock. Nhưng nó tạo ra rủi ro "Undetected Error" do nhầm lẫn Stuff bit thành Data bit. CAN FD vá lỗi này bằng cách dùng Dynamic Stuffing cho Header/Data, nhưng áp dụng **Fixed Stuffing** cho vùng CRC (Cứ bắt buộc sau 1 số bit cố định, không quan tâm giống hay khác nhau, sẽ chèn 1 bit Parity).
-  - 🔧 **ECU/AUTOSAR:** Kỹ sư Software hoàn toàn không phải viết logic Bit Stuffing. Quá trình "Stuff" khi phát và "De-stuff" khi nhận được thực thi tự động ở tốc độ chớp mắt bởi phần cứng Transceiver và Silicon MAC.
-  - ⚠️ **Interview Trap:** "Bit Stuffing ảnh hưởng thế nào đến tài nguyên hệ thống (Bus Load)?" → Vì số lượng bit chèn thêm phụ thuộc vào nội dung Data (Dynamic), chiều dài khung truyền thực tế sẽ co giãn liên tục tạo ra Jitter. Khi lập lịch (Schedule Table), kỹ sư phải tính Bus Load ở trường hợp tồi tệ nhất (Worst-case) với lượng Stuff bit tối đa.
-- 🇬🇧 **English:**
-  - 📖 **Theory:** CAN 2.0 uses Dynamic Stuffing (inserting an opposite bit after 5 consecutive identical bits) to provide edges for clock synchronization. This creates an "Undetected Error" risk where a stuff bit is mistaken for data. CAN FD patches this by using Dynamic Stuffing for Header/Data, but applying **Fixed Stuffing** for the CRC field (inserting a Parity bit at fixed intervals, regardless of bit continuity).
-  - 🔧 **ECU/AUTOSAR:** Software Engineers never write Bit Stuffing logic. The "Stuff" (Tx) and "De-stuff" (Rx) processes are executed automatically at hardware speeds by the Silicon MAC.
-  - ⚠️ **Interview Trap:** "How does Bit Stuffing impact System Bus Load?" → Since the number of stuffed bits depends on the payload content (Dynamic), the actual frame length fluctuates, introducing Jitter. When designing Schedule Tables, engineers must calculate Bus Load using the Worst-Case Execution Time (WCET) assuming maximum stuff bits.
+### ✅ Item 4 (Ngày 10–12): Q&A Cluster 3 — Bit Stuffing (Dynamic/Fixed) + SBC + CRC
 
-#### Q&A 4.2: SBC (Stuff Bit Count) & Thuật toán CRC CAN FD
+**Nhiệm vụ:** Giải phẫu cơ chế nhồi bit động/tĩnh, trường đếm Stuff Bit Count (SBC mã Gray) và đa thức bảo vệ toàn vẹn dữ liệu CRC-17/CRC-21 theo chuẩn ISO 11898-1:2015. Chuẩn hóa theo khung **5W-1H** và **Micro-STAR**.
+
+#### Q&A 4.1: Dynamic Stuffing vs Fixed Stuffing trong CAN FD
 - 🇻🇳 **Tiếng Việt:**
-  - 📖 **Theory:** Payload 64 bytes khiến thuật toán CRC-15 cũ trở nên vô dụng (Hamming Distance giảm nghiêm trọng, không bắt được nhiều bit lỗi). CAN FD áp dụng CRC-17 (cho payload ≤ 16 bytes) và CRC-21 (cho payload > 16 bytes). Đặc biệt, trường SBC (4 bits) được thêm vào ngay trước CRC để "báo cáo" tổng số bit stuffing đã được chèn vào trước đó, giúp triệt tiêu hoàn toàn rủi ro nhầm bit.
-  - 🔧 **ECU/AUTOSAR:** Nếu module CanSM trong AUTOSAR liên tục ném ra lỗi `CAN_E_DATALOST` hoặc Error Passive, nguyên nhân sâu xa thường là CRC fail liên tục do nhiễu điện từ (EMI) trên cáp vật lý hoặc cấu hình clock MCU bị sai lệch.
-  - ⚠️ **Interview Trap:** "Trong CAN FD, chuỗi bit CRC được tính toán dựa trên dữ liệu gốc hay dữ liệu ĐÃ bị nhồi bit (Stuffed data)?" → Nó tính toán bao gồm CẢ các Stuff bits. Đây là điểm khác biệt cốt lõi so với CAN 2.0 (chỉ tính trên dữ liệu gốc), giúp CAN FD khắc phục lỗi rò rỉ dữ liệu (data integrity flaw).
+  - 📖 **Theory (5W-1H):**
+    - 📌 **What:** Bit Stuffing là kỹ thuật chèn thêm bit phụ vào luồng truyền thông để triệt tiêu các chuỗi bit giống nhau kéo dài. CAN FD kết hợp hai cơ chế: **Dynamic Stuffing** (chèn 1 bit đảo dấu sau 5 bit giống nhau liên tiếp) và **Fixed Stuffing** (bắt buộc chèn 1 bit đảo dấu của bit liền trước tại các mốc vị trí cố định sau mỗi 4 bit).
+    - 💡 **Why:** Giao thức CAN dùng mã hóa đường truyền NRZ (Non-Return-to-Zero) không có đường xung clock riêng nên bắt buộc phải có sườn chuyển mức điện áp để mạch PLL/DPLL của các node nhận tái đồng bộ xung nhịp (Resynchronization). Tuy nhiên, trong CAN 2.0, nếu có một cặp lỗi bit đảo chiều (double bit error) biến bit dữ liệu thành chuỗi 5 bit giống nhau và biến 1 bit phía sau thành stuff bit giả, chiều dài frame bị co giãn làm trượt toàn bộ vị trí CRC (Hamming Distance tụt xuống $HD = 2$), gây rò rỉ dữ liệu sai mà không phát hiện được. CAN FD dùng **Fixed Stuffing** trong vùng CRC để khóa cứng vị trí các bit kiểm tra lỗi.
+    - ⏱️ **When:**
+      - **Dynamic Stuffing:** Áp dụng từ bit SOF qua Arbitration Field, Control Field cho đến hết Data Field.
+      - **Fixed Stuffing:** Kích hoạt ngay tại bit đầu tiên của trường SBC (Stuff Bit Count) và lặp lại đều đặn sau mỗi 4 bit xuyên suốt trường SBC và trường CRC-17/21.
+    - 📍 **Where:** Nằm ở lớp Data Link Layer (MAC sublayer), thực thi trực tiếp trên luồng bit nối tiếp trước khi đẩy ra bộ thu phát vật lý.
+    - ⚙️ **Who & How:** Do mạch phần cứng Bit-Stuffer / De-Stuffer trong Silicon CAN Controller đảm nhiệm. Ở vùng Fixed Stuffing, phần cứng hoàn toàn phớt lờ bộ đếm 5 bit liên tiếp, mà dùng bộ đếm modulo-4 cố định để chèn $\text{FSB} = \overline{\text{bit}_{\text{prev}}}$. Nếu node nhận thấy $\text{FSB} = \text{bit}_{\text{prev}}$, nó lập tức báo **Stuff Error (Form Error trong vùng CRC)** và bắn Error Frame.
+  - 🖥️ **SystemC/C++ Modeling:** Trong bộ mô phỏng bit-accurate SystemC/C++, thiết kế class `CanFdBitStuffer` với hai chế độ trạng thái (`Mode::DYNAMIC` và `Mode::FIXED_CRC`). Ở chế độ `DYNAMIC`, duy trì biến `uint8_t consecutive_cnt` và `bool last_bit`; khi `consecutive_cnt == 5`, phát ra `!last_bit`, tăng biến đếm `dynamic_stuff_count++` (dùng để nạp vào trường SBC) và đặt lại `consecutive_cnt = 1`. Khi sang vùng CRC (`Mode::FIXED_CRC`), dùng phép toán bitwise modulo `(crc_bit_idx % 4 == 0)` để chèn `!last_bit` mà không cần rẽ nhánh phức tạp, giúp giữ nguyên hiệu năng pipeline.
+  - 🔧 **ECU/AUTOSAR Practice:** Toàn bộ quá trình Stuff/De-stuff diễn ra tự động trong phần cứng Silicon MAC (như Bosch M_CAN / NXP FlexCAN), hoàn toàn trong suốt với tầng `CanDrv` và `CanIf`. Tuy nhiên, kỹ sư tích hợp hệ thống phải tính toán số lượng Dynamic Stuff Bits tối đa (Worst-Case Stuff Bits: $\lfloor \frac{N_{\text{bits}} - 1}{4} \rfloor$) khi thiết kế bảng lập lịch `Com` và tính toán **WCET (Worst-Case Execution Time)** cũng như **Bus Load%** trên Vector CANoe / PREEvision.
+  - ⚠️ **Interview Trap (Micro-STAR):**
+    - 🚨 **S (Situation):** Trên mạng CAN FD điều khiển khung gầm (Chassis 2 Mbps), kỹ sư thiết kế thông điệp trạng thái cảm biến góc lái truyền định kỳ 2ms với nhiều trường chưa dùng được khởi tạo toàn giá trị `0x00` (48 bytes toàn bit 0). Khi xe vận hành, đường truyền xuất hiện độ trễ biến thiên (Frame Jitter) lên tới $35\mu s$ làm bộ lọc Kalman trên ECU điều khiển ổn định thân xe (ESC) bị nhiễu.
+    - 🎯 **T (Task):** Xác định nguyên nhân gây ra sự co giãn thời lượng khung truyền (Frame Duration Jitter) dù DLC cố định ở mức 48 bytes và triệt tiêu hiện tượng này.
+    - 🛠️ **A (Action):**
+      - 🚗 *Automotive / Protocol:* Phân tích luồng bit: 48 bytes toàn `0x00` (384 bits `0` liên tiếp) kích hoạt cơ chế Dynamic Stuffing tối đa (cứ 4 bit dữ liệu cùng dấu với stuff bit trước đó lại sinh ra 1 stuff bit mới $\rightarrow$ đẻ thêm $\approx 96$ stuff bits!). Khi dữ liệu cảm biến thay đổi ngẫu nhiên, số stuff bits dao động từ 0 đến 96 bits, làm thời lượng truyền khung co giãn mạnh. Giải pháp: Đổi giá trị khởi tạo (Unused Bit Pattern / Padding Byte) trong cấu hình `Com` và `CanIfPduPaddingValue` từ `0x00` sang **`0xAA` (`10101010b`) hoặc `0x55` (`01010101b`)** để phá vỡ chuỗi 5 bit giống nhau.
+      - 💻 *C++ / Modeling:* Viết công cụ kiểm tra tĩnh (Static Analyzer) bằng C++ quét qua toàn bộ cấu hình DBC/ARXML, mô phỏng bộ đếm Stuffing trên các giá trị Default/Init của PDU và tự động cảnh báo nếu tỷ lệ Stuffing vượt ngưỡng 5%.
+    - 📊 **R (Result):** Số lượng Dynamic Stuff Bits trong trạng thái nghỉ giảm từ 96 bits xuống 0 bit, triệt tiêu 92% độ trễ Jitter của khung truyền và tiết kiệm được 6.5% băng thông tổng thể của bus.
 - 🇬🇧 **English:**
-  - 📖 **Theory:** A 64-byte payload renders the old CRC-15 algorithm useless (reduced Hamming Distance). CAN FD employs CRC-17 (for payloads ≤ 16 bytes) and CRC-21 (for > 16 bytes). Crucially, an SBC field (Stuff Bit Count - 4 bits) is prepended to the CRC to "report" the exact number of dynamic stuff bits inserted earlier, completely eliminating bit-shift risks.
-  - 🔧 **ECU/AUTOSAR:** If the AUTOSAR CanSM module frequently throws `CAN_E_DATALOST` or enters Error Passive, the root cause is usually continuous CRC failures due to physical Electromagnetic Interference (EMI) or severe MCU clock misconfiguration.
-  - ⚠️ **Interview Trap:** "In CAN FD, is the CRC polynomial calculated on the raw data or the STUFFED data?" → It includes the Stuff bits! This is a core difference from CAN 2.0 (which calculates on raw data), definitively fixing a fatal data integrity flaw in the legacy protocol.
+  - 📖 **Theory (5W-1H):**
+    - 📌 **What:** Bit Stuffing inserts complementary bits into the serial stream to break long runs of identical bits. CAN FD combines two schemes: **Dynamic Stuffing** (inserting an opposite bit after 5 consecutive identical bits) and **Fixed Stuffing** (unconditionally inserting the inverse of the preceding bit at fixed 4-bit intervals).
+    - 💡 **Why:** CAN uses NRZ encoding without a dedicated clock line, requiring frequent voltage edges for receiver DPLL resynchronization. In Classic CAN 2.0, a double-bit error could corrupt a stuff bit condition, shrinking or stretching the frame and shifting the CRC delimiter (reducing Hamming Distance to $HD = 2$). CAN FD enforces **Fixed Stuffing** in the CRC field to strictly lock bit positions.
+    - ⏱️ **When:** **Dynamic Stuffing** applies from SOF through Arbitration, Control, and Data fields. **Fixed Stuffing** starts at the very first bit of the SBC field and repeats every 4 bits across the entire SBC and CRC-17/21 fields.
+    - 📍 **Where:** Executed at the Data Link Layer (Silicon MAC sublayer) directly on the serial bit stream prior to the physical transceiver.
+    - ⚙️ **Who & How:** Controlled by the hardware CAN Controller. During Fixed Stuffing, hardware bypasses the 5-bit counter and uses a modulo-4 counter to insert $\text{FSB} = \overline{\text{bit}_{\text{prev}}}$. If a receiver samples $\text{FSB} = \text{bit}_{\text{prev}}$, it immediately triggers a **Form/Stuff Error** and broadcasts an Error Frame.
+  - 🖥️ **SystemC/C++ Modeling:** In bit-accurate SystemC/C++ simulators, implement a `CanFdBitStuffer` state machine with `Mode::DYNAMIC` and `Mode::FIXED_CRC`. In `DYNAMIC` mode, track `consecutive_cnt`; when reaching 5, emit `!last_bit` and increment `dynamic_stuff_cnt++` (for the SBC field). Upon entering the CRC field (`Mode::FIXED_CRC`), evaluate `(crc_bit_idx % 4 == 0)` to deterministically inject `!last_bit` regardless of prior bit patterns.
+  - 🔧 **ECU/AUTOSAR Practice:** Stuffing and de-stuffing are handled autonomously by the Silicon MAC, remaining transparent to `CanDrv / CanIf`. However, system engineers must account for Worst-Case Dynamic Stuff Bits ($\lfloor \frac{N_{\text{bits}} - 1}{4} \rfloor$) when designing schedule tables and calculating **Bus Load%**. Always configure `CanIfPduPaddingValue = 0xAA` or `0x55` to prevent worst-case stuffing streaks.
+  - ⚠️ **Interview Trap (Micro-STAR):**
+    - 🚨 **S (Situation):** On a 2 Mbps chassis CAN FD network, a 2ms cyclic steering sensor message initializes 48 reserved bytes to `0x00`. During track testing, frame transmission duration exhibits severe $35\mu s$ jitter, destabilizing the ESC Kalman filter.
+    - 🎯 **T (Task):** Identify the root cause of frame duration jitter despite a fixed 48-byte DLC and eliminate the timing variance.
+    - 🛠️ **A (Action):**
+      - 🚗 *Automotive / Protocol:* 48 bytes of `0x00` (384 consecutive zeros) trigger worst-case Dynamic Stuffing, injecting $\approx 96$ extra stuff bits! As live sensor data changes, stuff bits fluctuate between 0 and 96. Solution: Change Unused Bit Patterns and `CanIfPduPaddingValue` from `0x00` to alternating bit patterns **`0xAA` (`10101010b`)**.
+      - 💻 *C++ / Modeling:* Build a C++ static configuration analyzer that parses ARXML/DBC default PDU values, simulates bit-stuffing overhead, and flags payloads exceeding 5% stuff bit inflation.
+    - 📊 **R (Result):** Default dynamic stuff bits dropped from 96 to 0, eliminating 92% of frame duration jitter and reclaiming 6.5% of total bus bandwidth.
+
+#### Q&A 4.2: Trường SBC (Stuff Bit Count) & Thuật Toán CRC-17 / CRC-21 (ISO vs Non-ISO)
+- 🇻🇳 **Tiếng Việt:**
+  - 📖 **Theory (5W-1H):**
+    - 📌 **What:** CAN FD nâng cấp toàn diện trường kiểm tra lỗi bằng cách bổ sung trường **SBC (Stuff Bit Count - 4 bits)** đứng ngay trước trường **CRC-17** (cho payload $0 \dots 16$ bytes) hoặc **CRC-21** (cho payload $20 \dots 64$ bytes).
+    - 💡 **Why:** Đa thức CRC-15 của CAN 2.0 chỉ đủ an toàn cho khung ngắn tối đa 8 bytes; khi kéo dài lên 64 bytes (512 bits), khoảng cách Hamming tụt dốc khiến lỗi đa bit dễ dàng lọt lưới. Hơn nữa, trong CAN 2.0, CRC được tính trên chuỗi bit *trước khi nhồi bit (de-stuffed)*, nên nếu lỗi đường truyền vô tình ăn mất 1 stuff bit và sinh ra 1 stuff bit khác ở cuối frame, tổng số bit không đổi nhưng dữ liệu bị dịch trái/phải mà CRC-15 vẫn báo đúng!
+    - ⏱️ **When:** Được tính toán theo thời gian thực ngay khi từng bit (bao gồm cả các bit Dynamic Stuffing) được đẩy ra bus từ bit SOF cho đến hết Data Field, và được phát ra ngay sau byte cuối cùng của Payload.
+    - 📍 **Where:** Nằm ở đầu vùng CRC Field: `[FSB] + [3-bit Gray-coded Stuff Count] + [1-bit Even Parity] + [FSB] + [CRC-17/21 với FSB mỗi 4 bit]`.
+    - ⚙️ **Who & How:** Do mạch thanh ghi dịch phản hồi tuyến tính **LFSR (Linear Feedback Shift Register)** trong Silicon MAC thực thi. Khác biệt cốt lõi của chuẩn **ISO 11898-1:2015**: (1) Đa thức CRC-17 ($0\text{x}1685\text{B}$) và CRC-21 ($0\text{x}102899$) tính toán trực tiếp trên **luồng bit ĐÃ NHỒI (Stuffed Bit Stream)**; (2) Trường SBC ghi lại tổng số Dynamic Stuff Bits theo $\pmod 8$ dưới dạng **Mã Gray 3-bit** kèm **1 bit chẵn lẻ (Even Parity)**, khóa chặt số lượng stuff bits và nâng Hamming Distance lên $HD = 6$ xuyên suốt mọi kích thước payload.
+  - 🖥️ **SystemC/C++ Modeling:** Khi mô hình hóa bộ tính CRC CAN FD trong C++, tuyệt đối không gọi hàm `calculate_crc(raw_payload)` trên mảng byte thô như CAN 2.0! Phải đặt bộ `CrcLfsrEngine<17, 0x1685B>` hoặc `CrcLfsrEngine<21, 0x102899>` nằm **phía sau** đầu ra của `DynamicBitStuffer`. Đối với trường SBC, ánh xạ số đếm `stuff_cnt % 8` qua bảng hằng số `constexpr uint8_t GRAY_PARITY_LUT[8] = {0b0000, 0b0011, 0b0110, 0b0101, 0b1100, 0b1111, 0b1010, 0b1001};` (3 bit đầu là Gray code, LSB là Even Parity) để xuất ra 4 bit SBC trong $O(1)$.
+  - 🔧 **ECU/AUTOSAR Practice:** Trong lịch sử chuyển giao (2012–2015), bản nháp Bosch CAN FD đầu tiên (Non-ISO CAN FD) không có trường SBC và không đưa Stuff bits vào LFSR. Các vi điều khiển hiện đại (Infineon AURIX TC3xx, NXP S32K3, Renesas RH850) đều có bit cấu hình phần cứng `CCCR.NISO` (Non-ISO Operation). Trong cấu hình AUTOSAR MCAL `CanControllerFdIsoMode`, bắt buộc phải đặt `TRUE` (ISO 11898-1:2015 mode) cho toàn bộ các ECU và thiết bị đo Vector CANoe trên xe.
+  - ⚠️ **Interview Trap (Micro-STAR):**
+    - 🚨 **S (Situation):** Khi tích hợp một ECU Điều khiển Pin (BMS) mới dùng chip Infineon AURIX với thiết bị giả lập HIL (Hardware-in-the-Loop) trên bàn test, mọi khung Classic CAN 2.0 đều nhận bình thường, nhưng cứ hễ gửi khung CAN FD (`FDF = 1`) là BMS lập tức bắn Error Frame báo **CRC Error** tại cuối khung truyền, dù Baudrate và Sample Point đã cấu hình khớp 100%.
+    - 🎯 **T (Task):** Chẩn đoán nguyên nhân tại sao chỉ riêng khung CAN FD bị lỗi CRC và khắc phục ngay trong buổi bring-up phần cứng.
+    - 🛠️ **A (Action):**
+      - 🚗 *Automotive / Protocol:* Kiểm tra chi tiết cấu trúc bit vùng CRC trên máy phân tích logic / CANoe: Phát hiện hệ thống HIL đang để cấu hình mặc định cũ là **Non-ISO CAN FD (Bosch 2012)** (thiếu 4 bit SBC ở đầu vùng CRC), trong khi MCU AURIX đang chạy chuẩn **ISO CAN FD (ISO 11898-1:2015)**. Chuyển cấu hình kênh CAN trên HIL sang chế độ `ISO CAN FD` và kiểm tra thanh ghi `M_CAN->CCCR.NISO = 0` trong MCAL của ECU.
+      - 💻 *C++ / Modeling:* Trong thư viện giải mã khung truyền C++ của công cụ test, bổ sung cờ `enum class FdStandard { ISO_11898_2015, BOSCH_NON_ISO };` và viết Unit Test kiểm증 vector chuẩn ISO để ngăn ngừa lỗi cấu hình lệch chuẩn.
+    - 📊 **R (Result):** Giao tiếp CAN FD 2 Mbps / 64 bytes thông suốt ngay lập tức với 0% lỗi CRC, rút ngắn 2 ngày debug vật lý vô ích cho đội phần cứng.
+- 🇬🇧 **English:**
+  - 📖 **Theory (5W-1H):**
+    - 📌 **What:** ISO 11898-1:2015 upgrades frame integrity by introducing a 4-bit **SBC (Stuff Bit Count)** field immediately preceding a **CRC-17** (for payloads $0\dots 16$ bytes) or **CRC-21** (for payloads $20\dots 64$ bytes).
+    - 💡 **Why:** Classic CRC-15 is mathematically insufficient for 64-byte payloads. Worse yet, CAN 2.0 computes CRC over *de-stuffed raw bits*; if bus noise turns a data bit into a stuff bit and deletes a later stuff bit, the frame length remains unchanged while data shifts undetected!
+    - ⏱️ **When:** The CRC engine processes every transmitted bit (including Dynamic Stuff Bits) in real-time from SOF to the end of the Data Field; SBC and CRC are transmitted right after the payload.
+    - 📍 **Where:** Positioned at the start of the CRC Field: `[FSB] + [3-bit Gray-coded Count] + [1-bit Even Parity] + [FSB] + [CRC-17/21 with FSB every 4 bits]`.
+    - ⚙️ **Who & How:** Hardware LFSR logic computes CRC-17 ($0\text{x}1685\text{B}$) or CRC-21 ($0\text{x}102899$) directly over the **STUFFED bit stream**. Meanwhile, SBC encodes the modulo-8 count of dynamic stuff bits using a **3-bit Gray code + 1 Even Parity bit**, guaranteeing a strict Hamming Distance of $HD = 6$.
+  - 🖥️ **SystemC/C++ Modeling:** In C++ simulators, never compute CAN FD CRC over raw byte arrays! Chain the `CrcLfsrEngine<17, 0x1685B>` or `CrcLfsrEngine<21, 0x102899>` directly to the output of the `DynamicBitStuffer`. For the SBC field, encode `stuff_cnt % 8` via a compile-time lookup table: `constexpr uint8_t SBC_GRAY_PARITY_LUT[8] = {0x0, 0x3, 0x6, 0x5, 0xC, 0xF, 0xA, 0x9};` (upper 3 bits represent Gray code, LSB represents Even Parity) for $O(1)$ bit generation.
+  - 🔧 **ECU/AUTOSAR Practice:** Early Bosch CAN FD implementations (2012 **Non-ISO CAN FD**) omitted the SBC field and excluded stuff bits from CRC calculation. Modern MCUs (Infineon AURIX TC3xx, NXP S32K3) provide a `CCCR.NISO` register bit. In AUTOSAR MCAL, engineers must enforce `CanControllerFdIsoMode = TRUE` across all ECUs and Vector CANoe interfaces.
+  - ⚠️ **Interview Trap (Micro-STAR):**
+    - 🚨 **S (Situation):** During bench bring-up of an AURIX TC397 BMS ECU against a HIL simulator, Classic CAN 2.0 frames work flawlessly, but 100% of CAN FD frames (`FDF = 1`) trigger immediate **CRC Errors** despite identical Baudrate and Sample Point settings.
+    - 🎯 **T (Task):** Diagnose why CRC failures occur exclusively on CAN FD frames and resolve the incompatibility immediately.
+    - 🛠️ **A (Action):**
+      - 🚗 *Automotive / Protocol:* Inspect the CRC bit field on CANoe: Discovered the HIL interface defaulted to legacy **Non-ISO CAN FD (Bosch 2012)** (omitting the 4-bit SBC field), whereas the AURIX MCU operated in **ISO 11898-1:2015** mode. Switched the HIL channel to `ISO CAN FD` and verified `CCCR.NISO = 0` in MCAL.
+      - 💻 *C++ / Modeling:* Parameterize C++ protocol parsers with `enum class CanFdSpec { ISO_11898_2015, NON_ISO_BOSCH };` and add ISO conformance test vectors to CI pipelines.
+    - 📊 **R (Result):** Restored 100% error-free 64-byte CAN FD communication immediately, saving 2 days of unnecessary hardware debugging.
 
 ---
 

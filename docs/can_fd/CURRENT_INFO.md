@@ -1,7 +1,7 @@
 # Đặc Tả Kỹ Thuật Hiện Trạng: CAN FD Protocol Explorer (Current Info)
 
 * **Tên file nguồn**: [`widget_can_fd.html`](../../widget_can_fd.html)
-* **Phiên bản hiện tại**: `v1.6.0` (Chuẩn hóa toàn diện Ngân Hàng Câu Hỏi theo khung 5W-1H & Micro-STAR song ngữ, tích hợp Cổng Khám Phá Landing Portal Hub tương tác 3D Tilt theo chuột, bộ quy tắc bảo mật Cloud Firestore Zero-Trust và bộ kiểm soát pre-commit tự động sync-docs.js; tổng cộng 2,929 dòng code).
+* **Phiên bản hiện tại**: `v1.6.0` (Chuẩn hóa toàn diện Ngân Hàng Câu Hỏi theo khung 5W-1H & Micro-STAR song ngữ, tích hợp Cổng Khám Phá Landing Portal Hub tương tác 3D Tilt theo chuột, bộ quy tắc bảo mật Cloud Firestore Zero-Trust và bộ kiểm soát pre-commit tự động sync-docs.js; tổng cộng 3,035 dòng code).
 * **Ngày cập nhật**: `2026-10-17`
 * **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức mạng ô tô CAN FD, tích hợp Cổng mở màn Landing Portal Hub 3D theo chuột, phân tích cấu trúc Frame ở cấp độ Bit, cơ chế BRS (Bit Rate Switch), bảng so sánh Classic CAN / CAN FD / CAN XL, hệ thống ngân hàng câu hỏi ôn luyện phỏng vấn ECU/AUTOSAR chuyên sâu, và hệ sinh thái Thảo luận cộng đồng kết nối Cloud Firestore (hỗ trợ Google Auth thật, trả lời lồng nhau, ghi chú tác giả, đồng bộ đa thiết bị, hỗ trợ Dark Mode). Phục vụ nhúng vào bài viết Google Blogger hoặc học tập độc lập.
 
@@ -103,20 +103,20 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
   - **Tab 2** (`#tab-compare`): Bảng So Sánh Thế Hệ Giao Thức (Classic CAN vs CAN FD vs CAN XL).
   - **Tab 3** (`#tab-interview`): Tiêu đề và Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`), danh sách thẻ Q&A Accordion (`div#qa-container`), empty state và WIP banner.
 * **Dòng 673 – 854**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn, Google Sign-In, Landing Portal Hub và tooltip Theme Toggle.
-* **Dòng 855 – 1227**: Data Layer `qaData`: Mảng Object song ngữ 5 câu hỏi chuẩn hóa 100% theo khung 5W-1H (📌 What, 💡 Why, ⏱️ When, 📍 Where, ⚙️ Who & How) và Micro-STAR (🚨 Situation, 🎯 Task, 🛠️ Action song song 🚗 vs 💻, 📊 Result).
-* **Dòng 1228 – 1260**: State variables (`qaState`, `currentDifficulty`, `currentTag`) và cấu hình Firebase (`firebaseConfig`).
-* **Dòng 1261 – 1540**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
-* **Dòng 1541 – 1940**: Controller render UI Header & Thảo luận (`renderAuthHeader()`, `renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes với dark palette chuẩn.
-* **Dòng 1941 – 2220**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
-* **Dòng 2221 – 2365**: Controller Q&A Cards (`renderQACards()`): Hiển thị chiều cao tự nhiên không scrollbar lồng, Dark Mode toàn diện.
-* **Dòng 2366 – 2470**: Controller Accordion (`toggleAnswer()`): Single-Open Accordion với Scroll Focus mượt mà.
-* **Dòng 2471 – 2505**: Sub-tab switcher (`switchQATab()`): Chuyển đổi 4 tầng kiến thức và đồng bộ scope selector.
-* **Dòng 2506 – 2565**: Handlers lọc câu hỏi (`applyFilters()`, `filterByDifficulty()`, `filterByTag()`, `resetFilters()`, `updateFilterUI()`).
-* **Dòng 2566 – 2685**: Data cho Segment Frame (`segmentData`).
-* **Dòng 2686 – 2765**: Controllers 3D Tilt Cards & Portal Hub (`initTiltCards()`, `enterExplorer()`, `backToPortal()`).
-* **Dòng 2766 – 2825**: Navigation & View Switcher (`switchTab()`, `selectSegment()`).
-* **Dòng 2826 – 2875**: Theme Engine (`getPreferredTheme()`, `applyTheme()`, `toggleTheme()`, `initTheme()`).
-* **Dòng 2876 – 2929**: Sự kiện `DOMContentLoaded`: Khởi tạo Theme, khởi tạo 3D Tilt, gán listeners tab/portal, áp dụng i18n, kết nối Firebase Auth/Firestore, render Q&A Cards và Lucide icons. (File tổng cộng 2,929 dòng, 100% comment Tiếng Anh, đạt chuẩn Verification Protocol `Syntax OK`).
+* **Dòng 855 – 1333**: Data Layer `qaData`: Mảng Object song ngữ 7 câu hỏi chuẩn hóa 100% theo khung 5W-1H (📌 What, 💡 Why, ⏱️ When, 📍 Where, ⚙️ Who & How) và Micro-STAR (🚨 Situation, 🎯 Task, 🛠️ Action song song 🚗 vs 💻, 📊 Result), bao gồm Item 2 (CAN Classic Foundation), Item 3 (Frame Structure & BRS/DLC), và Item 4 (Dynamic/Fixed Bit Stuffing & SBC Gray-code CRC-17/21).
+* **Dòng 1334 – 1370**: State variables (`qaState`, `currentDifficulty`, `currentTag`) và cấu hình Firebase (`firebaseConfig`).
+* **Dòng 1371 – 1650**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
+* **Dòng 1651 – 2050**: Controller render UI Header & Thảo luận (`renderAuthHeader()`, `renderCommentsUI()`), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes với dark palette chuẩn.
+* **Dòng 2051 – 2330**: Handlers tương tác thảo luận kết nối Cloud Firestore (`toggleReplyBox()`, `postComment()`, `postReply()`, `togglePinComment()`, `toggleLike()`, `deleteComment()`, `updateBadgeCount()`).
+* **Dòng 2331 – 2475**: Controller Q&A Cards (`renderQACards()`): Hiển thị chiều cao tự nhiên không scrollbar lồng, Dark Mode toàn diện.
+* **Dòng 2476 – 2580**: Controller Accordion (`toggleAnswer()`): Single-Open Accordion với Scroll Focus mượt mà.
+* **Dòng 2581 – 2615**: Sub-tab switcher (`switchQATab()`): Chuyển đổi 4 tầng kiến thức và đồng bộ scope selector.
+* **Dòng 2616 – 2675**: Handlers lọc câu hỏi (`applyFilters()`, `filterByDifficulty()`, `filterByTag()`, `resetFilters()`, `updateFilterUI()`).
+* **Dòng 2676 – 2795**: Data cho Segment Frame (`segmentData`).
+* **Dòng 2796 – 2875**: Controllers 3D Tilt Cards & Portal Hub (`initTiltCards()`, `enterExplorer()`, `backToPortal()`).
+* **Dòng 2876 – 2935**: Navigation & View Switcher (`switchTab()`, `selectSegment()`).
+* **Dòng 2936 – 2985**: Theme Engine (`getPreferredTheme()`, `applyTheme()`, `toggleTheme()`, `initTheme()`).
+* **Dòng 2986 – 3035**: Sự kiện `DOMContentLoaded`: Khởi tạo Theme, khởi tạo 3D Tilt, gán listeners tab/portal, áp dụng i18n, kết nối Firebase Auth/Firestore, render Q&A Cards và Lucide icons. (File tổng cộng 3,035 dòng, 100% comment Tiếng Anh, đạt chuẩn Verification Protocol `Syntax OK`).
 
 ---
 
@@ -138,6 +138,7 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
 
 ## 6. Tài Liệu Liên Quan & Kế Hoạch Bảo Trì
  
+- **Báo cáo đánh giá chiến lược từ Argon 4**: [`ARGON_REVIEW.md`](ARGON_REVIEW.md) — Toàn văn phân tích Signal-to-Bloat, 6 lỗ hổng kiến thức, Top 3 câu hỏi phỏng vấn sát thủ và kiến trúc Inline Micro-Labs.
 - **Bộ quy tắc bảo mật Cloud**: [`firestore.rules`](../../firestore.rules) — Cấu hình rules chính thức triển khai trên Firebase Console / CLI.
-- **Kế hoạch bảo trì chi tiết & Ground Truth**: [`MAINTENANCE_PLAN.md`](MAINTENANCE_PLAN.md) — Tài liệu theo dõi tiến độ 60 ngày (20 Items), lưu trữ toàn bộ nội dung Q&A gốc, và lộ trình tích hợp các Micro-Lab tương tác (Sample Point Playground, Bus Off FSM Simulator, Live DBC Decoder, Oscilloscope Glitch Hunter).
-- **Backlog tính năng tổng thể**: [`BACKLOG.md`](BACKLOG.md) — Danh sách tính năng mở rộng dài hạn ([CANFD-001] đến [CANFD-009]).
+- **Kế hoạch bảo trì chi tiết & Ground Truth**: [`MAINTENANCE_PLAN.md`](MAINTENANCE_PLAN.md) — Tài liệu theo dõi tiến độ 60 ngày (20 Items), lưu trữ toàn bộ nội dung Q&A gốc, và lộ trình tích hợp các Micro-Lab tương tác.
+- **Backlog tính năng tổng thể**: [`BACKLOG.md`](BACKLOG.md) — Danh sách tính năng mở rộng dài hạn ([CANFD-001] đến [CANFD-011]).

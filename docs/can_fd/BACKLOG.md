@@ -48,23 +48,28 @@ Khi cần đề xuất tính năng mới hoặc cập nhật nội dung Q&A, vui
 
 - [x] **[CANFD-001] Chế độ tối (Dark Mode Theme):** Tự động nhận diện theme hệ thống (`prefers-color-scheme`) kết hợp toggle nút bấm Sun/Moon, lưu `localStorage` (`canfd_theme`), hỗ trợ chuẩn màu Dark Palette cho toàn bộ 3 tab, modal và thảo luận Firestore *(Hoàn thành ở v1.4.0)*.
 - [x] **[CANFD-003] Cổng Khám Phá Mở Màn (Landing Portal Hub with 3D Tilt Cards):** Xây dựng trang mở màn Landing Portal Hub với 3 thẻ xếp dọc tương tác 3D Tilt theo con trỏ chuột, vệt sáng Glare, visual đồ họa trực quan (Oscilloscope waveform, Benchmark speedometer, Microchip ECU) và điều hướng mượt vào từng tab *(Hoàn thành ở v1.5.0)*.
-- [ ] **[CANFD-002] Tích hợp bộ giả lập Oscilloscope (Signal Waveform):** Vẽ dạng sóng điện áp vi sai CAN_H / CAN_L khi chuyển đổi giữa Arbitration Phase và Data Phase để trực quan hóa hiệu ứng dội tín hiệu (Ringing).
+- [ ] **[CANFD-002/007] Phòng Thí Nghiệm Chẩn Đoán Lỗi Xung Sóng Thực Tế (Interactive Fault Diagnosis Lab):**
+  - Gộp từ đề xuất Oscilloscope (`CANFD-002`) và Glitch Hunter (`CANFD-007`). Cắt bỏ thành phần gamification (điểm số, huy hiệu) để tối ưu Signal-to-Bloat ratio (tiết kiệm ~600 dòng code).
+  - Tích hợp 5 kịch bản lỗi xung sóng thực tế (thiếu trở đầu cuối 120Ω, mất ACK bit, lệch sample point, trễ TDC, dội tín hiệu quá mức). Bấm trực tiếp vào vùng sóng bất thường để hiển thị popup giải thích cơ chế vật lý.
 - [ ] **[CANFD-004] Bộ Giả Lập Xử Lý Lỗi & Máy Trạng Thái Bus Off (Fault Confinement Simulator):**
   - Bảng điều khiển kích hoạt lỗi (Bit Error, Stuff Error, CRC Error, ACK Error).
-  - 2 đồng hồ đo điện tử `TEC` và `REC` nhảy số thực tế (+8 / -1).
-  - Máy trạng thái FSM 3 nút phát sáng (Error Active $\rightarrow$ Error Passive $\rightarrow$ Bus Off) kèm cơ chế đếm lùi 128x11 recessive bits tự phục hồi. *(Dự kiến tích hợp vào Item 6)*.
+  - 2 đồng hồ đo điện tử `TEC` và `REC` nhảy số thực tế (+8 / -1), cờ trạng thái `ESI` (0: Error Active, 1: Error Passive).
+  - Máy trạng thái FSM 3 nút phát sáng (Error Active $\rightarrow$ Error Passive $\rightarrow$ Bus Off) kèm cơ chế đếm lùi 128x11 recessive bits tự phục hồi. *(Dự kiến tích hợp Inline Micro-Lab vào Item 6)*.
 - [ ] **[CANFD-005] Bộ Thí Nghiệm Bit Timing & Sample Point / TDCO (Interactive Sample Point Playground):**
   - Sliders chỉnh tần số dao động thạch anh MCU, Prescaler, Prop_Seg, Phase_Seg1/2, SJW.
   - Vẽ động 1 bit chia nhỏ thành các Time Quanta (TQ) và vạch laser báo vị trí Sample Point % (cảnh báo khi lệch ngoài khoảng $75\% - 85\%$).
-  - Hiển thị mốc Secondary Sample Point khi kích hoạt bù trễ TDC Offset. *(Dự kiến tích hợp vào Item 5)*.
+  - Hiển thị mốc Secondary Sample Point (SSP) khi kích hoạt bù trễ TDC Offset. *(Dự kiến tích hợp Inline Micro-Lab vào Item 5)*.
 - [ ] **[CANFD-006] Trình Giải Mã Tín Hiệu DBC Thực & Ma Trận 64B Payload (Live DBC Signal Decoder):**
   - Thanh trượt điều khiển: Tốc độ xe (0–250 km/h), Vòng tua máy (0–8000 RPM), Góc lái (-540° đến +540°), Vị trí số (P, R, N, D).
   - Đổi màu và chớp sáng trực tiếp các byte/bit trong ma trận 64-byte Payload của CAN FD.
-  - Nút gạt chuyển đổi tức thì giữa định dạng Intel (Little-Endian) và Motorola (Big-Endian). *(Dự kiến tích hợp vào Item 18)*.
-- [ ] **[CANFD-007] Minigame Thử Thách "Thợ Săn Lỗi Xung Sóng" (Oscilloscope Glitch Hunter):**
-  - 5 kịch bản lỗi xung sóng thực tế (thiếu trở 120Ω, mất ACK, lệch sample point, trễ TDC...).
-  - Độc giả click trực tiếp vào dạng sóng để bắt lỗi; chấm điểm, cấp huy hiệu kỹ sư ô tô. *(Dự kiến tích hợp vào Item 19)*.
+  - Nút gạt chuyển đổi tức thì giữa định dạng Intel (Little-Endian) và Motorola (Big-Endian).
+  - *Tối ưu UX Mobile (theo Argon 4)*: Hiển thị cửa sổ trượt 8-byte (Windowed view) hoặc gom nhóm theo Word 32-bit thay vì render 512 ô DOM gây vỡ layout 375px. *(Dự kiến tích hợp vào Item 18)*.
 - [ ] **[CANFD-008] Sơ Đồ Xuyên Thấu Luồng Dữ Liệu AUTOSAR (AUTOSAR Data Flow Journey):**
-  - Trực quan hóa gói tin (Packet Orb) bay qua từng tầng `SW-C` $\rightarrow$ `RTE` $\rightarrow$ `COM` $\rightarrow$ `PduR` $\rightarrow$ `CanIf` $\rightarrow$ `Driver` $\rightarrow$ `Cáp CAN`, bóc tách header tại từng tầng. *(Dự kiến tích hợp vào Item 7 & 8)*.
-- [ ] **[CANFD-009] m Thanh Kỹ Thuật Số Giả Lập Thiết Bị Lab (Web Audio FX):**
-  - Sử dụng Web Audio API thuần (0KB tải ngoài) tạo hiệu ứng âm thanh vi mô (micro-tones): xung nhịp thấp ở Arbitration, vút cao ở Data Phase, âm báo chirp khi phát hiện lỗi bus, kèm nút Mute trên Header.
+  - Trực quan hóa gói tin theo dạng **Step-by-step State Inspector**: bấm từng trạm (`SW-C` $\rightarrow$ `RTE` $\rightarrow$ `COM` $\rightarrow$ `PduR` $\rightarrow$ `CanIf` $\rightarrow$ `Driver` $\rightarrow$ `Cáp CAN`) để xem cấu trúc `PduInfoType` biến đổi và bóc tách header. *(Dự kiến tích hợp Inline Micro-Lab vào Item 7 & 8)*.
+- [ ] **[CANFD-010] Bộ Mô Phỏng Transceiver SIC (Signal Improvement Capability) vs Non-SIC (ISO 11898-2:2024):**
+  - Đề xuất bổ sung từ Argon 4: Trực quan hóa hiện tượng dội tín hiệu (Ringing) ở tốc độ 5–8 Mbps trên mạng có nhánh rẽ dài (Star/Stub topology).
+  - Thanh trượt chỉnh `Stub Length` (0.3m – 3.0m) và nút toggle `[SIC Active Mode]`; mô phỏng cách vi mạch SIC ghìm trở kháng đầu ra để dập tắt sóng dội tức thì trong pha Recessive.
+- [ ] **[CANFD-011] Bộ Mô Phỏng Phân Mảnh ISO-TP (ISO 15765-2:2016) & SecOC Payload Packer:**
+  - Đề xuất bổ sung từ Argon 4: So sánh truyền khối dữ liệu UDS `0x36 TransferData` (4095 bytes) trên CAN 2.0 (8B) vs CAN FD (64B).
+  - Trực quan hóa header `FF_DL` 32-bit (hỗ trợ tới 4GB), Escape Sequence `SF_DL` 2-byte, và định lượng thời gian tiết kiệm nhờ cắt giảm số chu kỳ bắt tay Flow Control (`FC - BS, STmin`).
+- [x] ~~**[CANFD-009] Âm Thanh Kỹ Thuật Số Giả Lập Thiết Bị Lab (Web Audio FX):**~~ *(ĐÃ BỎ QUA - DROPPED theo đánh giá Argon 4: Nguy cơ bloatware, gây phiền hà cho độc giả trong môi trường văn phòng và bị chính sách autoplay/AudioContext của trình duyệt hiện đại chặn)*.
