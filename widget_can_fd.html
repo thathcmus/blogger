@@ -119,34 +119,45 @@
     <!-- UNIQUE ROOT CONTAINER ENSURING ISOLATION FROM BLOGGER THEMES -->
     <div id="canfd-explorer-root" class="max-w-5xl mx-auto transition-colors duration-300">
         
-        <!-- Header -->
-        <div class="mb-8 text-center relative">
-            <div class="flex flex-wrap items-center justify-end gap-2 md:absolute md:right-0 md:top-0 mb-3 md:mb-0">
-                <!-- User Auth Container (Google Sign-In) -->
-                <div id="auth-header-container" class="flex items-center gap-2"></div>
+        <!-- Header: Split 2-Column Responsive Layout (Eliminating Absolute Overlap) -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-slate-200/80 dark:border-slate-800/80">
+            <!-- Left Column: Branding, Title & Subtitle -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2.5 mb-1.5">
+                    <span class="p-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs shrink-0">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </span>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
+                        <span data-i18n="main_title">CAN FD Protocol Explorer</span>
+                    </h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed ml-0.5" data-i18n="main_desc">
+                    Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)
+                </p>
+            </div>
+
+            <!-- Right Column: User Auth & Action Toolbar -->
+            <div class="flex items-center gap-2 shrink-0 self-start md:self-center flex-wrap sm:flex-nowrap">
+                <!-- User Auth Container (Google Sign-In / Profile Dropdown) -->
+                <div id="auth-header-container" class="relative"></div>
 
                 <!-- Theme Toggle Button (Dark / Light Mode) -->
-                <button id="btn-theme" onclick="toggleTheme()" title="Chế độ Sáng / Tối (Dark Mode)" class="flex items-center justify-center p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
-                    <i id="theme-icon" data-lucide="moon" class="w-4 h-4 text-slate-600 dark:text-amber-400"></i>
+                <button id="btn-theme" onclick="toggleTheme()" title="Chế độ Sáng / Tối (Dark Mode)" class="flex items-center justify-center p-2 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
+                    <i id="icon-theme" data-lucide="moon" class="w-4 h-4 text-slate-600 dark:text-amber-400"></i>
                 </button>
 
                 <!-- Language indicator -->
-                <button onclick="toggleLang()" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
+                <button onclick="toggleLang()" class="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-xs sm:text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
                     <i data-lucide="languages" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
                     <span id="lang-indicator">EN</span>
                 </button>
 
                 <!-- Fullscreen button -->
-                <button id="btn-fullscreen" onclick="toggleFullscreen()" title="Toàn màn hình / Thu nhỏ" class="flex items-center justify-center p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
+                <button id="btn-fullscreen" onclick="toggleFullscreen()" title="Toàn màn hình / Thu nhỏ" class="flex items-center justify-center p-2 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full text-sm font-semibold transition-colors border border-slate-300 dark:border-slate-700 shadow-sm">
                     <i id="icon-fullscreen" data-lucide="maximize-2" class="w-4 h-4 text-slate-600 dark:text-slate-300"></i>
                 </button>
             </div>
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center justify-center gap-2">
-                <i data-lucide="zap" class="text-amber-600 dark:text-amber-400 w-8 h-8"></i>
-                <span data-i18n="main_title">CAN FD Protocol Explorer</span>
-            </h1>
-            <p class="text-slate-600 dark:text-slate-400 text-sm" data-i18n="main_desc">Trực quan hóa cấu trúc Frame ở cấp độ bit và cơ chế Bit Rate Switch (BRS)</p>
-        </div>
+        </header>
 
         <!-- Google Sign-In & Firebase Auth Modal -->
         <div id="google-auth-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm p-4 animate-fadeIn">
@@ -741,6 +752,9 @@
                 cancel: "Hủy",
                 send_reply: "Gửi phản hồi",
                 author_badge: "Tác Giả",
+                switch_account: "Đổi tài khoản Google",
+                user_role_author: "Tác Giả Blog (Admin)",
+                user_role_reader: "Kỹ sư / Độc giả",
                 pin_note: "Ghim Note",
                 unpin_note: "Bỏ ghim",
                 pinned_badge: "📌 Note của Tác Giả",
@@ -826,6 +840,9 @@
                 cancel: "Cancel",
                 send_reply: "Send Reply",
                 author_badge: "Author",
+                switch_account: "Switch Google Account",
+                user_role_author: "Blog Author (Admin)",
+                user_role_reader: "Engineer / Reader",
                 pin_note: "Pin Note",
                 unpin_note: "Unpin",
                 pinned_badge: "📌 Author's Note",
@@ -1669,21 +1686,46 @@
             if (user) {
                 const isAuthor = isUserAuthor(user);
                 const roleBadge = isAuthor 
-                    ? `<span class="px-1.5 py-0.2 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
+                    ? `<span class="px-1.5 py-0.5 text-[9px] font-bold bg-amber-500 text-white rounded-full flex items-center gap-0.5 shadow-xs"><i data-lucide="crown" class="w-2.5 h-2.5"></i> ${labels.author_badge}</span>` 
                     : '';
                 const borderClass = isAuthor ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-900/50' : 'border-slate-300 dark:border-slate-700';
 
                 container.innerHTML = `
-                    <div class="flex items-center gap-2 bg-white/95 dark:bg-slate-900/95 px-3 py-1.5 rounded-full border ${borderClass} shadow-sm text-xs">
-                        <img src="${user.avatar}" alt="${escapeHtml(user.name)}" class="w-5 h-5 rounded-full border border-slate-300 dark:border-slate-700 object-cover shrink-0">
-                        <span class="font-bold text-slate-800 dark:text-slate-200 max-w-[120px] truncate">${escapeHtml(user.name)}</span>
-                        ${roleBadge}
-                        <button onclick="openAuthModal()" title="Đổi tài khoản" class="text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors ml-1">
-                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    <div class="relative" id="user-profile-menu-container">
+                        <!-- Compact User Pill Trigger -->
+                        <button onclick="toggleUserProfileMenu(event)" class="flex items-center gap-2 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 px-2.5 py-1.5 rounded-full border ${borderClass} shadow-sm text-xs transition-all cursor-pointer group">
+                            <img src="${user.avatar}" alt="${escapeHtml(user.name)}" class="w-5 h-5 rounded-full border border-slate-300 dark:border-slate-700 object-cover shrink-0">
+                            <span class="font-bold text-slate-800 dark:text-slate-200 max-w-[90px] sm:max-w-[120px] truncate">${escapeHtml(user.name)}</span>
+                            ${roleBadge}
+                            <i data-lucide="chevron-down" id="user-menu-chevron" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-transform duration-200"></i>
                         </button>
-                        <button onclick="logoutUser()" title="${labels.sign_out}" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 ml-1 transition-colors">
-                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                        </button>
+
+                        <!-- Profile Popover Dropdown -->
+                        <div id="user-profile-dropdown" class="hidden absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 py-2 animate-fadeIn">
+                            <div class="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/70 rounded-t-2xl">
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate flex items-center gap-1.5">
+                                    <span>${escapeHtml(user.name)}</span>
+                                    ${isAuthor ? `<i data-lucide="crown" class="w-3 h-3 text-amber-500 fill-amber-500"></i>` : ''}
+                                </p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${escapeHtml(user.email || '')}</p>
+                                <div class="mt-2">
+                                    ${isAuthor 
+                                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 rounded-md border border-amber-300/60 dark:border-amber-700/60">⭐ ${labels.user_role_author || 'Tác Giả Blog (Admin)'}</span>`
+                                        : `<span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800/60">${labels.user_role_reader || 'Kỹ sư / Độc giả'}</span>`
+                                    }
+                                </div>
+                            </div>
+                            <div class="p-1.5 space-y-0.5">
+                                <button onclick="openAuthModal(); closeUserProfileMenu();" class="w-full text-left px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl flex items-center gap-2.5 transition-colors">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400"></i>
+                                    <span>${labels.switch_account || 'Đổi tài khoản Google'}</span>
+                                </button>
+                                <button onclick="logoutUser(); closeUserProfileMenu();" class="w-full text-left px-3 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-xl flex items-center gap-2.5 transition-colors font-medium">
+                                    <i data-lucide="log-out" class="w-3.5 h-3.5 text-rose-500"></i>
+                                    <span>${labels.sign_out || 'Đăng xuất'}</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 `;
             } else {
@@ -1701,6 +1743,38 @@
             }
             try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
         }
+
+        function toggleUserProfileMenu(event) {
+            if (event) event.stopPropagation();
+            const dropdown = document.getElementById('user-profile-dropdown');
+            const chevron = document.getElementById('user-menu-chevron');
+            if (!dropdown) return;
+            const isHidden = dropdown.classList.contains('hidden');
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+                try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+            } else {
+                dropdown.classList.add('hidden');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function closeUserProfileMenu() {
+            const dropdown = document.getElementById('user-profile-dropdown');
+            const chevron = document.getElementById('user-menu-chevron');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const menuContainer = document.getElementById('user-profile-menu-container');
+            if (menuContainer && !menuContainer.contains(e.target)) {
+                closeUserProfileMenu();
+            }
+        });
 
         const qaCommentFilter = {};
 

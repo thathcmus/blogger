@@ -7,6 +7,19 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 ---
 
 ## [Unreleased]
+### Fixed
+- **Triệt Tiêu Lỗi Xung Đột Bố Cục Đè Chữ Header (`widget_can_fd.html`)**:
+  - Khắc phục triệt để lỗi va chạm chữ (Layout Collision) khiến tiêu đề `CAN FD Protocol Explorer` bị cụm User Info và Action Toolbar đè chữ "Explorer" trên các màn hình có độ rộng trung bình (768px – 1150px) hoặc khi nhúng vào Blogger iframe.
+  - Bỏ định vị `md:absolute` ghim góc phải, đưa toàn bộ Header vào Document Flow tự nhiên.
+
+### Changed
+- **Tái Cấu Trúc Header 2 Cột Chuẩn Dashboard & Tích Hợp Profile Popover Dropdown (`widget_can_fd.html`, `docs/can_fd/CURRENT_INFO.md`)**:
+  - **Split 2-Column Responsive Layout**: Bố cục Flexbox 2 cột (`flex flex-col md:flex-row md:items-center md:justify-between`). Cột trái chứa biểu tượng tia chớp `⚡` và Tiêu đề / Phụ đề căn lề tự nhiên; Cột phải chứa toàn bộ Toolbar tiện ích.
+  - **User Profile Popover Dropdown (Chuẩn Google/GitHub)**:
+    - Trạng thái đóng: Rút gọn User Pill thành chip nhỏ gọn `[Avatar + Tên + 👑 Tác Giả + ▾]`, tiết kiệm hơn 50% diện tích toolbar.
+    - Trạng thái mở: Click vào mở popover dropdown menu cao cấp hiển thị chi tiết tên, email, huy hiệu `⭐ Tác Giả Blog (Admin)` / `Kỹ sư / Độc giả`, nút `🔄 Đổi tài khoản Google`, nút `🚪 Đăng xuất` an toàn, tích hợp cơ chế đóng tự động khi click ra ngoài (`click-outside listener`).
+  - Bổ sung bộ từ điển `i18n` song ngữ (`switch_account`, `user_role_author`, `user_role_reader`) cho menu profile.
+
 ### Added
 - **Triển Khai Hoàn Thành Item 4 Trong Kế Hoạch 60 Ngày CAN FD (`widget_can_fd.html`, `docs/can_fd/MAINTENANCE_PLAN.md`)**:
   - Bổ sung 2 cụm câu hỏi Q&A chuẩn 4 tầng (Theory 5W-1H, SystemC/C++ Modeling, ECU/AUTOSAR Practice, Double-Angle Trap Micro-STAR):
