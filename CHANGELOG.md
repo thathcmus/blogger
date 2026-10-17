@@ -11,9 +11,13 @@ Tất cả các thay đổi đáng chú ý của dự án **Tech Blogger Widgets
 - **Chuẩn Hóa & Hoàn Thiện Hệ Thống Tài Liệu Kỹ Thuật Toàn Bộ Widget (`docs/cpp_oop/`, `docs/flexray/`)**:
   - **Khởi tạo tài liệu C++ OOP Simulator (`docs/cpp_oop/CURRENT_INFO.md`, `docs/cpp_oop/BACKLOG.md`)**: Đặc tả hiện trạng kỹ thuật 4 trụ cột OOP (Encapsulation, Inheritance, Polymorphism, Abstraction), phân tích cấu trúc bộ nhớ & VTABLE resolution, bản đồ mã nguồn 513 dòng chính xác, và lộ trình backlog tính năng (`[CPP-001]` đến `[CPP-004]`).
   - **Khởi tạo Ground Truth Q&A FlexRay (`docs/flexray/MAINTENANCE_PLAN.md`)**: Trích xuất nguyên văn toàn bộ nội dung Q1 (Time-Triggered Protocol) và Q2 (FTM Clock Drift Synchronization) từ mã nguồn làm Single Source of Truth cho quá trình bảo trì và mở rộng.
-- **Nâng Cấp Bộ Công Cụ Tự Động Hóa & Kiểm Soát Chất Lượng (`scripts/sync-docs.js`)**:
-  - Tích hợp cơ chế tự động đồng bộ số dòng code thực tế và ngày cập nhật cho cả `widget_flexray.html` và `widget_cpp_oop.html` vào các file `CURRENT_INFO.md` tương ứng.
-  - Tự động kiểm tra cú pháp JS của toàn bộ 3 widget trước khi cho phép commit.
+- **Nâng Cấp Bộ Công Cụ Tự Động Hóa & Lưới An Toàn Kiểm Soát Chất Lượng (`scripts/sync-docs.js`)**:
+  - **Dynamic Auto-Discovery**: Loại bỏ hoàn toàn hardcode danh sách file; script tự động quét mọi `widget_*.html` xuất hiện ở thư mục gốc.
+  - **Cưỡng chế Bất biến cấu trúc Atomic Unit**: Tự động xác thực tính toàn vẹn của từng widget (`widget_<name>.html` bắt buộc đi kèm `docs/<name>/CURRENT_INFO.md` và `docs/<name>/BACKLOG.md`). Lập tức báo lỗi đỏ (`Exit 1`) và chặn đứng commit nếu phát hiện widget mồ côi hoặc thiếu tài liệu.
+  - **Xác thực Showcase Invariant**: Tự động kiểm tra và đảm bảo 100% widget mới đã được liệt kê trong bảng Showcase của cả `README.md` và `README.vi.md`.
+  - **Tự động đồng bộ số dòng code & ngày cập nhật**: Tính toán chính xác số dòng code thực tế và ngày hiện tại cho toàn bộ các file `CURRENT_INFO.md`.
+- **Thiết Lập Quy Tắc Bất Biến Cấu Trúc Atomic Unit (`.agents/rules/blogger-embed-rules.md`)**:
+  - Bổ sung quy định nghiêm ngặt về tính toàn vẹn của một Widget (bộ ba bắt buộc: HTML + CURRENT_INFO + BACKLOG + Showcase). Chống tuyệt đối việc tạo file widget mồ côi thiếu tài liệu.
 - **Bổ Sung SOP-4: Quy Trình Xử Lý Sự Cố & Hotfix Production (`AGENTS.md`)**:
   - Bổ sung quy trình 4 bước chẩn đoán lỗi chuyên sâu (CDN Error fallback, Blogger Theme layout break, mobile viewport 375px break, JS Runtime error).
 - **Tạo Kỹ Năng Mới Cho AI Agent: Review & Soạn Thảo Q&A (`.agents/skills/review-qa-content/SKILL.md`)**:

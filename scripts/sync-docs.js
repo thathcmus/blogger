@@ -1,12 +1,15 @@
 /**
  * scripts/sync-docs.js
- * Automated Verification & Documentation Synchronization Script.
+ * Automated Verification, Documentation Synchronization & Invariant Enforcement Script.
  *
  * Capabilities:
- * 1. Checks JavaScript syntax across all standalone HTML widgets.
- * 2. Extracts exact line counts, QA count, and current date.
- * 3. Synchronizes metrics automatically into corresponding CURRENT_INFO.md docs.
- * 4. Staged updated docs via git if --git-add flag is provided.
+ * 1. DYNAMIC AUTO-DISCOVERY: Scans repository root for all `widget_*.html` files.
+ * 2. ATOMIC UNIT INVARIANT: Enforces that every widget has corresponding `docs/<topic>/CURRENT_INFO.md`
+ *    and `docs/<topic>/BACKLOG.md`. Fails hard (Exit 1) if missing.
+ * 3. SHOWCASE INVARIANT: Enforces that every widget is listed in `README.md` and `README.vi.md` showcase tables.
+ * 4. JAVASCRIPT SYNTAX VERIFICATION: Validates syntax of all internal script blocks using Node.js VM/Function parser.
+ * 5. METRICS AUTO-SYNC: Updates exact line counts and current date into each `CURRENT_INFO.md`.
+ * 6. GIT AUTO-STAGE: Automatically stages modified documentation files if `--git-add` flag is provided.
  */
 
 const fs = require('fs');
@@ -16,7 +19,7 @@ const { execSync } = require('child_process');
 const ROOT_DIR = path.resolve(__dirname, '..');
 const shouldGitAdd = process.argv.includes('--git-add');
 
-// Format a number with commas (e.g., 2673 -> "2,673")
+// Format a number with commas (e.g., 2929 -> "2,929")
 function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
@@ -34,7 +37,7 @@ function getTodayDate() {
 function validateJsSyntax(htmlContent, fileName) {
     const scriptMatches = htmlContent.match(/<script(?:\s+type="text\/javascript")?>([\s\S]*?)<\/script>/gi);
     if (!scriptMatches) {
-        console.warn(`[WARN] No <script> tags found in ${fileName}`);
+        console.warn(`⚠️ [WARN] No <script> tags found in ${fileName}`);
         return true;
     }
 
@@ -52,169 +55,96 @@ function validateJsSyntax(htmlContent, fileName) {
             new Function(jsContent);
         } catch (err) {
             console.error(`\n❌ [SYNTAX ERROR] Failed in ${fileName} (Script block #${i + 1}):`);
-            console.error(err.message);
+            console.error(`   ${err.message}`);
             return false;
         }
     }
     return true;
 }
 
-// Sync CAN FD Widget Docs
-function syncCanFdWidget() {
-    const htmlPath = path.join(ROOT_DIR, 'widget_can_fd.html');
-    const docPath = path.join(ROOT_DIR, 'docs', 'can_fd', 'CURRENT_INFO.md');
+// Derive topic name from widget filename (e.g., "widget_can_fd.html" -> "can_fd")
+function getTopicName(widgetFileName) {
+    return widgetFileName.replace(/^widget_/, '').replace(/\.html$/i, '');
+}
 
+// Sync single widget metrics and verify atomic invariants
+function processWidget(widgetFileName, readmeContent, readmeViContent) {
+    let hasError = false;
+    const topic = getTopicName(widgetFileName);
+    const htmlPath = path.join(ROOT_DIR, widgetFileName);
+    const docsDir = path.join(ROOT_DIR, 'docs', topic);
+    const currentInfoPath = path.join(docsDir, 'CURRENT_INFO.md');
+    const backlogPath = path.join(docsDir, 'BACKLOG.md');
+
+    // 1. Check HTML exists
     if (!fs.existsSync(htmlPath)) {
-        console.error(`[ERROR] File not found: ${htmlPath}`);
+        console.error(`❌ [FILE NOT FOUND] Widget HTML missing: ${widgetFileName}`);
         return false;
     }
 
     const html = fs.readFileSync(htmlPath, 'utf8');
-    const isValid = validateJsSyntax(html, 'widget_can_fd.html');
-    if (!isValid) return false;
-
     const lineCount = html.split('\n').length;
     const formattedLines = formatNumber(lineCount);
-    const today = getTodayDate();
 
-    // Extract Q&A items count from qaData array
+    // 2. Validate JS Syntax
+    const isSyntaxValid = validateJsSyntax(html, widgetFileName);
+    if (!isSyntaxValid) {
+        hasError = true;
+    }
+
+    // Extract Q&A count if available
     const qaMatch = html.match(/id:\s*["']q_[a-zA-Z0-9_]+["']/g);
     const qaCount = qaMatch ? qaMatch.length : 0;
+    const qaInfo = qaCount > 0 ? ` | Q&A Items: ${qaCount}` : '';
 
-    console.log(`✅ [widget_can_fd.html] Syntax OK | Lines: ${formattedLines} | Q&A Items: ${qaCount}`);
-
-    if (fs.existsSync(docPath)) {
-        let docContent = fs.readFileSync(docPath, 'utf8');
-        let modified = false;
-
-        // 1. Update line count in Version description: tổng cộng X dòng code
-        const versionLineRegex = /(\* \*\*Phiên bản hiện tại\*\*:.*?)tổng cộng\s+[\d,]+\s+dòng code/g;
-        if (versionLineRegex.test(docContent)) {
-            docContent = docContent.replace(versionLineRegex, `$1tổng cộng ${formattedLines} dòng code`);
-            modified = true;
-        }
-
-        // 2. Update date: * **Ngày cập nhật**: `YYYY-MM-DD`
-        const dateRegex = /(\* \*\*Ngày cập nhật\*\*:\s*`)(\d{4}-\d{2}-\d{2})(`)/g;
-        if (dateRegex.test(docContent)) {
-            docContent = docContent.replace(dateRegex, `$1${today}$3`);
-            modified = true;
-        }
-
-        // 3. Update line count in Section 4 summary: (File tổng cộng X dòng, 100% comment Tiếng Anh...)
-        const section4Regex = /(File tổng cộng\s+)[\d,]+(\s+dòng,\s+100%\s+comment\s+Tiếng\s+Anh)/g;
-        if (section4Regex.test(docContent)) {
-            docContent = docContent.replace(section4Regex, `$1${formattedLines}$2`);
-            modified = true;
-        }
-
-        if (modified) {
-            fs.writeFileSync(docPath, docContent, 'utf8');
-            console.log(`📄 [SYNC] docs/can_fd/CURRENT_INFO.md updated with line count (${formattedLines}) and date (${today}).`);
-            if (shouldGitAdd) {
-                try {
-                    execSync(`git add "${docPath}"`, { cwd: ROOT_DIR });
-                    console.log(`📌 [GIT] Staged docs/can_fd/CURRENT_INFO.md`);
-                } catch (gitErr) {
-                    console.warn(`[WARN] Failed to git add ${docPath}:`, gitErr.message);
-                }
-            }
-        } else {
-            console.log(`📄 [UP-TO-DATE] docs/can_fd/CURRENT_INFO.md is already up to date.`);
-        }
+    if (isSyntaxValid) {
+        console.log(`✅ [${widgetFileName}] Syntax OK | Lines: ${formattedLines}${qaInfo}`);
     }
 
-    return true;
-}
+    // 3. Invariant: Check Atomic Unit Documents
+    if (!fs.existsSync(currentInfoPath)) {
+        console.error(`❌ [INVARIANT VIOLATION] Missing docs/${topic}/CURRENT_INFO.md for ${widgetFileName}!`);
+        console.error(`   👉 Every widget must have a corresponding CURRENT_INFO.md.`);
+        hasError = true;
+    }
 
-// Sync FlexRay Widget Docs
-function syncFlexRayWidget() {
-    const htmlPath = path.join(ROOT_DIR, 'widget_flexray.html');
-    const docPath = path.join(ROOT_DIR, 'docs', 'flexray', 'CURRENT_INFO.md');
+    if (!fs.existsSync(backlogPath)) {
+        console.error(`❌ [INVARIANT VIOLATION] Missing docs/${topic}/BACKLOG.md for ${widgetFileName}!`);
+        console.error(`   👉 Every widget must have a corresponding BACKLOG.md.`);
+        hasError = true;
+    }
 
-    if (!fs.existsSync(htmlPath)) return true;
+    // 4. Invariant: Check Showcase Tables in README.md & README.vi.md
+    if (!readmeContent.includes(widgetFileName)) {
+        console.error(`❌ [INVARIANT VIOLATION] ${widgetFileName} is NOT listed in README.md showcase table!`);
+        hasError = true;
+    }
+    if (!readmeViContent.includes(widgetFileName)) {
+        console.error(`❌ [INVARIANT VIOLATION] ${widgetFileName} is NOT listed in README.vi.md showcase table!`);
+        hasError = true;
+    }
 
-    const html = fs.readFileSync(htmlPath, 'utf8');
-    const isValid = validateJsSyntax(html, 'widget_flexray.html');
-    if (!isValid) return false;
-
-    const lineCount = html.split('\n').length;
-    const formattedLines = formatNumber(lineCount);
-    console.log(`✅ [widget_flexray.html] Syntax OK | Lines: ${formattedLines}`);
-
-    if (fs.existsSync(docPath)) {
-        let docContent = fs.readFileSync(docPath, 'utf8');
+    // 5. If CURRENT_INFO.md exists, sync line count & date
+    if (fs.existsSync(currentInfoPath)) {
+        let docContent = fs.readFileSync(currentInfoPath, 'utf8');
         const today = getTodayDate();
         let modified = false;
 
-        // 1. Update line count in Version description: tổng cộng X dòng code
+        // A. Update line count in Version description: tổng cộng X dòng code
         const versionLineRegex = /(\* \*\*Phiên bản hiện tại\*\*:.*?)tổng cộng\s+[\d,]+\s+dòng code/g;
         if (versionLineRegex.test(docContent)) {
             docContent = docContent.replace(versionLineRegex, `$1tổng cộng ${formattedLines} dòng code`);
             modified = true;
         }
 
-        // 2. Update date: * **Ngày cập nhật**: `YYYY-MM-DD`
+        // B. Update date: * **Ngày cập nhật**: `YYYY-MM-DD`
         const dateRegex = /(\* \*\*Ngày cập nhật\*\*:\s*`)(\d{4}-\d{2}-\d{2})(`)/g;
         if (dateRegex.test(docContent)) {
             docContent = docContent.replace(dateRegex, `$1${today}$3`);
             modified = true;
         }
 
-        if (modified) {
-            fs.writeFileSync(docPath, docContent, 'utf8');
-            console.log(`📄 [SYNC] docs/flexray/CURRENT_INFO.md updated (lines: ${formattedLines}, date: ${today}).`);
-            if (shouldGitAdd) {
-                try {
-                    execSync(`git add "${docPath}"`, { cwd: ROOT_DIR });
-                    console.log(`📌 [GIT] Staged docs/flexray/CURRENT_INFO.md`);
-                } catch (gitErr) {
-                    console.warn(`[WARN] Failed to git add ${docPath}:`, gitErr.message);
-                }
-            }
-        } else {
-            console.log(`📄 [UP-TO-DATE] docs/flexray/CURRENT_INFO.md is already up to date.`);
-        }
-    }
-
-    return true;
-}
-
-// Sync C++ OOP Widget Docs
-function syncCppOopWidget() {
-    const htmlPath = path.join(ROOT_DIR, 'widget_cpp_oop.html');
-    const docPath = path.join(ROOT_DIR, 'docs', 'cpp_oop', 'CURRENT_INFO.md');
-
-    if (!fs.existsSync(htmlPath)) return true;
-
-    const html = fs.readFileSync(htmlPath, 'utf8');
-    const isValid = validateJsSyntax(html, 'widget_cpp_oop.html');
-    if (!isValid) return false;
-
-    const lineCount = html.split('\n').length;
-    const formattedLines = formatNumber(lineCount);
-    console.log(`✅ [widget_cpp_oop.html] Syntax OK | Lines: ${formattedLines}`);
-
-    if (fs.existsSync(docPath)) {
-        let docContent = fs.readFileSync(docPath, 'utf8');
-        const today = getTodayDate();
-        let modified = false;
-
-        // 1. Update line count in Version description: tổng cộng X dòng code
-        const versionLineRegex = /(\* \*\*Phiên bản hiện tại\*\*:.*?)tổng cộng\s+[\d,]+\s+dòng code/g;
-        if (versionLineRegex.test(docContent)) {
-            docContent = docContent.replace(versionLineRegex, `$1tổng cộng ${formattedLines} dòng code`);
-            modified = true;
-        }
-
-        // 2. Update date: * **Ngày cập nhật**: `YYYY-MM-DD`
-        const dateRegex = /(\* \*\*Ngày cập nhật\*\*:\s*`)(\d{4}-\d{2}-\d{2})(`)/g;
-        if (dateRegex.test(docContent)) {
-            docContent = docContent.replace(dateRegex, `$1${today}$3`);
-            modified = true;
-        }
-
-        // 3. Update line count in Section 4 summary (if exists)
+        // C. Update line count in Section 4 summary if present
         const section4Regex = /(File tổng cộng\s+)[\d,]+(\s+dòng)/g;
         if (section4Regex.test(docContent)) {
             docContent = docContent.replace(section4Regex, `$1${formattedLines}$2`);
@@ -222,22 +152,22 @@ function syncCppOopWidget() {
         }
 
         if (modified) {
-            fs.writeFileSync(docPath, docContent, 'utf8');
-            console.log(`📄 [SYNC] docs/cpp_oop/CURRENT_INFO.md updated (lines: ${formattedLines}, date: ${today}).`);
+            fs.writeFileSync(currentInfoPath, docContent, 'utf8');
+            console.log(`📄 [SYNC] docs/${topic}/CURRENT_INFO.md updated (lines: ${formattedLines}, date: ${today}).`);
             if (shouldGitAdd) {
                 try {
-                    execSync(`git add "${docPath}"`, { cwd: ROOT_DIR });
-                    console.log(`📌 [GIT] Staged docs/cpp_oop/CURRENT_INFO.md`);
+                    execSync(`git add "${currentInfoPath}"`, { cwd: ROOT_DIR });
+                    console.log(`📌 [GIT] Staged docs/${topic}/CURRENT_INFO.md`);
                 } catch (gitErr) {
-                    console.warn(`[WARN] Failed to git add ${docPath}:`, gitErr.message);
+                    console.warn(`[WARN] Failed to git add ${currentInfoPath}:`, gitErr.message);
                 }
             }
         } else {
-            console.log(`📄 [UP-TO-DATE] docs/cpp_oop/CURRENT_INFO.md is already up to date.`);
+            console.log(`📄 [UP-TO-DATE] docs/${topic}/CURRENT_INFO.md is up to date.`);
         }
     }
 
-    return true;
+    return !hasError;
 }
 
 // Main execution flow
@@ -246,17 +176,44 @@ function main() {
     console.log('🔍 RUNNING PRE-COMMIT VERIFICATION & DOCS AUTO-SYNC');
     console.log('====================================================');
 
-    const canFdOk = syncCanFdWidget();
-    const flexRayOk = syncFlexRayWidget();
-    const cppOopOk = syncCppOopWidget();
+    // 1. Dynamic Auto-Discovery of widgets
+    const rootEntries = fs.readdirSync(ROOT_DIR);
+    const widgetFiles = rootEntries.filter(file => file.startsWith('widget_') && file.endsWith('.html')).sort();
 
-    console.log('----------------------------------------------------');
-    if (canFdOk && flexRayOk && cppOopOk) {
-        console.log('🎉 ALL CHECKS PASSED: JavaScript Syntax OK & Docs Synchronized!');
+    if (widgetFiles.length === 0) {
+        console.error('❌ [ERROR] No widget_*.html files found in repository root!');
+        process.exit(1);
+    }
+
+    console.log(`🔎 Discovered ${widgetFiles.length} widget(s): ${widgetFiles.join(', ')}\n`);
+
+    // 2. Read READMEs for showcase invariant verification
+    const readmePath = path.join(ROOT_DIR, 'README.md');
+    const readmeViPath = path.join(ROOT_DIR, 'README.vi.md');
+
+    const readmeContent = fs.existsSync(readmePath) ? fs.readFileSync(readmePath, 'utf8') : '';
+    const readmeViContent = fs.existsSync(readmeViPath) ? fs.readFileSync(readmeViPath, 'utf8') : '';
+
+    if (!readmeContent || !readmeViContent) {
+        console.warn('⚠️ [WARN] README.md or README.vi.md missing or empty.');
+    }
+
+    // 3. Process each widget
+    let overallSuccess = true;
+    for (const widgetFileName of widgetFiles) {
+        const isOk = processWidget(widgetFileName, readmeContent, readmeViContent);
+        if (!isOk) {
+            overallSuccess = false;
+        }
+    }
+
+    console.log('\n----------------------------------------------------');
+    if (overallSuccess) {
+        console.log('🎉 ALL CHECKS PASSED: JavaScript Syntax OK, Docs Synchronized & Invariants Verified!');
         console.log('====================================================\n');
         process.exit(0);
     } else {
-        console.error('❌ VERIFICATION FAILED: Please fix syntax or file issues above!');
+        console.error('❌ VERIFICATION FAILED: Please fix syntax or file invariant issues listed above!');
         console.log('====================================================\n');
         process.exit(1);
     }

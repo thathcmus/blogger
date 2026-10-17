@@ -109,7 +109,7 @@ Khi widget bị báo lỗi trên Blogger hoặc GitHub Pages:
 
 ### 🎯 Tiêu Chuẩn Hoàn Thành Bắt Buộc (Definition of Done - DoD)
 Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** nếu chưa kiểm tra đủ 4 điểm chốt (4-Point Checkpoint):
-- [ ] **Point 1 (Code & Syntax):** File HTML/JS chạy mượt, Verification Protocol trả về `Syntax OK`.
+- [ ] **Point 1 (Code, Syntax & Atomic Invariants):** Toàn bộ widget được Dynamic Scanner phát hiện, cú pháp JS đạt chuẩn `Syntax OK`, và tuân thủ tuyệt đối quy tắc Atomic Unit (đủ `CURRENT_INFO.md`, `BACKLOG.md` và có mặt trong bảng Showcase `README.md`).
 - [ ] **Point 2 (Auto Info-Sync Spec & Metrics):** Tự động cập nhật `docs/<widget>/CURRENT_INFO.md` (phiên bản, ngày cập nhật, số dòng code thực tế, kiến trúc mới).
 - [ ] **Point 3 (Ground Truth Plan):** Lưu nội dung hoàn chỉnh vào `docs/<widget>/MAINTENANCE_PLAN.md` (nếu có sprint plan).
 - [ ] **Point 4 (Global Sync & Changelog):** Ánh xạ đồng bộ `README.md` & `AGENTS.md` (cây thư mục/bảng Showcase) và ghi log chi tiết vào `CHANGELOG.md` dưới mục `[Unreleased]`.
@@ -121,11 +121,11 @@ Agent **tuyệt đối không được kết thúc lượt làm việc (turn)** 
 Mỗi khi Agent chỉnh sửa hoặc tạo mới file HTML, **bắt buộc phải chạy kiểm tra cú pháp JavaScript và kích hoạt bộ đồng bộ tài liệu tự động**:
 
 ```powershell
-# Chạy script tự động hóa: kiểm tra cú pháp toàn bộ widget + đồng bộ docs/can_fd/CURRENT_INFO.md
+# Chạy script tự động hóa: Dynamic Auto-Discovery toàn bộ widget + kiểm tra cú pháp JS + cưỡng chế Atomic Unit + đồng bộ docs
 node scripts/sync-docs.js
 ```
 
-> 🛡️ **Lưới an toàn Git Pre-Commit Hook**: Kho mã nguồn đã được cấu hình `.git/hooks/pre-commit`. Mọi lệnh `git commit` sẽ tự động thực thi `node scripts/sync-docs.js --git-add`. Nếu có bất kỳ lỗi cú pháp nào, commit sẽ bị hủy ngay lập tức và tài liệu sẽ được tự động cập nhật khớp với số dòng code thực tế.
+> 🛡️ **Lưới an toàn Git Pre-Commit Hook**: Kho mã nguồn đã được cấu hình `.git/hooks/pre-commit`. Mọi lệnh `git commit` sẽ tự động thực thi `node scripts/sync-docs.js --git-add`. Script áp dụng cơ chế **Dynamic Auto-Discovery** quét toàn bộ file `widget_*.html`, kiểm tra cú pháp JS và cưỡng chế tính toàn vẹn **Atomic Unit** (bắt buộc đủ `CURRENT_INFO.md`, `BACKLOG.md`, và có trong Showcase). Nếu có bất kỳ lỗi nào, commit sẽ bị hủy ngay lập tức và tài liệu sẽ được tự động cập nhật khớp với số dòng code thực tế.
 
 ---
 

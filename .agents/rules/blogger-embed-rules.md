@@ -60,8 +60,14 @@ Tài liệu này định nghĩa các quy tắc kỹ thuật và tiêu chuẩn th
 1. **Tuân Thủ Chuẩn Quốc Tế (Industry Standards)**:
    - Đối với các widget về giao thức ô tô (FlexRay, CAN, LIN, Ethernet), các khái niệm phải đối chiếu chính xác với tài liệu chuẩn (ISO 17458 cho FlexRay, ISO 11898 cho CAN, AUTOSAR Classic/Adaptive).
    - Không được đơn giản hóa sai bản chất (ví dụ: nhầm lẫn giữa Wakeup WUP và Startup CAS/Startup Frame; bỏ qua tính chất Active-Low của bit cờ).
-2. **Tính Trong Suốt Khi Nhúng**:
-   - Mọi widget phải có file tài liệu hiện trạng tương ứng đặt tại `docs/<widget_name>/CURRENT_INFO.md` để người quản trị blog hoặc AI có thể đọc hiểu trong 30 giây.
+2. **Bất Biến Cấu Trúc Atomic Unit (Structural Invariant)**:
+   - Một Widget **tuyệt đối không bao giờ được phép tồn tại đơn lẻ** dưới dạng một file HTML mồ côi.
+   - Một Widget hợp lệ **BẮT BUỘC** là một **Atomic Unit (Bộ ba cấu trúc không thể tách rời)**:
+     1. `widget_<name>.html`: Mã nguồn standalone zero-build HTML5/CSS/VanillaJS.
+     2. `docs/<name>/CURRENT_INFO.md`: Đặc tả hiện trạng kỹ thuật, phiên bản, ngày cập nhật, số dòng code thực tế, và bản đồ mã nguồn.
+     3. `docs/<name>/BACKLOG.md`: Kế hoạch nâng cấp và biểu mẫu đề xuất thay đổi chuẩn `[PREFIX-XXX]`.
+     4. **Showcase Invariant**: Tên file `widget_<name>.html` bắt buộc phải có mặt trong bảng Showcase của cả `README.md` và `README.vi.md`.
+   - 🛡️ **Cơ chế cưỡng chế tự động (Enforcement Gate)**: Script `scripts/sync-docs.js` tự động quét toàn bộ kho mã nguồn bằng cơ chế Dynamic Auto-Discovery. Nếu phát hiện thiếu bất kỳ thành tố nào trong Atomic Unit, script sẽ lập tức báo đỏ (`Exit 1`) và Git Pre-Commit Hook sẽ chặn đứng commit.
 
 3. **Tiêu Chuẩn 4 Tầng Nội Dung & Khung Diễn Đạt 5W-1H / Micro-STAR**:
    - Mọi Q&A item trong các visualizer phỏng vấn kỹ thuật (CAN FD, FlexRay, C++...) bắt buộc phải có đủ 4 tầng nội dung:
