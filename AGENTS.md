@@ -60,6 +60,11 @@ Repository này chứa các **Interactive Visualizers / Educational Simulators**
 │   ├── pack-context.js                     # Đóng gói ngữ cảnh repo cho AI (LLM Context Packer)
 │   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
 │
+├── src/                                    # Dữ liệu nguồn độc lập (Source of Truth)
+│   └── data/                               # Ngân hàng nội dung tri thức (Questions, i18n)
+│       └── can_fd/
+│           └── questions.json              # Ngân hàng Q&A 4 tầng CAN FD tự động biên dịch
+│
 ├── widget_can_fd.html                      # Widget: Trực quan hóa giao thức CAN FD
 ├── widget_flexray.html                     # Widget: Trực quan hóa giao thức FlexRay
 └── widget_cpp_oop.html                     # Widget: Trực quan hóa lập trình hướng đối tượng C++

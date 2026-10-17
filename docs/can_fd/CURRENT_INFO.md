@@ -1,7 +1,7 @@
 # Đặc Tả Kỹ Thuật Hiện Trạng: CAN FD Protocol Explorer (Current Info)
 
 * **Tên file nguồn**: [`widget_can_fd.html`](../../widget_can_fd.html)
-* **Phiên bản hiện tại**: `v1.6.0` (Chuẩn hóa toàn diện Ngân Hàng Câu Hỏi theo khung 5W-1H & Micro-STAR song ngữ, tích hợp Cổng Khám Phá Landing Portal Hub tương tác 3D Tilt theo chuột, bộ quy tắc bảo mật Cloud Firestore Zero-Trust và bộ kiểm soát pre-commit tự động sync-docs.js; tổng cộng 3,109 dòng code).
+* **Phiên bản hiện tại**: `v1.6.0` (Chuẩn hóa toàn diện Ngân Hàng Câu Hỏi theo khung 5W-1H & Micro-STAR song ngữ, tích hợp Cổng Khám Phá Landing Portal Hub tương tác 3D Tilt theo chuột, bộ quy tắc bảo mật Cloud Firestore Zero-Trust và bộ kiểm soát pre-commit tự động sync-docs.js; tổng cộng 2,815 dòng code).
 * **Ngày cập nhật**: `2026-10-17`
 * **Mục đích**: Widget tương tác trực quan hóa kiến thức giao thức mạng ô tô CAN FD, tích hợp Cổng mở màn Landing Portal Hub 3D theo chuột, phân tích cấu trúc Frame ở cấp độ Bit, cơ chế BRS (Bit Rate Switch), bảng so sánh Classic CAN / CAN FD / CAN XL, hệ thống ngân hàng câu hỏi ôn luyện phỏng vấn ECU/AUTOSAR chuyên sâu, và hệ sinh thái Thảo luận cộng đồng kết nối Cloud Firestore (hỗ trợ Google Auth thật, trả lời lồng nhau, ghi chú tác giả, đồng bộ đa thiết bị, hỗ trợ Dark Mode). Phục vụ nhúng vào bài viết Google Blogger hoặc học tập độc lập.
 
@@ -103,7 +103,7 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
   - **Tab 2** (`#tab-compare`): Bảng So Sánh Thế Hệ Giao Thức (Classic CAN vs CAN FD vs CAN XL).
   - **Tab 3** (`#tab-interview`): Tiêu đề và Bộ lọc độ khó & chủ đề (`#qa-filter-header-group`), danh sách thẻ Q&A Accordion (`div#qa-container`), empty state và WIP banner.
 * **Dòng 673 – 854**: Dictionary `i18n` hỗ trợ đa ngôn ngữ (vi/en) cho toàn bộ hệ thống nhãn, Google Sign-In, User Profile Dropdown, Landing Portal Hub và tooltip Theme Toggle.
-* **Dòng 855 – 1333**: Data Layer `qaData`: Mảng Object song ngữ 7 câu hỏi chuẩn hóa 100% theo khung 5W-1H (📌 What, 💡 Why, ⏱️ When, 📍 Where, ⚙️ Who & How) và Micro-STAR (🚨 Situation, 🎯 Task, 🛠️ Action song song 🚗 vs 💻, 📊 Result), bao gồm Item 2 (CAN Classic Foundation), Item 3 (Frame Structure & BRS/DLC), và Item 4 (Dynamic/Fixed Bit Stuffing & SBC Gray-code CRC-17/21).
+* **Dòng 855 – 1055**: Data Layer `qaData`: Tự động biên dịch từ [`src/data/can_fd/questions.json`](../../src/data/can_fd/questions.json) qua `scripts/sync-docs.js`. Mảng Object song ngữ 7 câu hỏi chuẩn hóa 100% theo khung 5W-1H (📌 What, 💡 Why, ⏱️ When, 📍 Where, ⚙️ Who & How) và Micro-STAR (🚨 Situation, 🎯 Task, 🛠️ Action song song 🚗 vs 💻, 📊 Result), bao gồm Item 2 (CAN Classic Foundation), Item 3 (Frame Structure & BRS/DLC), và Item 4 (Dynamic/Fixed Bit Stuffing & SBC Gray-code CRC-17/21).
 * **Dòng 1334 – 1370**: State variables (`qaState`, `currentDifficulty`, `currentTag`) và cấu hình Firebase (`firebaseConfig`).
 * **Dòng 1371 – 1675**: Controller Firebase Live Auth & Cloud Firestore Engine (`initFirebaseAuthListener()`, `signInWithGoogle()`, `logoutUser()`, `initFirestoreSync()`, `getAllComments()`, `saveAllCommentsLocally()`).
 * **Dòng 1676 – 1765**: Controller render UI Header & User Profile Popover Dropdown (`renderAuthHeader()`, `toggleUserProfileMenu()`, `closeUserProfileMenu()`, click-outside listener), phân loại comment gốc/replies, lọc theo Filter Pills, render author badges & pinned notes với dark palette chuẩn.
@@ -116,7 +116,7 @@ Mỗi thẻ câu hỏi được cấu trúc chặt chẽ gồm **4 sub-tabs nộ
 * **Dòng 2796 – 2875**: Controllers 3D Tilt Cards & Portal Hub (`initTiltCards()`, `enterExplorer()`, `backToPortal()`).
 * **Dòng 2876 – 2935**: Navigation & View Switcher (`switchTab()`, `selectSegment()`).
 * **Dòng 2936 – 2985**: Theme Engine (`getPreferredTheme()`, `applyTheme()`, `toggleTheme()`, `initTheme()`).
-* **Dòng 2986 – 3035**: Sự kiện `DOMContentLoaded`: Khởi tạo Theme, khởi tạo 3D Tilt, gán listeners tab/portal, áp dụng i18n, kết nối Firebase Auth/Firestore, render Q&A Cards và Lucide icons. (File tổng cộng 3,109 dòng, 100% comment Tiếng Anh, đạt chuẩn Verification Protocol `Syntax OK`).
+* **Dòng 2986 – 3035**: Sự kiện `DOMContentLoaded`: Khởi tạo Theme, khởi tạo 3D Tilt, gán listeners tab/portal, áp dụng i18n, kết nối Firebase Auth/Firestore, render Q&A Cards và Lucide icons. (File tổng cộng 2,815 dòng, 100% comment Tiếng Anh, đạt chuẩn Verification Protocol `Syntax OK`).
 
 ---
 

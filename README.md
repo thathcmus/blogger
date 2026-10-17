@@ -118,6 +118,10 @@ This repository is optimized for autonomous AI agents (Claude, Antigravity, Copi
 ├── scripts/                                # Automation & Quality Control
 │   ├── pack-context.js                     # LLM Context Packer script
 │   └── sync-docs.js                        # Auto-verification & documentation sync script
+├── src/                                    # Raw Source Data Layer (Single Source of Truth)
+│   └── data/                               # Domain Knowledge & Question Banks
+│       └── can_fd/
+│           └── questions.json              # CAN FD 4-tier Q&A questions compiled at sync-time
 ├── widget_can_fd.html                      # CAN FD Protocol Explorer widget
 ├── widget_flexray.html                     # FlexRay Protocol Explorer widget
 └── widget_cpp_oop.html                     # C++ OOP Simulator widget

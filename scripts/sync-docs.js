@@ -82,7 +82,40 @@ function processWidget(widgetFileName, readmeContent, readmeViContent) {
         return false;
     }
 
-    const html = fs.readFileSync(htmlPath, 'utf8');
+    let html = fs.readFileSync(htmlPath, 'utf8');
+
+    // 1.1 Compile Q&A Data from src/data/<topic>/questions.json if present
+    const qaDataJsonPath = path.join(ROOT_DIR, 'src', 'data', topic, 'questions.json');
+    if (fs.existsSync(qaDataJsonPath)) {
+        try {
+            const rawJson = fs.readFileSync(qaDataJsonPath, 'utf8');
+            const parsedQuestions = JSON.parse(rawJson);
+            if (!Array.isArray(parsedQuestions)) {
+                console.error(`❌ [DATA ERROR] ${qaDataJsonPath} must contain a JSON array.`);
+                hasError = true;
+            } else {
+                const syncRegex = /(\/\*\s*QA_DATA_AUTO_SYNC_START\s*\*\/)[\s\S]*?(\/\*\s*QA_DATA_AUTO_SYNC_END\s*\*\/)/;
+                if (syncRegex.test(html)) {
+                    const formattedJs = `/* QA_DATA_AUTO_SYNC_START */\n        const qaData = ${JSON.stringify(parsedQuestions, null, 4)};\n        /* QA_DATA_AUTO_SYNC_END */`;
+                    const newHtml = html.replace(syncRegex, formattedJs);
+                    if (newHtml !== html) {
+                        fs.writeFileSync(htmlPath, newHtml, 'utf8');
+                        html = newHtml;
+                        console.log(`📦 [DATA COMPILED] Synced ${parsedQuestions.length} questions from ${path.relative(ROOT_DIR, qaDataJsonPath)} -> ${widgetFileName}`);
+                    }
+                    if (shouldGitAdd) {
+                        try {
+                            execSync(`git add "${qaDataJsonPath}"`, { cwd: ROOT_DIR });
+                        } catch (e) {}
+                    }
+                }
+            }
+        } catch (jsonErr) {
+            console.error(`❌ [JSON SYNTAX ERROR] In ${qaDataJsonPath}: ${jsonErr.message}`);
+            hasError = true;
+        }
+    }
+
     const lineCount = html.split('\n').length;
     const formattedLines = formatNumber(lineCount);
 

@@ -118,6 +118,10 @@ Repository này được chuẩn hóa toàn diện theo kiến trúc **AI-Agent 
 ├── scripts/                                # Công cụ tự động hóa & Kiểm soát chất lượng
 │   ├── pack-context.js                     # Script đóng gói ngữ cảnh repo cho AI (LLM Context Packer)
 │   └── sync-docs.js                        # Script tự động kiểm tra cú pháp & đồng bộ docs
+├── src/                                    # Dữ liệu nguồn độc lập (Single Source of Truth)
+│   └── data/                               # Ngân hàng tri thức & nội dung câu hỏi
+│       └── can_fd/
+│           └── questions.json              # Ngân hàng Q&A 4 tầng CAN FD tự động biên dịch
 ├── widget_can_fd.html                      # Widget CAN FD Protocol Explorer
 ├── widget_flexray.html                     # Widget FlexRay Protocol Explorer
 └── widget_cpp_oop.html                     # Widget C++ OOP Simulator
